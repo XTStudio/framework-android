@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.xt.kimi">
+    <application>
+        <meta-data android:name="com.xt.kimi.KIMIPackage" android:value="EDOPackage" />
+    </application>
+</manifest>
