@@ -1,8 +1,10 @@
 package com.xt.kimi_demo
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.jscore.JSValue
@@ -18,17 +20,6 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val testView = UIView()
-        val testWindow = UIWindow()
-        testView.frame = CGRect(0.0, 0.0, 100.0, 100.0)
-        testView.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 44.0, 44.0)
-        val yyyView = UIView()
-        yyyView.frame = CGRect(200.0, 200.0, 44.0, 44.0)
-        testWindow.addSubview(testView)
-        testWindow.addSubview(yyyView)
-        val e = yyyView.convertPointFromView(CGPoint(50.0, 50.0), testView)
-
         UULog.attachTo(context)
         EDOExporter.sharedExporter.exportWithContext(context)
         context.exceptionHandler = { _, exception ->

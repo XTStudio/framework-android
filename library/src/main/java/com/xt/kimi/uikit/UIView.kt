@@ -28,10 +28,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     fun attachToActivity(activity: Activity) {
         UIView.findScale(activity)
-        (this.parent as? ViewGroup)?.removeView(this)
+        this.removeFromSuperview()
         val rootView = UIWindow()
-        rootView.addView(this, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        activity.setContentView(rootView)
+        rootView.addSubview(this)
+        activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
 
     init {
@@ -363,6 +363,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        if (this is UIWindow) { return }
         frame?.let {
             val scale = resources.displayMetrics.density
             x = (it.x * scale).toFloat()
@@ -417,6 +418,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     fun convertPointFromView(point: CGPoint, fromView: UIView): CGPoint {
         val fromPoint = fromView.convertPointToWindow(point) ?: return point
         return this.convertPointFromWindow(fromPoint) ?: return point
+    }
+
+    fun convertPointToView(point: CGPoint, toView: UIView): CGPoint {
+        return toView.convertPointFromView(point, this)
     }
 
     fun convertPointToWindow(point: CGPoint): CGPoint? {
