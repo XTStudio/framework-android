@@ -1,13 +1,31 @@
+class MainView extends UIView {
 
-var main = new UIView
-main.frame = { x: 44, y: 44, width: 200, height: 200 }
+    layoutSubviews() {
+        super.layoutSubviews()
+        console.error('layoutSubviews')
+    }
+
+}
+
+var main = new MainView
+main.frame = { x: 44, y: 44, width: 300, height: 300 }
 main.backgroundColor = new UIColor(1, 0, 0, 1)
+// main.clipsToBounds = true
+main.contentMode = UIViewContentMode.scaleAspectFit
 
-var subview = new UISwitch
-subview.frame = { x: 44, y: 44, width: 44, height: 44 }
-subview.backgroundColor = new UIColor(1, 1, 0, 1)
-main.addSubview(subview)
+var yellowView = new UISwitch
+yellowView.frame = { x: 44, y: 44, width: 44, height: 44 }
+yellowView.transform = {a: 1.0, b: 0.0, c: 0.0, d: 1.0, tx: 66.0, ty: 66.0}
+yellowView.backgroundColor = new UIColor(1, 1, 0, 1)
+main.addSubview(yellowView)
 
-// subview.removeFromSuperview()
+var blueView = new UIView
+blueView.frame = { x: 22, y: 22, width: 44, height: 44 }
+blueView.backgroundColor = new UIColor(0, 0, 1, 1)
+main.addSubview(blueView)
+// blueView.hidden = true
 
-// console.log("Hello, World!")
+// if (blueView.isDescendantOfView(main)) {
+//     blueView.backgroundColor = new UIColor(1, 1, 1, 1)
+// }
+// main.exchangeSubview(1, 0)

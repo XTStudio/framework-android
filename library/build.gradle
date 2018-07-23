@@ -27,5 +27,5 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.github.XTStudio:Endo-Android:0.0.1'
+    implementation 'com.github.XTStudio:Endo-Android:a7212b8e245d60f33c08029d050be22c04fa3031'
 }
