@@ -25,6 +25,7 @@ class UILongPressGestureRecognizer: UIGestureRecognizer() {
         super.handleTouch(touches)
         touches.forEach {
             if (it.phase == UITouchPhase.began) {
+                if (UIView.recognizedGesture != null) { this.beganPoints.clear(); return }
                 it.windowPoint?.let { windowPoint ->
                     this.beganPoints[it.identifier] = windowPoint
                 }

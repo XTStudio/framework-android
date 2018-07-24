@@ -367,14 +367,19 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     // Accessibility
 
+    // todo: stub
     var isAccessibilityElement: Boolean = false
 
+    // todo: stub
     var accessibilityLabel: String? = null
 
+    // todo: stub
     var accessibilityHint: String? = null
 
+    // todo: stub
     var accessibilityValue: String? = null
 
+    // todo: stub
     var accessibilityIdentifier: String? = null
 
 
@@ -405,6 +410,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             canvas.concat(matrix)
         }
         canvas.let {
+            this.layer.view = this
             this.layer.drawInContext(it)
         }
         if (!this.clipsToBounds) {
@@ -530,6 +536,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
 fun KIMIPackage.installUIView() {
     exporter.exportClass(UIView::class.java, "UIView")
+    exporter.exportProperty(UIView::class.java, "layer")
     exporter.exportProperty(UIView::class.java, "frame")
     exporter.exportProperty(UIView::class.java, "bounds")
     exporter.exportProperty(UIView::class.java, "center")
@@ -571,6 +578,11 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "gestureRecognizers", true)
     exporter.exportMethodToJavaScript(UIView::class.java, "addGestureRecognizer")
     exporter.exportMethodToJavaScript(UIView::class.java, "removeGestureRecognizer")
+    exporter.exportProperty(UIView::class.java, "isAccessibilityElement")
+    exporter.exportProperty(UIView::class.java, "accessibilityLabel")
+    exporter.exportProperty(UIView::class.java, "accessibilityHint")
+    exporter.exportProperty(UIView::class.java, "accessibilityValue")
+    exporter.exportProperty(UIView::class.java, "accessibilityIdentifier")
 }
 
 fun CGAffineTransform.isIdentity(): Boolean {
