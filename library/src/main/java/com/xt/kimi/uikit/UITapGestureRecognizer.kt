@@ -35,6 +35,12 @@ class UITapGestureRecognizer : UIGestureRecognizer() {
                 }
             }
             else if (it.phase == UITouchPhase.ended) {
+                if (UIView.recognizedGesture != null) {
+                    this.beganPoints.clear()
+                    this.state = UIGestureRecognizerState.possible
+                    this.validPointsCount = 0
+                    return
+                }
                 if (it.tapCount >= this.numberOfTapsRequired && this.beganPoints[it.identifier] != null) {
                     this.validPointsCount++
                 }

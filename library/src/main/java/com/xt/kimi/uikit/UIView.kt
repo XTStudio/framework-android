@@ -2,9 +2,11 @@ package com.xt.kimi.uikit
 
 import android.app.Activity
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Region
 import android.util.DisplayMetrics
+import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -30,6 +32,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         UIView.findScale(activity)
         this.removeFromSuperview()
         val rootView = UIWindow()
+        rootView.setBackgroundColor(Color.WHITE)
         rootView.addSubview(this)
         activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
     }
@@ -512,6 +515,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     companion object {
 
         internal var recognizedGesture: UIGestureRecognizer? = null
+
+        internal var sharedVelocityTracker = VelocityTracker.obtain()
 
         private fun findScale(activity: Activity) {
             val metrics = DisplayMetrics()

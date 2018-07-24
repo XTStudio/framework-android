@@ -12,6 +12,18 @@ main.frame = { x: 44, y: 44, width: 300, height: 300 }
 main.backgroundColor = new UIColor(1, 0, 0, 1)
 // main.clipsToBounds = true
 main.contentMode = UIViewContentMode.scaleAspectFit
+var longPressGesture = new UILongPressGestureRecognizer
+longPressGesture.numberOfTouchesRequired = 1
+longPressGesture.on('began', function () {
+    main.backgroundColor = new UIColor(1, 1, 1, 1)
+})
+longPressGesture.on('changed', function () {
+    main.backgroundColor = new UIColor(1, 1, 0, 1)
+})
+longPressGesture.on('ended', function () {
+    main.backgroundColor = new UIColor(1, 0, 0, 1)
+})
+main.addGestureRecognizer(longPressGesture)
 
 var yellowView = new UISwitch
 yellowView.frame = { x: 44, y: 44, width: 44, height: 44 }
@@ -23,8 +35,7 @@ var blueView = new UIView
 blueView.frame = { x: 22, y: 22, width: 400, height: 400 }
 blueView.backgroundColor = new UIColor(0, 0, 1, 1)
 var tapGesture = new UITapGestureRecognizer
-tapGesture.numberOfTouchesRequired = 3
-tapGesture.numberOfTapsRequired = 3
+tapGesture.numberOfTapsRequired = 1
 tapGesture.on('touch', function () {
     blueView.backgroundColor = new UIColor(1, 1, 0, 1)
 })

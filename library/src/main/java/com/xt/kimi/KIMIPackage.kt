@@ -18,6 +18,8 @@ class KIMIPackage : EDOPackage() {
         installUIColor()
         installUIGestureRecognizer()
         installUITapGestureRecognizer()
+        installUIPanGestureRecognizer()
+        installUILongPressGestureRecognizer()
     }
 
 }

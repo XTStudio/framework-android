@@ -1,7 +1,6 @@
 package com.xt.kimi.uikit
 
 import android.os.SystemClock
-import android.util.Log
 import android.view.MotionEvent
 import com.xt.endo.CGPoint
 import kotlin.math.abs
@@ -17,6 +16,7 @@ class UIWindow : UIView() {
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         val event = event ?: return super.onTouchEvent(event)
+        sharedVelocityTracker.addMovement(event)
         if (event.actionMasked == MotionEvent.ACTION_DOWN || event.actionMasked == MotionEvent.ACTION_POINTER_DOWN) {
             val pointerId = event.getPointerId(event.actionIndex)
             val point = CGPoint((event.getX(event.actionIndex) / scale).toDouble(), (event.getY(event.actionIndex) / scale).toDouble())
@@ -45,6 +45,7 @@ class UIWindow : UIView() {
             touch.view?.touchesBegan(setOf(touch))
         }
         else if (event.actionMasked == MotionEvent.ACTION_MOVE) {
+            sharedVelocityTracker.computeCurrentVelocity(1000)
             val pointerId = event.getPointerId(event.actionIndex)
             val point = CGPoint((event.getX(event.actionIndex) / scale).toDouble(), (event.getY(event.actionIndex) / scale).toDouble())
             val touch = touches[pointerId] ?: return true
@@ -71,26 +72,27 @@ class UIWindow : UIView() {
                     }
                 }
                 touches.clear()
+                sharedVelocityTracker.clear()
             }
         }
         else if (event.actionMasked == MotionEvent.ACTION_CANCEL) {
             val pointerId = event.getPointerId(event.actionIndex)
             val point = CGPoint((event.getX(event.actionIndex) / scale).toDouble(), (event.getY(event.actionIndex) / scale).toDouble())
             val touch = touches[pointerId] ?: return true
-            touch.phase = UITouchPhase.calcelled
+            touch.phase = UITouchPhase.cancelled
             touch.timestamp = SystemClock.uptimeMillis().toDouble() / 1000.0
             touch.windowPoint = point
             touch.view?.touchesCancelled(setOf(touch))
+            upCount.clear()
+            upTimestamp.clear()
+            touches.clear()
+            sharedVelocityTracker.clear()
         }
         return true
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return true
-    }
-
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun pointInside(point: CGPoint): Boolean {

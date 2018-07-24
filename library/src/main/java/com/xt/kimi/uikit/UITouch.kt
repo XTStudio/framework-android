@@ -7,7 +7,7 @@ enum class UITouchPhase {
     moved,
     stationary,
     ended,
-    calcelled,
+    cancelled,
 }
 
 class UITouch {
@@ -17,7 +17,7 @@ class UITouch {
     var timestamp: Double = 0.0
         internal set
 
-    var phase: UITouchPhase = UITouchPhase.calcelled
+    var phase: UITouchPhase = UITouchPhase.cancelled
         internal set
 
     var tapCount: Int = 0
