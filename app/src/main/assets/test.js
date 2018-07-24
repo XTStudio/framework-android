@@ -3,9 +3,11 @@ var main = new UIView
 main.frame = { x: 44, y: 44, width: 300, height: 300 }
 main.backgroundColor = new UIColor(1, 0, 0, 1)
 main.contentMode = UIViewContentMode.scaleAspectFit
+main.layer.masksToBounds = true
 main.layer.cornerRadius = 150
 main.layer.borderWidth = 10
 main.layer.borderColor = new UIColor(0, 0, 0, 1)
+main.layer.opacity = 0.5
 
 var yellowLayer = new CALayer
 yellowLayer.frame = { x: 44, y: 44, width: 44, height: 44 }
@@ -13,7 +15,7 @@ yellowLayer.backgroundColor = new UIColor(1, 1, 0, 1)
 main.layer.addSublayer(yellowLayer)
 
 var blueLayer = new CALayer
-blueLayer.frame = { x: 88, y: 88, width: 44, height: 44 }
+blueLayer.frame = { x: 22, y: 22, width: 44, height: 44 }
 blueLayer.backgroundColor = new UIColor(0, 0, 1, 1)
 main.layer.replaceSublayer(yellowLayer, blueLayer)
 

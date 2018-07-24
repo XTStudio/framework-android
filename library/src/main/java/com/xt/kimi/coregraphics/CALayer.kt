@@ -129,6 +129,10 @@ open class CALayer {
     var mask: CALayer? = null
 
     var masksToBounds: Boolean = false
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     var backgroundColor: UIColor? = null
 
@@ -167,12 +171,6 @@ open class CALayer {
     open fun drawInContext(ctx: Canvas) {
         if (this.hidden) { return }
         sharedOuterPath.reset()
-        if (this.cornerRadius > 0) {
-            sharedOuterPath.addRoundRect(RectF(0.0f, 0.0f, this.frame.width.toFloat() * scale, this.frame.height.toFloat() * scale), (this.cornerRadius * scale).toFloat(), (this.cornerRadius * scale).toFloat(), Path.Direction.CCW)
-        }
-        else {
-            sharedOuterPath.addRect(RectF(0.0f, 0.0f, this.frame.width.toFloat() * scale, this.frame.height.toFloat() * scale), Path.Direction.CCW)
-        }
         sharedBackgroundPaint.reset()
         sharedBackgroundPaint.isAntiAlias = true
         sharedBackgroundPaint.color = Color.TRANSPARENT
@@ -188,20 +186,47 @@ open class CALayer {
             }
             return@run max(0, min(255, (opacity * 255.0).toInt()))
         }
-        ctx.drawPath(sharedOuterPath, sharedBackgroundPaint)
-        if (this.borderWidth > 0 && this.borderColor != null) {
-            sharedBackgroundPaint.style = Paint.Style.STROKE
-            sharedBackgroundPaint.strokeWidth = (this.borderWidth * scale).toFloat()
-            this.borderColor?.let {
-                sharedBackgroundPaint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
-            }
-            ctx.drawPath(sharedOuterPath, sharedBackgroundPaint)
+        sharedOuterPath.reset()
+        val outRect = RectF((this.borderWidth * scale).toFloat(), (this.borderWidth * scale).toFloat(), ((this.frame.width - this.borderWidth) * scale).toFloat(), ((this.frame.width - this.borderWidth) * scale).toFloat())
+        sharedOuterPath.addRoundRect(outRect, (this.cornerRadius * scale).toFloat(), (this.cornerRadius * scale).toFloat(), Path.Direction.CCW)
+        ctx.save()
+        if (this.masksToBounds) {
+            ctx.clipPath(sharedOuterPath)
         }
+        ctx.drawPath(sharedOuterPath, sharedBackgroundPaint)
         this.sublayers.forEach {
             ctx.save()
             ctx.translate((it.frame.x * scale).toFloat(), (it.frame.y * scale).toFloat())
             it.drawInContext(ctx)
             ctx.restore()
+        }
+        ctx.restore()
+        if (this.borderWidth > 0 && this.borderColor != null) {
+            sharedOuterPath.reset()
+            sharedBackgroundPaint.reset()
+            outRect.set((this.borderWidth / 2.0 * scale).toFloat(), (this.borderWidth / 2.0 * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat())
+            if (this.cornerRadius > 0) {
+                sharedOuterPath.addRoundRect(outRect, (this.cornerRadius * ((this.frame.width - this.borderWidth / 2.0) / this.frame.width) * scale).toFloat(), (this.cornerRadius * ((this.frame.height - this.borderWidth / 2.0) / this.frame.height) * scale).toFloat(), Path.Direction.CCW)
+            }
+            else {
+                sharedOuterPath.addRect(outRect, Path.Direction.CCW)
+            }
+            sharedBackgroundPaint.style = Paint.Style.STROKE
+            sharedBackgroundPaint.strokeWidth = (this.borderWidth * scale).toFloat()
+            sharedBackgroundPaint.isAntiAlias = true
+            this.borderColor?.let {
+                sharedBackgroundPaint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+            }
+            sharedBackgroundPaint.alpha = kotlin.run {
+                var current: CALayer? = this
+                var opacity = 1.0
+                while (current != null) {
+                    opacity *= current!!.opacity
+                    current = current!!.superlayer
+                }
+                return@run max(0, min(255, (opacity * 255.0).toInt()))
+            }
+            ctx.drawPath(sharedOuterPath, sharedBackgroundPaint)
         }
     }
 
@@ -220,6 +245,7 @@ fun KIMIPackage.installCALayer() {
     exporter.exportMethodToJavaScript(CALayer::class.java, "replaceSublayer")
     exporter.exportProperty(CALayer::class.java, "hidden")
     exporter.exportProperty(CALayer::class.java, "opacity")
+    exporter.exportProperty(CALayer::class.java, "masksToBounds")
     exporter.exportProperty(CALayer::class.java, "backgroundColor")
     exporter.exportProperty(CALayer::class.java, "cornerRadius")
     exporter.exportProperty(CALayer::class.java, "borderWidth")

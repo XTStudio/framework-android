@@ -293,9 +293,12 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.invalidate()
     }
 
-    var clipsToBounds: Boolean = false
+    var clipsToBounds: Boolean
+        get() {
+            return this.layer.masksToBounds
+        }
         set(value) {
-            field = value
+            this.layer.masksToBounds = value
             this.setNeedsDisplay()
         }
 
