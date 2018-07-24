@@ -15,13 +15,20 @@ main.contentMode = UIViewContentMode.scaleAspectFit
 
 var yellowView = new UISwitch
 yellowView.frame = { x: 44, y: 44, width: 44, height: 44 }
-yellowView.transform = {a: 1.0, b: 0.0, c: 0.0, d: 1.0, tx: 66.0, ty: 66.0}
+yellowView.transform = { a: 1.0, b: 0.0, c: 0.0, d: 1.0, tx: 66.0, ty: 66.0 }
 yellowView.backgroundColor = new UIColor(1, 1, 0, 1)
 main.addSubview(yellowView)
 
 var blueView = new UIView
-blueView.frame = { x: 22, y: 22, width: 44, height: 44 }
+blueView.frame = { x: 22, y: 22, width: 400, height: 400 }
 blueView.backgroundColor = new UIColor(0, 0, 1, 1)
+var tapGesture = new UITapGestureRecognizer
+tapGesture.numberOfTouchesRequired = 3
+tapGesture.numberOfTapsRequired = 3
+tapGesture.on('touch', function () {
+    blueView.backgroundColor = new UIColor(1, 1, 0, 1)
+})
+blueView.addGestureRecognizer(tapGesture)
 main.addSubview(blueView)
 // blueView.hidden = true
 

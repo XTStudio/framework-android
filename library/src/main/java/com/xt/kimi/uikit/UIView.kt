@@ -296,7 +296,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.setNeedsDisplay()
         }
 
-    var backgroundColor: UIColor? = null
+    var edo_backgroundColor: UIColor? = null
         set(value) {
             field = value
             this.layer.backgroundColor = value
@@ -339,12 +339,28 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     var userInteractionEnabled: Boolean = true
 
-    var gestureRecognizers: List<Any> = listOf()
+    var gestureRecognizers: List<UIGestureRecognizer> = listOf()
         private set
 
-    fun addGestureRecognizer(gestureRecognizer: Any) {}
+    fun addGestureRecognizer(gestureRecognizer: UIGestureRecognizer) {
+        if (this.gestureRecognizers.contains(gestureRecognizer)) { return }
+        this.gestureRecognizers = kotlin.run {
+            val gestureRecognizers = this.gestureRecognizers.toMutableList()
+            gestureRecognizers.add(gestureRecognizer)
+            gestureRecognizer.view = this
+            return@run gestureRecognizers.toList()
+        }
+    }
 
-    fun removeGestureRecognizer(gestureRecognizer: Any) {}
+    fun removeGestureRecognizer(gestureRecognizer: UIGestureRecognizer) {
+        if (!this.gestureRecognizers.contains(gestureRecognizer)) { return }
+        this.gestureRecognizers = kotlin.run {
+            val gestureRecognizers = this.gestureRecognizers.toMutableList()
+            gestureRecognizers.remove(gestureRecognizer)
+            gestureRecognizer.view = null
+            return@run gestureRecognizers.toList()
+        }
+    }
 
     // Accessibility
 
@@ -359,7 +375,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     var accessibilityIdentifier: String? = null
 
 
-    //
+    // Private
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -402,13 +418,33 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun hitTest(point: CGPoint): UIView? {
         if (this.userInteractionEnabled && this.alpha > 0.0 && !this.hidden && this.pointInside(point)) {
-            this.subviews.forEach {
+            this.subviews.reversed().forEach {
                 val convertedPoint = it.convertPointFromView(point, this)
                 it.hitTest(convertedPoint)?.let { return it }
             }
             return this
         }
         return null
+    }
+
+    open fun touchesBegan(touches: Set<UITouch>) {
+        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.superview?.touchesBegan(touches)
+    }
+
+    open fun touchesMoved(touches: Set<UITouch>) {
+        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.superview?.touchesMoved(touches)
+    }
+
+    open fun touchesEnded(touches: Set<UITouch>) {
+        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.superview?.touchesEnded(touches)
+    }
+
+    open fun touchesCancelled(touches: Set<UITouch>) {
+        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.superview?.touchesCancelled(touches)
     }
 
     open fun pointInside(point: CGPoint): Boolean {
@@ -475,6 +511,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     companion object {
 
+        internal var recognizedGesture: UIGestureRecognizer? = null
+
         private fun findScale(activity: Activity) {
             val metrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getMetrics(metrics)
@@ -513,7 +551,7 @@ fun KIMIPackage.installUIView() {
     exporter.bindMethodToJavaScript(UIView::class.java, "layoutSubviews")
     exporter.exportMethodToJavaScript(UIView::class.java, "setNeedsDisplay")
     exporter.exportProperty(UIView::class.java, "clipsToBounds")
-    exporter.exportProperty(UIView::class.java, "backgroundColor")
+    exporter.exportProperty(UIView::class.java, "edo_backgroundColor")
     exporter.exportProperty(UIView::class.java, "edo_alpha")
     exporter.exportProperty(UIView::class.java, "hidden")
     exporter.exportProperty(UIView::class.java, "contentMode")
