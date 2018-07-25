@@ -10,6 +10,8 @@ import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.facebook.rebound.SimpleSpringListener
+import com.facebook.rebound.Spring
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
@@ -47,8 +49,65 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     // Geometry
 
+    private var edo_frame_animations: List<UIAnimation>? = null
+
     var frame: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
         set(value) {
+            if (!UIAnimator.duringAnimationValueSet) {
+                this.edo_frame_animations?.forEach { it.cancel() }
+                this.edo_frame_animations = null
+            }
+            UIAnimator.activeAnimator?.let {
+                it.animationCreater?.let {
+                    val animations = mutableListOf<UIAnimation>()
+                    if (field.x != value.x) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.frame = CGRect(it, this.frame.y, this.frame.width, this.frame.height)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.x)
+                        animation.setEndValue(value.x)
+                        animations.add(animation)
+                    }
+                    if (field.y != value.y) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.frame = CGRect(this.frame.x, it, this.frame.width, this.frame.height)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.y)
+                        animation.setEndValue(value.y)
+                        animations.add(animation)
+                    }
+                    if (field.width != value.width) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.frame = CGRect(this.frame.x, this.frame.y, it, this.frame.height)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.width)
+                        animation.setEndValue(value.width)
+                        animations.add(animation)
+                    }
+                    if (field.height != value.height) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.frame = CGRect(this.frame.x, this.frame.y, this.frame.width, it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.height)
+                        animation.setEndValue(value.height)
+                        animations.add(animation)
+                    }
+                    edo_frame_animations = animations.toList()
+                    return
+                }
+            }
             field = value
             this.layer.frame = frame
             this.bounds = CGRect(0.0, 0.0, frame.width, frame.height)
@@ -66,8 +125,78 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.frame = CGRect(value.x - this.frame.width / 2.0, value.y - this.frame.height, this.frame.width, this.frame.height)
         }
 
+    private var edo_transform_animations: List<UIAnimation>? = null
+
     var transform: CGAffineTransform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
         set(value) {
+            if (!UIAnimator.duringAnimationValueSet) {
+                this.edo_transform_animations?.forEach { it.cancel() }
+                this.edo_transform_animations = null
+            }
+            UIAnimator.activeAnimator?.let {
+                it.animationCreater?.let {
+                    val animations = mutableListOf<UIAnimation>()
+                    val fieldUnmatrix = field.unmatrix()
+                    val valueUnmatrix = value.unmatrix()
+                    if (fieldUnmatrix.scale.x != valueUnmatrix.scale.x) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.transform = this.transform.setScaleX(it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(fieldUnmatrix.scale.x)
+                        animation.setEndValue(valueUnmatrix.scale.x)
+                        animations.add(animation)
+                    }
+                    if (fieldUnmatrix.scale.y != valueUnmatrix.scale.y) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.transform = this.transform.setScaleY(it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(fieldUnmatrix.scale.y)
+                        animation.setEndValue(valueUnmatrix.scale.y)
+                        animations.add(animation)
+                    }
+                    if (fieldUnmatrix.degree != valueUnmatrix.degree) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.transform = this.transform.setDegree(it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(fieldUnmatrix.degree)
+                        animation.setEndValue(valueUnmatrix.degree)
+                        animations.add(animation)
+                    }
+                    if (fieldUnmatrix.translate.x != valueUnmatrix.translate.x) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.transform = this.transform.setTranslateX(it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(fieldUnmatrix.translate.x)
+                        animation.setEndValue(valueUnmatrix.translate.x)
+                        animations.add(animation)
+                    }
+                    if (fieldUnmatrix.translate.y != valueUnmatrix.translate.y) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            UIAnimator.duringAnimationValueSet = true
+                            this.transform = this.transform.setTranslateY(it)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(fieldUnmatrix.translate.y)
+                        animation.setEndValue(valueUnmatrix.translate.y)
+                        animations.add(animation)
+                    }
+                    edo_transform_animations = animations.toList()
+                    return
+                }
+            }
             field = value
             this.setNeedsDisplay()
         }
@@ -309,11 +438,31 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.setNeedsDisplay()
         }
 
+    private var edo_alpha_animation: UIAnimation? = null
+
     var edo_alpha: Double
         get() {
             return this.alpha.toDouble()
         }
         set(value) {
+            if (!UIAnimator.duringAnimationValueSet) {
+                this.edo_alpha_animation?.cancel()
+                this.edo_alpha_animation = null
+            }
+            UIAnimator.activeAnimator?.let {
+                it.animationCreater?.let {
+                    val animation = it()
+                    this.edo_alpha_animation = animation
+                    animation.setUpdateListener {
+                        UIAnimator.duringAnimationValueSet = true
+                        this.alpha = it.toFloat()
+                        UIAnimator.duringAnimationValueSet = false
+                    }
+                    animation.setStartValue(this.alpha.toDouble())
+                    animation.setEndValue(value)
+                    return
+                }
+            }
             this.alpha = value.toFloat()
         }
 
@@ -635,4 +784,59 @@ fun CGAffineTransform.toNativeMatrix(): Matrix {
     arr[8] = 1.0.toFloat()
     matrix.setValues(arr)
     return matrix
+}
+
+fun CGAffineTransform.setScaleX(value: Double): CGAffineTransform {
+    val unmatrix = this.unmatrix()
+    val matrix = Matrix()
+    matrix.postRotate(unmatrix.degree.toFloat())
+    matrix.postScale(value.toFloat(), unmatrix.scale.y.toFloat())
+    matrix.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+    val arr = FloatArray(9)
+    matrix.getValues(arr)
+    return CGAffineTransform(arr[0].toDouble(), arr[3].toDouble(), arr[1].toDouble(), arr[4].toDouble(), arr[2].toDouble(), arr[5].toDouble())
+}
+
+fun CGAffineTransform.setScaleY(value: Double): CGAffineTransform {
+    val unmatrix = this.unmatrix()
+    val matrix = Matrix()
+    matrix.postRotate(unmatrix.degree.toFloat())
+    matrix.postScale(unmatrix.scale.x.toFloat(), value.toFloat())
+    matrix.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+    val arr = FloatArray(9)
+    matrix.getValues(arr)
+    return CGAffineTransform(arr[0].toDouble(), arr[3].toDouble(), arr[1].toDouble(), arr[4].toDouble(), arr[2].toDouble(), arr[5].toDouble())
+}
+
+fun CGAffineTransform.setDegree(value: Double): CGAffineTransform {
+    val unmatrix = this.unmatrix()
+    val matrix = Matrix()
+    matrix.postRotate(value.toFloat())
+    matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+    matrix.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+    val arr = FloatArray(9)
+    matrix.getValues(arr)
+    return CGAffineTransform(arr[0].toDouble(), arr[3].toDouble(), arr[1].toDouble(), arr[4].toDouble(), arr[2].toDouble(), arr[5].toDouble())
+}
+
+fun CGAffineTransform.setTranslateX(value: Double): CGAffineTransform {
+    val unmatrix = this.unmatrix()
+    val matrix = Matrix()
+    matrix.postRotate(unmatrix.degree.toFloat())
+    matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+    matrix.postTranslate(value.toFloat(), unmatrix.translate.y.toFloat())
+    val arr = FloatArray(9)
+    matrix.getValues(arr)
+    return CGAffineTransform(arr[0].toDouble(), arr[3].toDouble(), arr[1].toDouble(), arr[4].toDouble(), arr[2].toDouble(), arr[5].toDouble())
+}
+
+fun CGAffineTransform.setTranslateY(value: Double): CGAffineTransform {
+    val unmatrix = this.unmatrix()
+    val matrix = Matrix()
+    matrix.postRotate(unmatrix.degree.toFloat())
+    matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+    matrix.postTranslate(unmatrix.translate.x.toFloat(), value.toFloat())
+    val arr = FloatArray(9)
+    matrix.getValues(arr)
+    return CGAffineTransform(arr[0].toDouble(), arr[3].toDouble(), arr[1].toDouble(), arr[4].toDouble(), arr[2].toDouble(), arr[5].toDouble())
 }

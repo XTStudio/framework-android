@@ -313,7 +313,7 @@ open class CALayer {
             canvas.drawPath(boundsPath, paint)
             this.shadowBitmap = shadowBitmap
         }
-        else {
+        else if (shadowColor.a == 0.0 || shadowOpacity == 0.0 || shadowRadius == 0.0) {
             this.shadowBitmap = null
         }
         this.shadowBitmap?.let {

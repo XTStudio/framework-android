@@ -3,6 +3,7 @@ package com.xt.kimi
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
 import com.xt.kimi.coregraphics.installCALayer
+import com.xt.kimi.foundation.installDispatchQueue
 import com.xt.kimi.uikit.*
 
 /**
@@ -14,6 +15,8 @@ class KIMIPackage : EDOPackage() {
 
     override fun install() {
         super.install()
+        // Foundation
+        installDispatchQueue()
         // UIKit
         installUIView()
         installUISwitch()
@@ -24,6 +27,7 @@ class KIMIPackage : EDOPackage() {
         installUILongPressGestureRecognizer()
         installUIPinchGestureRecognizer()
         installUIRotationGestureRecognizer()
+        installUIAnimator()
         // CoreGraphics
         installCALayer()
     }
