@@ -31,7 +31,7 @@ class DispatchQueue(val identifier: String) {
 
     companion object {
 
-        val main = DispatchQueue("main")
+        @JvmStatic val main = DispatchQueue("main")
 
     }
 
@@ -48,5 +48,5 @@ fun KIMIPackage.installDispatchQueue() {
         }
         return@exportInitializer DispatchQueue.main
     })
-    exporter.exportScript(DispatchQueue::class.java, "Initializer.main = new Initializer('main')")
+    exporter.exportStaticProperty(DispatchQueue::class.java, "main", true)
 }

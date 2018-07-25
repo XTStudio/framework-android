@@ -23,19 +23,23 @@ var f = true
 var tapGesture = new UITapGestureRecognizer
 tapGesture.numberOfTapsRequired = 1
 tapGesture.on('touch', function () {
-    UIAnimator.shared.spring(100.0, 12.0, function () {
+    UIAnimator.shared.linear(1.0, function () {
         if (f) {
+            main.backgroundColor = UIColor.gray
             main.transform = { a: 2.0, b: 0.0, c: 0.0, d: 2.0, tx: 44.0, ty: 44.0 }
         }
         else {
+            main.backgroundColor = UIColor.red
             main.transform = { a: 1.0, b: 0.0, c: 0.0, d: 1.0, tx: 0.0, ty: 0.0 }
         }
         f = !f;
-    }, function () {
-        main.backgroundColor = UIColor.gray
-    })
+    }, function () { })
 })
 main.addGestureRecognizer(tapGesture)
+
+DispatchQueue.main.asyncAfter(3.0, function() {
+    main.backgroundColor = UIColor.green
+})
 
 // var blueLayer = new CALayer
 // blueLayer.frame = { x: 22, y: 200, width: 44, height: 44 }

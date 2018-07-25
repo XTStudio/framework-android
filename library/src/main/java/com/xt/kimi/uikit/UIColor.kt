@@ -5,7 +5,22 @@ import com.xt.kimi.KIMIPackage
 /**
  * Created by cuiminghui on 2018/7/20.
  */
-class UIColor(val r: Double, val g: Double, val b: Double, val a: Double)
+class UIColor(val r: Double, val g: Double, val b: Double, val a: Double) {
+
+    companion object {
+
+        @JvmStatic val black = UIColor(0.0, 0.0, 0.0, 1.0)
+        @JvmStatic val clear = UIColor(0.0, 0.0, 0.0, 0.0)
+        @JvmStatic val gray = UIColor(0.5, 0.5, 0.5, 1.0)
+        @JvmStatic val red = UIColor(1.0, 0.0, 0.0, 1.0)
+        @JvmStatic val yellow = UIColor(1.0, 1.0, 0.0, 1.0)
+        @JvmStatic val green = UIColor(0.0, 1.0, 0.0, 1.0)
+        @JvmStatic val blue = UIColor(0.0, 0.0, 1.0, 1.0)
+        @JvmStatic val white = UIColor(1.0, 1.0, 1.0, 1.0)
+
+    }
+
+}
 
 fun KIMIPackage.installUIColor() {
     exporter.exportClass(UIColor::class.java, "UIColor")
@@ -16,12 +31,12 @@ fun KIMIPackage.installUIColor() {
         val a: Double = if (3 < it.count() && it[3] is Number) (it[3] as Number).toDouble() else 1.0
         return@exportInitializer UIColor(r, g, b, a)
     })
-    exporter.exportScript(UIColor::class.java, "Initializer.black = new Initializer(0,0,0,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.clear = new Initializer(0,0,0,0)")
-    exporter.exportScript(UIColor::class.java, "Initializer.gray = new Initializer(0.5,0.5,0.5,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.red = new Initializer(1,0,0,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.yellow = new Initializer(1,1,0,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.green = new Initializer(0,1,0,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.blue = new Initializer(0,0,1,1)")
-    exporter.exportScript(UIColor::class.java, "Initializer.white = new Initializer(1,1,1,1)")
+    exporter.exportStaticProperty(UIColor::class.java, "black", true)
+    exporter.exportStaticProperty(UIColor::class.java, "clear", true)
+    exporter.exportStaticProperty(UIColor::class.java, "gray", true)
+    exporter.exportStaticProperty(UIColor::class.java, "red", true)
+    exporter.exportStaticProperty(UIColor::class.java, "yellow", true)
+    exporter.exportStaticProperty(UIColor::class.java, "green", true)
+    exporter.exportStaticProperty(UIColor::class.java, "blue", true)
+    exporter.exportStaticProperty(UIColor::class.java, "white", true)
 }

@@ -15,6 +15,8 @@ import com.facebook.rebound.Spring
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Created by cuiminghui on 2018/7/20.
@@ -431,8 +433,71 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.setNeedsDisplay()
         }
 
+    private var edo_backgroundColor_animations: List<UIAnimation>? = null
+
     var edo_backgroundColor: UIColor? = null
         set(value) {
+            if (!UIAnimator.duringAnimationValueSet) {
+                this.edo_backgroundColor_animations?.forEach { it.cancel() }
+                this.edo_backgroundColor_animations = null
+            }
+            UIAnimator.activeAnimator?.let {
+                it.animationCreater?.let {
+                    val field = field ?: return@let
+                    val value = value ?: return@let
+                    val animations = mutableListOf<UIAnimation>()
+                    if (field.r != value.r) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            val backgroundColor = this.edo_backgroundColor ?: return@setUpdateListener
+                            UIAnimator.duringAnimationValueSet = true
+                            this.edo_backgroundColor = UIColor(max(0.0, min(1.0, it)), backgroundColor.g, backgroundColor.b, backgroundColor.a)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.r)
+                        animation.setEndValue(value.r)
+                        animations.add(animation)
+                    }
+                    if (field.g != value.g) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            val backgroundColor = this.edo_backgroundColor ?: return@setUpdateListener
+                            UIAnimator.duringAnimationValueSet = true
+                            this.edo_backgroundColor = UIColor(backgroundColor.r, max(0.0, min(1.0, it)), backgroundColor.b, backgroundColor.a)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.g)
+                        animation.setEndValue(value.g)
+                        animations.add(animation)
+                    }
+                    if (field.b != value.b) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            val backgroundColor = this.edo_backgroundColor ?: return@setUpdateListener
+                            UIAnimator.duringAnimationValueSet = true
+                            this.edo_backgroundColor = UIColor(backgroundColor.r, backgroundColor.g, max(0.0, min(1.0, it)), backgroundColor.a)
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.b)
+                        animation.setEndValue(value.b)
+                        animations.add(animation)
+                    }
+                    if (field.a != value.a) {
+                        val animation = it()
+                        animation.setUpdateListener {
+                            val backgroundColor = this.edo_backgroundColor ?: return@setUpdateListener
+                            UIAnimator.duringAnimationValueSet = true
+                            this.edo_backgroundColor = UIColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, max(0.0, min(1.0, it)))
+                            UIAnimator.duringAnimationValueSet = false
+                        }
+                        animation.setStartValue(field.a)
+                        animation.setEndValue(value.a)
+                        animations.add(animation)
+                    }
+                    edo_backgroundColor_animations = animations.toList()
+                    return
+                }
+            }
             field = value
             this.layer.backgroundColor = value
             this.setNeedsDisplay()
