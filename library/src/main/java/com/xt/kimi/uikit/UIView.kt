@@ -422,7 +422,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             canvas.clipRect(rect, Region.Op.REPLACE)
         }
         else {
-
+            canvas.clipPath(this.layer.createBoundsPath())
         }
         super.draw(canvas)
         canvas.restore()
