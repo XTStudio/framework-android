@@ -162,17 +162,34 @@ open class CALayer {
         }
 
     var shadowColor: UIColor? = null
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     var shadowOpacity: Double = 0.0
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     var shadowOffset: CGSize? = null
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     var shadowRadius: Double = 0.0
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     open fun drawInContext(ctx: Canvas) {
         if (this.hidden) { return }
         val boundsPath = createBoundsPath()
         ctx.save()
+        this.drawShadow(ctx)
         if (this.masksToBounds) {
             ctx.clipPath(boundsPath)
         }
@@ -244,6 +261,44 @@ open class CALayer {
         return sharedBackgroundPaint
     }
 
+    private var shadowBitmap: Bitmap? = null
+        set(value) {
+            field?.let { it.recycle() }
+            field = value
+        }
+
+    private fun drawShadow(ctx: Canvas, boundsPath: Path = createBorderPath()) {
+        val shadowColor = shadowColor ?: return
+        val shadowOffset = shadowOffset ?: return
+        if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0 && this.shadowBitmap == null) {
+            val width = (this.frame.width + shadowRadius * 2) * scale
+            val height = (this.frame.height + shadowRadius * 2) * scale
+            val shadowBitmap = Bitmap.createBitmap(width.toInt(), height.toInt(), Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(shadowBitmap)
+            val paint = Paint()
+            shadowColor?.let {
+                paint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+            }
+            paint.alpha = (shadowOpacity * 255).toInt()
+            paint.maskFilter = BlurMaskFilter((shadowRadius * scale).toFloat(), BlurMaskFilter.Blur.NORMAL)
+            canvas.translate((shadowRadius * scale).toFloat(), (shadowRadius * scale).toFloat())
+            canvas.drawPath(boundsPath, paint)
+            this.shadowBitmap = shadowBitmap
+        }
+        else {
+            this.shadowBitmap = null
+        }
+        this.shadowBitmap?.let {
+            sharedBackgroundPaint.reset()
+            ctx.drawBitmap(
+                    it,
+                    ((-shadowRadius + shadowOffset.width) * scale).toFloat(),
+                    ((-shadowRadius + shadowOffset.height) * scale).toFloat(),
+                    sharedBackgroundPaint
+            )
+        }
+    }
+
 }
 
 fun KIMIPackage.installCALayer() {
@@ -264,4 +319,8 @@ fun KIMIPackage.installCALayer() {
     exporter.exportProperty(CALayer::class.java, "cornerRadius")
     exporter.exportProperty(CALayer::class.java, "borderWidth")
     exporter.exportProperty(CALayer::class.java, "borderColor")
+    exporter.exportProperty(CALayer::class.java, "shadowColor")
+    exporter.exportProperty(CALayer::class.java, "shadowOpacity")
+    exporter.exportProperty(CALayer::class.java, "shadowOffset")
+    exporter.exportProperty(CALayer::class.java, "shadowRadius")
 }
