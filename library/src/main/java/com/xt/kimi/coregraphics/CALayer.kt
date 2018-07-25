@@ -18,6 +18,8 @@ import kotlin.math.min
 private val sharedOuterPath = Path()
 private val sharedBackgroundPaint = Paint()
 
+class CAOSCanvas(bitmap: Bitmap): Canvas(bitmap)
+
 open class CALayer {
 
     internal var view: UIView? = null
@@ -127,7 +129,11 @@ open class CALayer {
             this.view?.setNeedsDisplay()
         }
 
-    var mask: CALayer? = null
+    var edo_mask: CALayer? = null
+        set(value) {
+            field = value
+            this.view?.setNeedsDisplay()
+        }
 
     var masksToBounds: Boolean = false
         set(value) {
@@ -189,6 +195,28 @@ open class CALayer {
         if (this.hidden) { return }
         val boundsPath = createBoundsPath()
         ctx.save()
+        this.edo_mask?.takeIf { ctx !is CAOSCanvas }?.let { maskLayer ->
+            try {
+                val contentBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                val offScreenCtx0 = CAOSCanvas(contentBitmap)
+                this.drawInContext(offScreenCtx0)
+                val maskBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                val offScreenCtx1 = CAOSCanvas(maskBitmap)
+                offScreenCtx1.translate((maskLayer.frame.x * scale).toFloat(), (maskLayer.frame.y * scale).toFloat())
+                maskLayer.drawInContext(offScreenCtx1)
+                val concatBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                val concatCanvas = CAOSCanvas(concatBitmap)
+                val maskPaint = Paint()
+                maskPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+                concatCanvas.drawBitmap(contentBitmap, 0f, 0f, null)
+                concatCanvas.drawBitmap(maskBitmap, 0f, 0f, maskPaint)
+                ctx.drawBitmap(concatBitmap, 0f, 0f, null)
+                contentBitmap.recycle()
+                maskBitmap.recycle()
+                concatBitmap.recycle()
+            } catch (e: Exception) { } // avoid OOM crash.
+            return
+        }
         this.drawShadow(ctx)
         if (this.masksToBounds) {
             ctx.clipPath(boundsPath)
@@ -314,6 +342,7 @@ fun KIMIPackage.installCALayer() {
     exporter.exportMethodToJavaScript(CALayer::class.java, "replaceSublayer")
     exporter.exportProperty(CALayer::class.java, "hidden")
     exporter.exportProperty(CALayer::class.java, "opacity")
+    exporter.exportProperty(CALayer::class.java, "edo_mask")
     exporter.exportProperty(CALayer::class.java, "masksToBounds")
     exporter.exportProperty(CALayer::class.java, "backgroundColor")
     exporter.exportProperty(CALayer::class.java, "cornerRadius")

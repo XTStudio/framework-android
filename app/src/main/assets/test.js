@@ -4,8 +4,8 @@ main.frame = { x: 44, y: 44, width: 300, height: 300 }
 main.backgroundColor = new UIColor(1, 0, 0, 1)
 main.contentMode = UIViewContentMode.scaleAspectFit
 main.layer.masksToBounds = true
-main.layer.cornerRadius = 150
-main.layer.borderWidth = 10
+// main.layer.cornerRadius = 150
+// main.layer.borderWidth = 10
 main.layer.borderColor = new UIColor(0, 0, 0, 1)
 main.layer.shadowColor = new UIColor(0, 0, 0, 1)
 main.layer.shadowOpacity = 0.6
@@ -13,9 +13,10 @@ main.layer.shadowRadius = 16.0
 main.layer.shadowOffset = { width: 6, height: 6 }
 // main.layer.opacity = 0.5
 
-// var yellowLayer = new CALayer
-// yellowLayer.frame = { x: 44, y: 44, width: 44, height: 44 }
-// yellowLayer.backgroundColor = new UIColor(1, 1, 0, 1)
+var yellowLayer = new CALayer
+yellowLayer.frame = { x: 44, y: 44, width: 44, height: 44 }
+yellowLayer.backgroundColor = new UIColor(1, 1, 0, 1)
+// main.layer.mask = yellowLayer
 // main.layer.addSublayer(yellowLayer)
 
 // var blueLayer = new CALayer
