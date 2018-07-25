@@ -7,6 +7,7 @@ import com.xt.kimi.KIMIPackage
 import com.xt.kimi.uikit.UIColor
 import com.xt.kimi.uikit.UIView
 import com.xt.kimi.uikit.scale
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -187,7 +188,7 @@ open class CALayer {
             return@run max(0, min(255, (opacity * 255.0).toInt()))
         }
         sharedOuterPath.reset()
-        val outRect = RectF((this.borderWidth * scale).toFloat(), (this.borderWidth * scale).toFloat(), ((this.frame.width - this.borderWidth) * scale).toFloat(), ((this.frame.width - this.borderWidth) * scale).toFloat())
+        val outRect = RectF((max(0.0, this.borderWidth) * scale).toFloat(), (max(0.0, this.borderWidth) * scale).toFloat(), ((this.frame.width - max(0.0, this.borderWidth)) * scale).toFloat(), ((this.frame.width - max(0.0, this.borderWidth)) * scale).toFloat())
         sharedOuterPath.addRoundRect(outRect, (this.cornerRadius * scale).toFloat(), (this.cornerRadius * scale).toFloat(), Path.Direction.CCW)
         ctx.save()
         if (this.masksToBounds) {
@@ -201,18 +202,15 @@ open class CALayer {
             ctx.restore()
         }
         ctx.restore()
-        if (this.borderWidth > 0 && this.borderColor != null) {
+        if (this.borderWidth != 0.0 && this.borderColor != null) {
             sharedOuterPath.reset()
             sharedBackgroundPaint.reset()
             outRect.set((this.borderWidth / 2.0 * scale).toFloat(), (this.borderWidth / 2.0 * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat())
-            if (this.cornerRadius > 0) {
-                sharedOuterPath.addRoundRect(outRect, (this.cornerRadius * ((this.frame.width - this.borderWidth / 2.0) / this.frame.width) * scale).toFloat(), (this.cornerRadius * ((this.frame.height - this.borderWidth / 2.0) / this.frame.height) * scale).toFloat(), Path.Direction.CCW)
-            }
-            else {
-                sharedOuterPath.addRect(outRect, Path.Direction.CCW)
-            }
+            val radiusRatio = this.cornerRadius / max(this.frame.width, this.frame.height)
+            val newCornerRadius = max(outRect.width(), outRect.height()) * radiusRatio
+            sharedOuterPath.addRoundRect(outRect, newCornerRadius.toFloat(), newCornerRadius.toFloat(), Path.Direction.CCW)
             sharedBackgroundPaint.style = Paint.Style.STROKE
-            sharedBackgroundPaint.strokeWidth = (this.borderWidth * scale).toFloat()
+            sharedBackgroundPaint.strokeWidth = (abs(this.borderWidth) * scale).toFloat()
             sharedBackgroundPaint.isAntiAlias = true
             this.borderColor?.let {
                 sharedBackgroundPaint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())

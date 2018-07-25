@@ -7,7 +7,7 @@ main.layer.masksToBounds = true
 main.layer.cornerRadius = 150
 main.layer.borderWidth = 10
 main.layer.borderColor = new UIColor(0, 0, 0, 1)
-main.layer.opacity = 0.5
+// main.layer.opacity = 0.5
 
 var yellowLayer = new CALayer
 yellowLayer.frame = { x: 44, y: 44, width: 44, height: 44 }
