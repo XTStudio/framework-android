@@ -701,7 +701,14 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         routes.forEach {
             matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
             if (!it.transform.isIdentity()) {
-                matrix.postConcat(it.transform.toNativeMatrix())
+                val unmatrix = it.transform.unmatrix()
+                val matrix2 = Matrix()
+                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
+                matrix2.postRotate(unmatrix.degree.toFloat())
+                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
+                matrix.postConcat(matrix2)
             }
         }
         var fromArr = FloatArray(9)
@@ -724,7 +731,14 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         routes.forEach {
             matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
             if (!it.transform.isIdentity()) {
-                matrix.postConcat(it.transform.toNativeMatrix())
+                val unmatrix = it.transform.unmatrix()
+                val matrix2 = Matrix()
+                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
+                matrix2.postRotate(unmatrix.degree.toFloat())
+                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
+                matrix.preConcat(matrix2)
             }
         }
         var fromArr = FloatArray(9)
