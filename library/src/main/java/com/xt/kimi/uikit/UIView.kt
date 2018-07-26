@@ -15,6 +15,7 @@ import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
 import com.xt.kimi.coregraphics.CAOSCanvas
 import java.lang.ref.SoftReference
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -620,6 +621,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         if (canvas !is CAOSCanvas && this.clipsToBounds && !this.transform.isIdentity() && this.isHardwareAccelerated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             try {
                 val bitmap = UIView.createBitmap(((this.frame.width + this.layer.shadowRadius * 2) * scale).toInt(), ((this.frame.height + this.layer.shadowRadius * 2) * scale).toInt())
+                UIView.lockBitmap(bitmap)
                 val offScreenCtx0 = CAOSCanvas(bitmap)
                 offScreenCtx0.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
                 ignoreTransform = true
@@ -634,6 +636,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 matrix.postTranslate((this.width / 2.0).toFloat(), (this.height / 2.0).toFloat())
                 canvas.concat(matrix)
                 canvas.drawBitmap(bitmap, 0f, 0f, null)
+                UIView.unlockBitmap(bitmap)
                 canvas.restore()
             } catch (e: Exception) { } // avoid OOM crash.
             return // WTF Android >= M && hardwareAccelerated cause clipPath apply canvas transform error.
@@ -785,32 +788,28 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             scale = metrics.density
         }
 
-        private var sharedBitmap: SoftReference<Bitmap>? = null
-
-        private var sharedBitmap2: SoftReference<Bitmap>? = null
+        private var sharedBitmaps: MutableList<SoftReference<Bitmap>> = mutableListOf()
+        private var lockedBitmaps: WeakHashMap<Bitmap, Boolean> = WeakHashMap()
 
         internal fun createBitmap(width: Int, height: Int): Bitmap {
-            sharedBitmap?.get()?.takeIf { !it.isRecycled }?.let { sharedBitmap ->
-                if (sharedBitmap.width >= width && sharedBitmap.height >= height) {
-                    return sharedBitmap
+            sharedBitmaps.forEach { item ->
+                item.get()?.takeIf { !it.isRecycled && lockedBitmaps[it] == false }?.let { sharedBitmap ->
+                    if (sharedBitmap.width >= width && sharedBitmap.height >= height) {
+                        return sharedBitmap
+                    }
                 }
             }
-            sharedBitmap?.get()?.recycle()
-            val bitmap = Bitmap.createBitmap(min(2048, width), min(2048, height), Bitmap.Config.ARGB_8888)
-            sharedBitmap = SoftReference(bitmap)
+            val bitmap = Bitmap.createBitmap(max(256, min(2048, width)), max(256, min(2048, height)), Bitmap.Config.ARGB_8888)
+            sharedBitmaps.add(SoftReference(bitmap))
             return bitmap
         }
 
-        internal fun createBitmap2(width: Int, height: Int): Bitmap {
-            sharedBitmap2?.get()?.takeIf { !it.isRecycled }?.let { sharedBitmap2 ->
-                if (sharedBitmap2.width >= width && sharedBitmap2.height >= height) {
-                    return sharedBitmap2
-                }
-            }
-            sharedBitmap2?.get()?.recycle()
-            val bitmap = Bitmap.createBitmap(min(2048, width), min(2048, height), Bitmap.Config.ARGB_8888)
-            sharedBitmap2 = SoftReference(bitmap)
-            return bitmap
+        internal fun lockBitmap(bitmap: Bitmap) {
+            lockedBitmaps[bitmap] = true
+        }
+
+        internal fun unlockBitmap(bitmap: Bitmap) {
+            lockedBitmaps[bitmap] = false
         }
 
     }

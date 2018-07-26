@@ -199,23 +199,26 @@ open class CALayer {
         ctx.save()
         this.edo_mask?.takeIf { ctx !is CAOSCanvas }?.let { maskLayer ->
             try {
-                val contentBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                val contentBitmap = UIView.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt())
+                UIView.lockBitmap(contentBitmap)
                 val offScreenCtx0 = CAOSCanvas(contentBitmap)
                 this.drawInContext(offScreenCtx0)
-                val maskBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                UIView.unlockBitmap(contentBitmap)
+                val maskBitmap = UIView.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt())
+                UIView.lockBitmap(maskBitmap)
                 val offScreenCtx1 = CAOSCanvas(maskBitmap)
                 offScreenCtx1.translate((maskLayer.frame.x * scale).toFloat(), (maskLayer.frame.y * scale).toFloat())
                 maskLayer.drawInContext(offScreenCtx1)
-                val concatBitmap = Bitmap.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt(), Bitmap.Config.ARGB_8888)
+                UIView.unlockBitmap(maskBitmap)
+                val concatBitmap = UIView.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt())
+                UIView.lockBitmap(concatBitmap)
                 val concatCanvas = CAOSCanvas(concatBitmap)
                 val maskPaint = Paint()
                 maskPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
                 concatCanvas.drawBitmap(contentBitmap, 0f, 0f, null)
                 concatCanvas.drawBitmap(maskBitmap, 0f, 0f, maskPaint)
                 ctx.drawBitmap(concatBitmap, 0f, 0f, null)
-                contentBitmap.recycle()
-                maskBitmap.recycle()
-                concatBitmap.recycle()
+                UIView.unlockBitmap(concatBitmap)
             } catch (e: Exception) { } // avoid OOM crash.
             return
         }
@@ -298,7 +301,8 @@ open class CALayer {
             try {
                 val width = (this.frame.width + shadowRadius * 2) * scale
                 val height = (this.frame.height + shadowRadius * 2) * scale
-                val shadowBitmap = UIView.createBitmap2(width.toInt(), height.toInt())
+                val shadowBitmap = UIView.createBitmap(width.toInt(), height.toInt())
+                UIView.lockBitmap(shadowBitmap)
                 val canvas = CAOSCanvas(shadowBitmap)
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
                 val paint = Paint()
@@ -316,6 +320,7 @@ open class CALayer {
                         ((-shadowRadius + shadowOffset.height) * scale).toFloat(),
                         sharedBackgroundPaint
                 )
+                UIView.unlockBitmap(shadowBitmap)
             } catch (e: Exception) { } // avoid OOM
         }
     }
