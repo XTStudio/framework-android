@@ -8,6 +8,7 @@ import android.view.animation.LinearInterpolator
 import com.facebook.rebound.*
 import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
+import kotlin.math.exp
 
 interface UIAnimation {
 
@@ -129,7 +130,7 @@ class UIAnimator {
 
     companion object {
 
-        val shared = UIAnimator()
+        @JvmStatic val shared = UIAnimator()
 
         var activeAnimator: UIAnimator? = null
             private set
@@ -147,5 +148,7 @@ fun KIMIPackage.installUIAnimator() {
     })
     exporter.exportMethodToJavaScript(UIAnimator::class.java, "linear")
     exporter.exportMethodToJavaScript(UIAnimator::class.java, "spring")
-    exporter.exportScript(UIAnimator::class.java, "Initializer.shared = new Initializer")
+    exporter.exportStaticProperty(UIAnimator::class.java, "shared")
+    exporter.exportScript(UIAnimator::class.java, "UIAnimator.linear = function(){ UIAnimator.shared.linear.apply(UIAnimator.shared, arguments) }", false)
+    exporter.exportScript(UIAnimator::class.java, "UIAnimator.spring = function(){ UIAnimator.shared.spring.apply(UIAnimator.shared, arguments) }", false)
 }

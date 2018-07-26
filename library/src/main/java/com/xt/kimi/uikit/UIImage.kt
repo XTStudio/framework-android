@@ -9,7 +9,14 @@ import com.xt.endo.EDOExporter
 import com.xt.kimi.KIMIPackage
 import kotlin.math.floor
 
-class UIImage(val bitmap: Bitmap, val scale: Int = 1) {
+
+enum class UIImageRenderingMode {
+    automatic,
+    alwaysOriginal,
+    alwaysTemplate,
+}
+
+class UIImage(val bitmap: Bitmap, val scale: Int = 1, val renderingMode: UIImageRenderingMode = UIImageRenderingMode.automatic) {
 
     val size: CGSize
 
@@ -35,11 +42,12 @@ fun KIMIPackage.installUIImage() {
     exporter.exportClass(UIImage::class.java, "UIImage")
     exporter.exportInitializer(UIImage::class.java, {
         (it.firstOrNull() as? Map<String, Any>)?.let { options ->
+            val renderingMode = options["renderingMode"] as? UIImageRenderingMode ?: UIImageRenderingMode.automatic
             (options["base64"] as? String)?.let { base64 ->
                 try {
                     val byteArray = Base64.decode(base64, 0)
                     BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count())?.let {
-                        return@exportInitializer UIImage(it)
+                        return@exportInitializer UIImage(it, 1, renderingMode)
                     }
                 } catch (e: Exception) {}
             }
@@ -63,7 +71,7 @@ fun KIMIPackage.installUIImage() {
                 targetFile?.let { targetFile ->
                     try {
                         EDOExporter.sharedExporter.applicationContext?.assets?.open(targetFile).use {
-                            return@exportInitializer UIImage(BitmapFactory.decodeStream(it), currentScale)
+                            return@exportInitializer UIImage(BitmapFactory.decodeStream(it), currentScale, renderingMode)
                         }
                     } catch (e: Exception) { }
                 }
@@ -73,4 +81,9 @@ fun KIMIPackage.installUIImage() {
     })
     exporter.exportProperty(UIImage::class.java, "size")
     exporter.exportProperty(UIImage::class.java, "scale")
+    exporter.exportEnum("UIImageRenderingMode", mapOf(
+            Pair("automatic", UIImageRenderingMode.automatic),
+            Pair("alwaysOriginal", UIImageRenderingMode.alwaysOriginal),
+            Pair("alwaysTemplate", UIImageRenderingMode.alwaysTemplate)
+    ))
 }

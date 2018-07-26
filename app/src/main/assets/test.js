@@ -7,12 +7,12 @@ var imageView = new UIImageView
 imageView.contentMode = UIViewContentMode.scaleAspectFill
 imageView.clipsToBounds = true
 imageView.frame = { x: 0, y: 0, width: 100, height: 300 }
-imageView.image = new UIImage({ name: "animal" })
+imageView.image = new UIImage({ name: "animal", renderingMode: UIImageRenderingMode.alwaysTemplate })
 
 main.addSubview(imageView)
 
 DispatchQueue.main.asyncAfter(3.0, function () {
-    UIAnimator.shared.linear(3.0, function () {
+    UIAnimator.linear(3.0, function () {
         imageView.frame = { x: 0, y: 0, width: 300, height: 300 }
     }, function () { })
 })

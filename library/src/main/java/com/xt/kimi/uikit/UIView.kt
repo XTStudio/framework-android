@@ -545,6 +545,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
 
     var tintColor: UIColor? = null
+        get() {
+            return field ?: superview?.tintColor ?: UIColor(0.0, 122.0 / 255.0, 1.0, 1.0)
+        }
         set(value) {
             field = value
             this.tintColorDidChange()

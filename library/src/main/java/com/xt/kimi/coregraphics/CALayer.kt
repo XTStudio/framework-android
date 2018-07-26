@@ -327,6 +327,12 @@ open class CALayer {
     private fun drawContent(ctx: Canvas) {
         val contentMode = this.view?.contentMode ?: return
         (contents as? UIImage)?.let {
+            sharedContentPaint.reset()
+            if (it.renderingMode == UIImageRenderingMode.alwaysTemplate) {
+                this.view?.tintColor?.let { tintColor ->
+                    sharedContentPaint.colorFilter = PorterDuffColorFilter(Color.argb(Math.ceil(tintColor.a * 255.0).toInt(), Math.ceil(tintColor.r * 255.0).toInt(), Math.ceil(tintColor.g * 255.0).toInt(), Math.ceil(tintColor.b * 255.0).toInt()), PorterDuff.Mode.SRC_IN)
+                }
+            }
             when (contentMode) {
                 UIViewContentMode.scaleToFill -> {
                     ctx.drawBitmap(
