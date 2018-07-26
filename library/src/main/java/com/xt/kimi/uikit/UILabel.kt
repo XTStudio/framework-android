@@ -1,6 +1,7 @@
 package com.xt.kimi.uikit
 
 import android.text.SpannableString
+import com.xt.endo.CGRect
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
 import com.xt.kimi.coregraphics.CATextLayer
@@ -23,6 +24,13 @@ enum class UILineBreakMode {
 class UILabel: UIView() {
 
     override val layer: CATextLayer = CATextLayer()
+
+    override var frame: CGRect
+        get() = super.frame
+        set(value) {
+            super.frame = value
+            this.layer.textLayout = null
+        }
 
     var edo_text: String? = null
         set(value) {

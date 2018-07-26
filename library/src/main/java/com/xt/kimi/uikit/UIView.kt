@@ -53,7 +53,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     private var edo_frame_animations: List<UIAnimation>? = null
 
-    var frame: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
+    open var frame: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
         set(value) {
             if (!UIAnimator.duringAnimationValueSet) {
                 this.edo_frame_animations?.forEach { it.cancel() }
@@ -119,7 +119,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     var bounds: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
         private set
 
-    var center: CGPoint
+    open var center: CGPoint
         get() {
             return CGPoint(this.frame.x + this.frame.width / 2.0, this.frame.y + this.frame.height / 2.0)
         }
@@ -129,7 +129,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     private var edo_transform_animations: List<UIAnimation>? = null
 
-    var transform: CGAffineTransform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+    open var transform: CGAffineTransform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
         set(value) {
             if (!UIAnimator.duringAnimationValueSet) {
                 this.edo_transform_animations?.forEach { it.cancel() }
@@ -388,19 +388,19 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         return null
     }
 
-    fun didAddSubview(subview: UIView) {
+    open fun didAddSubview(subview: UIView) {
         EDOJavaHelper.invokeBindedMethod(this, "didAddSubview", subview)
     }
 
-    fun willRemoveSubview(subview: UIView) {
+    open fun willRemoveSubview(subview: UIView) {
         EDOJavaHelper.invokeBindedMethod(this, "willRemoveSubview", subview)
     }
 
-    fun willMoveToSuperview(newSuperview: UIView?) {
+    open fun willMoveToSuperview(newSuperview: UIView?) {
         EDOJavaHelper.invokeBindedMethod(this, "willMoveToSuperview", newSuperview)
     }
 
-    fun didMoveToSuperview() {
+    open fun didMoveToSuperview() {
         EDOJavaHelper.invokeBindedMethod(this, "didMoveToSuperview")
     }
 
@@ -414,7 +414,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.layoutSubviews()
     }
 
-    fun layoutSubviews() {
+    open fun layoutSubviews() {
         EDOJavaHelper.invokeBindedMethod(this, "layoutSubviews")
     }
 
@@ -424,7 +424,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.invalidate()
     }
 
-    var clipsToBounds: Boolean
+    open var clipsToBounds: Boolean
         get() {
             return this.layer.masksToBounds
         }
@@ -435,7 +435,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     private var edo_backgroundColor_animations: List<UIAnimation>? = null
 
-    var edo_backgroundColor: UIColor? = null
+    open var edo_backgroundColor: UIColor? = null
         set(value) {
             if (!UIAnimator.duringAnimationValueSet) {
                 this.edo_backgroundColor_animations?.forEach { it.cancel() }
@@ -505,7 +505,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     private var edo_alpha_animation: UIAnimation? = null
 
-    var edo_alpha: Double
+    open var edo_alpha: Double
         get() {
             return this.alpha.toDouble()
         }
@@ -531,20 +531,20 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.alpha = value.toFloat()
         }
 
-    var hidden: Boolean = false
+    open var hidden: Boolean = false
         set(value) {
             field = value
             this.visibility = if (value) View.GONE else View.VISIBLE
             this.setNeedsDisplay()
         }
 
-    var contentMode: UIViewContentMode = UIViewContentMode.scaleToFill
+    open var contentMode: UIViewContentMode = UIViewContentMode.scaleToFill
         set(value) {
             field = value
             this.setNeedsDisplay()
         }
 
-    var tintColor: UIColor? = null
+    open var tintColor: UIColor? = null
         get() {
             return field ?: superview?.tintColor ?: UIColor(0.0, 122.0 / 255.0, 1.0, 1.0)
         }
@@ -553,7 +553,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.tintColorDidChange()
         }
 
-    fun tintColorDidChange() {
+    open fun tintColorDidChange() {
         EDOJavaHelper.invokeBindedMethod(this, "tintColorDidChange")
         subviews.forEach {
             if (it.tintColor == null) {
@@ -564,7 +564,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     // GestureRecognizers
 
-    var userInteractionEnabled: Boolean = true
+    open var userInteractionEnabled: Boolean = true
 
     var gestureRecognizers: List<UIGestureRecognizer> = listOf()
         private set
