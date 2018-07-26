@@ -4,13 +4,13 @@ main.frame = { x: 88, y: 88, width: 144, height: 144 }
 main.backgroundColor = UIColor.red
 main.contentMode = UIViewContentMode.scaleAspectFit
 main.layer.masksToBounds = true
-// main.layer.cornerRadius = 150
-// main.layer.borderWidth = 10
+main.layer.cornerRadius = 77
+main.layer.borderWidth = 10
 main.layer.borderColor = new UIColor(0, 0, 0, 1)
-// main.layer.shadowColor = new UIColor(0, 0, 0, 1)
-// main.layer.shadowOpacity = 0.6
-// main.layer.shadowRadius = 16.0
-// main.layer.shadowOffset = { width: 6, height: 6 }
+main.layer.shadowColor = new UIColor(0, 0, 0, 1)
+main.layer.shadowOpacity = 0.6
+main.layer.shadowRadius = 16.0
+main.layer.shadowOffset = { width: 6, height: 6 }
 // main.layer.opacity = 0.5
 
 var yellowLayer = new CALayer
@@ -37,10 +37,6 @@ tapGesture.on('touch', function () {
 })
 main.addGestureRecognizer(tapGesture)
 
-DispatchQueue.main.asyncAfter(3.0, function() {
-    main.backgroundColor = UIColor.green
-})
-
 // var blueLayer = new CALayer
 // blueLayer.frame = { x: 22, y: 200, width: 44, height: 44 }
 // blueLayer.backgroundColor = new UIColor(0, 1, 1, 1)
@@ -59,11 +55,11 @@ DispatchQueue.main.asyncAfter(3.0, function() {
 // })
 // main.addGestureRecognizer(longPressGesture)
 
-// var yellowView = new UISwitch
-// yellowView.frame = { x: 44, y: 44, width: 44, height: 44 }
+var yellowView = new UIView
+yellowView.frame = { x: -22, y: -22, width: 44, height: 44 }
 // yellowView.transform = { a: 1.0, b: 0.0, c: 0.0, d: 1.0, tx: 66.0, ty: 66.0 }
-// yellowView.backgroundColor = new UIColor(1, 1, 0, 1)
-// main.addSubview(yellowView)
+yellowView.backgroundColor = UIColor.blue
+main.addSubview(yellowView)
 
 // var blueView = new UIView
 // blueView.frame = { x: 22, y: 22, width: 88, height: 88 }

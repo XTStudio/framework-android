@@ -1,12 +1,14 @@
 package com.xt.kimi.coregraphics
 
 import android.graphics.*
+import android.os.Build
+import android.os.Bundle
+import com.xt.endo.CGAffineTransform
 import com.xt.endo.CGRect
 import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
-import com.xt.kimi.uikit.UIColor
-import com.xt.kimi.uikit.UIView
-import com.xt.kimi.uikit.scale
+import com.xt.kimi.uikit.*
+import java.lang.reflect.Executable
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -219,7 +221,7 @@ open class CALayer {
         }
         this.drawShadow(ctx)
         if (this.masksToBounds) {
-            ctx.clipPath(boundsPath)
+            ctx.clipPath(createBoundsPath())
         }
         ctx.drawPath(boundsPath, createBackgroundPaint())
         this.sublayers.forEach {
@@ -289,41 +291,32 @@ open class CALayer {
         return sharedBackgroundPaint
     }
 
-    private var shadowBitmap: Bitmap? = null
-        set(value) {
-            field?.let { it.recycle() }
-            field = value
-        }
-
     private fun drawShadow(ctx: Canvas, boundsPath: Path = createBorderPath()) {
         val shadowColor = shadowColor ?: return
         val shadowOffset = shadowOffset ?: return
-        if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0 && this.shadowBitmap == null) {
-            val width = (this.frame.width + shadowRadius * 2) * scale
-            val height = (this.frame.height + shadowRadius * 2) * scale
-            val shadowBitmap = Bitmap.createBitmap(width.toInt(), height.toInt(), Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(shadowBitmap)
-            val paint = Paint()
-            shadowColor?.let {
-                paint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
-            }
-            paint.alpha = (shadowOpacity * 255).toInt()
-            paint.maskFilter = BlurMaskFilter((shadowRadius * scale).toFloat(), BlurMaskFilter.Blur.NORMAL)
-            canvas.translate((shadowRadius * scale).toFloat(), (shadowRadius * scale).toFloat())
-            canvas.drawPath(boundsPath, paint)
-            this.shadowBitmap = shadowBitmap
-        }
-        else if (shadowColor.a == 0.0 || shadowOpacity == 0.0 || shadowRadius == 0.0) {
-            this.shadowBitmap = null
-        }
-        this.shadowBitmap?.let {
-            sharedBackgroundPaint.reset()
-            ctx.drawBitmap(
-                    it,
-                    ((-shadowRadius + shadowOffset.width) * scale).toFloat(),
-                    ((-shadowRadius + shadowOffset.height) * scale).toFloat(),
-                    sharedBackgroundPaint
-            )
+        if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0) {
+            try {
+                val width = (this.frame.width + shadowRadius * 2) * scale
+                val height = (this.frame.height + shadowRadius * 2) * scale
+                val shadowBitmap = UIView.createBitmap2(width.toInt(), height.toInt())
+                val canvas = CAOSCanvas(shadowBitmap)
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                val paint = Paint()
+                shadowColor?.let {
+                    paint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+                }
+                paint.alpha = (shadowOpacity * 255).toInt()
+                paint.maskFilter = BlurMaskFilter((shadowRadius * scale).toFloat(), BlurMaskFilter.Blur.NORMAL)
+                canvas.translate((shadowRadius * scale).toFloat(), (shadowRadius * scale).toFloat())
+                canvas.drawPath(boundsPath, paint)
+                sharedBackgroundPaint.reset()
+                ctx.drawBitmap(
+                        shadowBitmap,
+                        ((-shadowRadius + shadowOffset.width) * scale).toFloat(),
+                        ((-shadowRadius + shadowOffset.height) * scale).toFloat(),
+                        sharedBackgroundPaint
+                )
+            } catch (e: Exception) { } // avoid OOM
         }
     }
 

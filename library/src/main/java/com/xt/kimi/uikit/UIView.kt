@@ -1,10 +1,8 @@
 package com.xt.kimi.uikit
 
 import android.app.Activity
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.Region
+import android.graphics.*
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.VelocityTracker
 import android.view.View
@@ -15,6 +13,8 @@ import com.facebook.rebound.Spring
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
+import com.xt.kimi.coregraphics.CAOSCanvas
+import java.lang.ref.SoftReference
 import kotlin.math.max
 import kotlin.math.min
 
@@ -613,10 +613,33 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
     }
 
+    private var ignoreTransform = false
+
     override fun draw(canvas: Canvas?) {
         val canvas = canvas ?: return
+        if (canvas !is CAOSCanvas && this.clipsToBounds && !this.transform.isIdentity() && this.isHardwareAccelerated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                val bitmap = UIView.createBitmap(((this.frame.width + this.layer.shadowRadius * 2) * scale).toInt(), ((this.frame.height + this.layer.shadowRadius * 2) * scale).toInt())
+                val offScreenCtx0 = CAOSCanvas(bitmap)
+                offScreenCtx0.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+                ignoreTransform = true
+                this.draw(offScreenCtx0)
+                canvas.save()
+                val unmatrix = this.transform.unmatrix()
+                val matrix = Matrix()
+                matrix.postTranslate(-(this.width / 2.0).toFloat(), -(this.height / 2.0).toFloat())
+                matrix.postRotate(unmatrix.degree.toFloat())
+                matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix.postTranslate((unmatrix.translate.x * scale).toFloat(), (unmatrix.translate.y * scale).toFloat())
+                matrix.postTranslate((this.width / 2.0).toFloat(), (this.height / 2.0).toFloat())
+                canvas.concat(matrix)
+                canvas.drawBitmap(bitmap, 0f, 0f, null)
+                canvas.restore()
+            } catch (e: Exception) { } // avoid OOM crash.
+            return // WTF Android >= M && hardwareAccelerated cause clipPath apply canvas transform error.
+        }
         canvas.save()
-        if (!this.transform.isIdentity()) {
+        if (!this.transform.isIdentity() && !ignoreTransform) {
             val unmatrix = this.transform.unmatrix()
             val matrix = Matrix()
             matrix.postTranslate(-(this.width / 2.0).toFloat(), -(this.height / 2.0).toFloat())
@@ -626,6 +649,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             matrix.postTranslate((this.width / 2.0).toFloat(), (this.height / 2.0).toFloat())
             canvas.concat(matrix)
         }
+        if (ignoreTransform) { ignoreTransform = true }
         canvas.let {
             this.layer.view = this
             this.layer.drawInContext(it)
@@ -759,6 +783,34 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             val metrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getMetrics(metrics)
             scale = metrics.density
+        }
+
+        private var sharedBitmap: SoftReference<Bitmap>? = null
+
+        private var sharedBitmap2: SoftReference<Bitmap>? = null
+
+        internal fun createBitmap(width: Int, height: Int): Bitmap {
+            sharedBitmap?.get()?.takeIf { !it.isRecycled }?.let { sharedBitmap ->
+                if (sharedBitmap.width >= width && sharedBitmap.height >= height) {
+                    return sharedBitmap
+                }
+            }
+            sharedBitmap?.get()?.recycle()
+            val bitmap = Bitmap.createBitmap(min(2048, width), min(2048, height), Bitmap.Config.ARGB_8888)
+            sharedBitmap = SoftReference(bitmap)
+            return bitmap
+        }
+
+        internal fun createBitmap2(width: Int, height: Int): Bitmap {
+            sharedBitmap2?.get()?.takeIf { !it.isRecycled }?.let { sharedBitmap2 ->
+                if (sharedBitmap2.width >= width && sharedBitmap2.height >= height) {
+                    return sharedBitmap2
+                }
+            }
+            sharedBitmap2?.get()?.recycle()
+            val bitmap = Bitmap.createBitmap(min(2048, width), min(2048, height), Bitmap.Config.ARGB_8888)
+            sharedBitmap2 = SoftReference(bitmap)
+            return bitmap
         }
 
     }
