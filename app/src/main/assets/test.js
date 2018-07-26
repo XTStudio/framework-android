@@ -12,6 +12,15 @@ sLayer.endPoint = { x: 0.7, y: 0 }
 
 main.layer.addSublayer(sLayer)
 
+var displayLink = new CADisplayLink(function () {
+    console.log(this.timestamp)
+})
+displayLink.active()
+
+DispatchQueue.main.asyncAfter(5.0, function () {
+    displayLink.invalidate()
+})
+
 // main.backgroundColor = UIColor.black
 
 // var label = new UILabel

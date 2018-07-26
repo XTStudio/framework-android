@@ -4,6 +4,7 @@ import android.content.Context.MODE_PRIVATE
 import com.xt.endo.CGRect
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
+import com.xt.kimi.coregraphics.installCADisplayLink
 import com.xt.kimi.coregraphics.installCAGradientLayer
 import com.xt.kimi.coregraphics.installCALayer
 import com.xt.kimi.foundation.UUID
@@ -62,6 +63,7 @@ class KIMIPackage : EDOPackage() {
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
+        installCADisplayLink()
     }
 
 }
