@@ -29,4 +29,6 @@ dependencies {
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation 'com.github.XTStudio:Endo-Android:1d80b2044d3b201c0df0319497fa2cc7bd983f4f'
     implementation 'com.facebook.rebound:rebound:0.3.8'
+    implementation 'com.facebook.fbui.textlayoutbuilder:textlayoutbuilder:1.4.0'
+    implementation 'com.android.support:support-core-utils:26.1.0'
 }

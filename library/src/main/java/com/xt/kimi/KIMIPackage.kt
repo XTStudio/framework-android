@@ -31,6 +31,8 @@ class KIMIPackage : EDOPackage() {
         installUIAnimator()
         installUIImage()
         installUIImageView()
+        installUILabel()
+        installUIFont()
         // CoreGraphics
         installCALayer()
     }

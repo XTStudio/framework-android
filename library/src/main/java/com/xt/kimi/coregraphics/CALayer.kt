@@ -248,7 +248,7 @@ open class CALayer {
         sharedBackgroundPaint.isAntiAlias = true
         sharedBackgroundPaint.color = Color.TRANSPARENT
         backgroundColor?.let {
-            sharedBackgroundPaint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+            sharedBackgroundPaint.color = it.toInt()
         }
         sharedBackgroundPaint.alpha = kotlin.run {
             var current: CALayer? = this
@@ -277,7 +277,7 @@ open class CALayer {
         sharedBackgroundPaint.strokeWidth = (abs(this.borderWidth) * scale).toFloat()
         sharedBackgroundPaint.isAntiAlias = true
         this.borderColor?.let {
-            sharedBackgroundPaint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+            sharedBackgroundPaint.color = it.toInt()
         }
         sharedBackgroundPaint.alpha = kotlin.run {
             var current: CALayer? = this
@@ -304,7 +304,7 @@ open class CALayer {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
                 val paint = Paint()
                 shadowColor?.let {
-                    paint.color = Color.argb(Math.ceil(it.a * 255.0).toInt(), Math.ceil(it.r * 255.0).toInt(), Math.ceil(it.g * 255.0).toInt(), Math.ceil(it.b * 255.0).toInt())
+                    paint.color = it.toInt()
                 }
                 paint.alpha = (shadowOpacity * 255).toInt()
                 paint.maskFilter = BlurMaskFilter((shadowRadius * scale).toFloat(), BlurMaskFilter.Blur.NORMAL)
@@ -324,13 +324,13 @@ open class CALayer {
 
     internal var contents: Any? = null
 
-    private fun drawContent(ctx: Canvas) {
+    protected open fun drawContent(ctx: Canvas) {
         val contentMode = this.view?.contentMode ?: return
         (contents as? UIImage)?.let {
             sharedContentPaint.reset()
             if (it.renderingMode == UIImageRenderingMode.alwaysTemplate) {
                 this.view?.tintColor?.let { tintColor ->
-                    sharedContentPaint.colorFilter = PorterDuffColorFilter(Color.argb(Math.ceil(tintColor.a * 255.0).toInt(), Math.ceil(tintColor.r * 255.0).toInt(), Math.ceil(tintColor.g * 255.0).toInt(), Math.ceil(tintColor.b * 255.0).toInt()), PorterDuff.Mode.SRC_IN)
+                    sharedContentPaint.colorFilter = PorterDuffColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
                 }
             }
             when (contentMode) {

@@ -47,7 +47,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         setWillNotDraw(false)
     }
 
-    val layer = CALayer()
+    open val layer = CALayer()
 
     // Geometry
 

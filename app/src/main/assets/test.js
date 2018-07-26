@@ -1,18 +1,14 @@
 
 var main = new UIView
 main.frame = { x: 44, y: 88, width: 300, height: 300 }
-main.backgroundColor = UIColor.black
+// main.backgroundColor = UIColor.black
 
-var imageView = new UIImageView
-imageView.contentMode = UIViewContentMode.scaleAspectFill
-imageView.clipsToBounds = true
-imageView.frame = { x: 0, y: 0, width: 100, height: 300 }
-imageView.image = new UIImage({ name: "animal", renderingMode: UIImageRenderingMode.alwaysTemplate })
+var label = new UILabel
+label.backgroundColor = UIColor.yellow
+label.font = new UIFont(24, "bold", "monospace")
+label.frame = { x: 0, y: 0, width: 300, height: 300 }
+label.text = "Hello, World!"
+label.textAlignment = UITextAlignment.center
+label.textColor = UIColor.black
 
-main.addSubview(imageView)
-
-DispatchQueue.main.asyncAfter(3.0, function () {
-    UIAnimator.linear(3.0, function () {
-        imageView.frame = { x: 0, y: 0, width: 300, height: 300 }
-    }, function () { })
-})
+main.addSubview(label)
