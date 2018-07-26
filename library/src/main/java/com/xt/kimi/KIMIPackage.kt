@@ -18,6 +18,7 @@ class KIMIPackage : EDOPackage() {
         // Foundation
         installDispatchQueue()
         // UIKit
+        scale = exporter.applicationContext?.resources?.displayMetrics?.density ?: 1.0f
         installUIView()
         installUISwitch()
         installUIColor()
@@ -28,6 +29,8 @@ class KIMIPackage : EDOPackage() {
         installUIPinchGestureRecognizer()
         installUIRotationGestureRecognizer()
         installUIAnimator()
+        installUIImage()
+        installUIImageView()
         // CoreGraphics
         installCALayer()
     }

@@ -1,14 +1,10 @@
 package com.xt.kimi.coregraphics
 
 import android.graphics.*
-import android.os.Build
-import android.os.Bundle
-import com.xt.endo.CGAffineTransform
 import com.xt.endo.CGRect
 import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.uikit.*
-import java.lang.reflect.Executable
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -195,7 +191,6 @@ open class CALayer {
 
     open fun drawInContext(ctx: Canvas) {
         if (this.hidden) { return }
-        val boundsPath = createBoundsPath()
         ctx.save()
         this.edo_mask?.takeIf { ctx !is CAOSCanvas }?.let { maskLayer ->
             try {
@@ -213,10 +208,9 @@ open class CALayer {
                 val concatBitmap = UIView.createBitmap((this.frame.width * scale).toInt(), (this.frame.height * scale).toInt())
                 UIView.lockBitmap(concatBitmap)
                 val concatCanvas = CAOSCanvas(concatBitmap)
-                val maskPaint = Paint()
-                maskPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+                CALayer.sharedMaskPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
                 concatCanvas.drawBitmap(contentBitmap, 0f, 0f, null)
-                concatCanvas.drawBitmap(maskBitmap, 0f, 0f, maskPaint)
+                concatCanvas.drawBitmap(maskBitmap, 0f, 0f, CALayer.sharedMaskPaint)
                 ctx.drawBitmap(concatBitmap, 0f, 0f, null)
                 UIView.unlockBitmap(concatBitmap)
             } catch (e: Exception) { } // avoid OOM crash.
@@ -226,7 +220,10 @@ open class CALayer {
         if (this.masksToBounds) {
             ctx.clipPath(createBoundsPath())
         }
-        ctx.drawPath(boundsPath, createBackgroundPaint())
+        if (this.backgroundColor != null) {
+            ctx.drawPath(createBoundsPath(), createBackgroundPaint())
+        }
+        this.drawContent(ctx)
         this.sublayers.forEach {
             ctx.save()
             ctx.translate((it.frame.x * scale).toFloat(), (it.frame.y * scale).toFloat())
@@ -241,12 +238,12 @@ open class CALayer {
 
     internal fun createBoundsPath(): Path {
         sharedOuterPath.reset()
-        val outRect = RectF((max(0.0, this.borderWidth) * scale).toFloat(), (max(0.0, this.borderWidth) * scale).toFloat(), ((this.frame.width - max(0.0, this.borderWidth)) * scale).toFloat(), ((this.frame.width - max(0.0, this.borderWidth)) * scale).toFloat())
+        val outRect = RectF((max(0.0, this.borderWidth) * scale).toFloat(), (max(0.0, this.borderWidth) * scale).toFloat(), ((this.frame.width - max(0.0, this.borderWidth)) * scale).toFloat(), ((this.frame.height - max(0.0, this.borderWidth)) * scale).toFloat())
         sharedOuterPath.addRoundRect(outRect, (this.cornerRadius * scale).toFloat(), (this.cornerRadius * scale).toFloat(), Path.Direction.CCW)
         return sharedOuterPath
     }
 
-    internal fun createBackgroundPaint(): Paint {
+    private fun createBackgroundPaint(): Paint {
         sharedBackgroundPaint.reset()
         sharedBackgroundPaint.isAntiAlias = true
         sharedBackgroundPaint.color = Color.TRANSPARENT
@@ -265,7 +262,7 @@ open class CALayer {
         return sharedBackgroundPaint
     }
 
-    internal fun createBorderPath(): Path {
+    private fun createBorderPath(): Path {
         sharedOuterPath.reset()
         val outRect = RectF((this.borderWidth / 2.0 * scale).toFloat(), (this.borderWidth / 2.0 * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat())
         val radiusRatio = this.cornerRadius / max(this.frame.width, this.frame.height)
@@ -274,7 +271,7 @@ open class CALayer {
         return sharedOuterPath
     }
 
-    internal fun createBorderPaint(): Paint {
+    private fun createBorderPaint(): Paint {
         sharedBackgroundPaint.reset()
         sharedBackgroundPaint.style = Paint.Style.STROKE
         sharedBackgroundPaint.strokeWidth = (abs(this.borderWidth) * scale).toFloat()
@@ -323,6 +320,96 @@ open class CALayer {
                 UIView.unlockBitmap(shadowBitmap)
             } catch (e: Exception) { } // avoid OOM
         }
+    }
+
+    internal var contents: Any? = null
+
+    private fun drawContent(ctx: Canvas) {
+        val contentMode = this.view?.contentMode ?: return
+        (contents as? UIImage)?.let {
+            when (contentMode) {
+                UIViewContentMode.scaleToFill -> {
+                    ctx.drawBitmap(
+                            it.bitmap,
+                            Rect(0, 0, it.bitmap.width, it.bitmap.height),
+                            RectF(0f, 0f, (this.frame.width * scale).toFloat(), (this.frame.height * scale).toFloat()),
+                            sharedContentPaint
+                    )
+                }
+                UIViewContentMode.scaleAspectFit -> {
+                    val viewRatio = this.frame.width / this.frame.height
+                    val contentRatio = it.bitmap.width / it.bitmap.height
+                    if (viewRatio > contentRatio) {
+                        val width = (it.bitmap.width * (this.frame.height / it.bitmap.height)).toFloat()
+                        ctx.drawBitmap(
+                                it.bitmap,
+                                Rect(0, 0, it.bitmap.width, it.bitmap.height),
+                                RectF(
+                                        ((this.frame.width - width) / 2.0 * scale).toFloat(),
+                                        0f,
+                                        ((this.frame.width - width) / 2.0 * scale).toFloat() + width * scale,
+                                        (this.frame.height * scale).toFloat()
+                                ),
+                                sharedContentPaint
+                        )
+                    }
+                    else {
+                        val height = (it.bitmap.height * (this.frame.width / it.bitmap.width)).toFloat()
+                        ctx.drawBitmap(
+                                it.bitmap,
+                                Rect(0, 0, it.bitmap.width, it.bitmap.height),
+                                RectF(
+                                        0f,
+                                        ((this.frame.height - height) / 2.0 * scale).toFloat(),
+                                        (this.frame.width * scale).toFloat(),
+                                        ((this.frame.height - height) / 2.0 * scale).toFloat() + height * scale
+                                ),
+                                sharedContentPaint
+                        )
+                    }
+                }
+                UIViewContentMode.scaleAspectFill -> {
+                    val viewRatio = this.frame.width / this.frame.height
+                    val contentRatio = it.bitmap.width / it.bitmap.height
+                    if (viewRatio < contentRatio) {
+                        val width = (it.bitmap.width * (this.frame.height / it.bitmap.height)).toFloat()
+                        ctx.drawBitmap(
+                                it.bitmap,
+                                Rect(0, 0, it.bitmap.width, it.bitmap.height),
+                                RectF(
+                                        ((this.frame.width - width) / 2.0 * scale).toFloat(),
+                                        0f,
+                                        ((this.frame.width - width) / 2.0 * scale).toFloat() + width * scale,
+                                        (this.frame.height * scale).toFloat()
+                                ),
+                                sharedContentPaint
+                        )
+                    }
+                    else {
+                        val height = (it.bitmap.height * (this.frame.width / it.bitmap.width)).toFloat()
+                        ctx.drawBitmap(
+                                it.bitmap,
+                                Rect(0, 0, it.bitmap.width, it.bitmap.height),
+                                RectF(
+                                        0f,
+                                        ((this.frame.height - height) / 2.0 * scale).toFloat(),
+                                        (this.frame.width * scale).toFloat(),
+                                        ((this.frame.height - height) / 2.0 * scale).toFloat() + height * scale
+                                ),
+                                sharedContentPaint
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    companion object {
+
+        val sharedMaskPaint = Paint()
+
+        val sharedContentPaint = Paint()
+
     }
 
 }

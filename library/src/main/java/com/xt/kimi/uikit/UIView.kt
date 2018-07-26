@@ -34,7 +34,6 @@ enum class UIViewContentMode {
 open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     fun attachToActivity(activity: Activity) {
-        UIView.findScale(activity)
         this.removeFromSuperview()
         val rootView = UIWindow()
         rootView.setBackgroundColor(Color.WHITE)
@@ -540,6 +539,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
 
     var contentMode: UIViewContentMode = UIViewContentMode.scaleToFill
+        set(value) {
+            field = value
+            this.setNeedsDisplay()
+        }
 
     var tintColor: UIColor? = null
         set(value) {
@@ -628,7 +631,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 this.draw(offScreenCtx0)
                 canvas.save()
                 val unmatrix = this.transform.unmatrix()
-                val matrix = Matrix()
+                val matrix = UIView.sharedMatrix
+                matrix.reset()
                 matrix.postTranslate(-(this.width / 2.0).toFloat(), -(this.height / 2.0).toFloat())
                 matrix.postRotate(unmatrix.degree.toFloat())
                 matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
@@ -644,7 +648,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         canvas.save()
         if (!this.transform.isIdentity() && !ignoreTransform) {
             val unmatrix = this.transform.unmatrix()
-            val matrix = Matrix()
+            val matrix = UIView.sharedMatrix
+            matrix.reset()
             matrix.postTranslate(-(this.width / 2.0).toFloat(), -(this.height / 2.0).toFloat())
             matrix.postRotate(unmatrix.degree.toFloat())
             matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
@@ -782,13 +787,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
         internal var sharedVelocityTracker = VelocityTracker.obtain()
 
-        private fun findScale(activity: Activity) {
-            val metrics = DisplayMetrics()
-            activity.windowManager.defaultDisplay.getMetrics(metrics)
-            scale = metrics.density
-        }
+        private val sharedMatrix = Matrix()
 
         private var sharedBitmaps: MutableList<SoftReference<Bitmap>> = mutableListOf()
+
         private var lockedBitmaps: WeakHashMap<Bitmap, Boolean> = WeakHashMap()
 
         internal fun createBitmap(width: Int, height: Int): Bitmap {
