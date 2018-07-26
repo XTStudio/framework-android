@@ -4,6 +4,7 @@ import android.content.Context.MODE_PRIVATE
 import com.xt.endo.CGRect
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
+import com.xt.kimi.coregraphics.installCAGradientLayer
 import com.xt.kimi.coregraphics.installCALayer
 import com.xt.kimi.foundation.UUID
 import com.xt.kimi.foundation.installDispatchQueue
@@ -60,6 +61,7 @@ class KIMIPackage : EDOPackage() {
         installUIDevice()
         // CoreGraphics
         installCALayer()
+        installCAGradientLayer()
     }
 
 }
