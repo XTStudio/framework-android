@@ -32,7 +32,7 @@ class UILabel: UIView() {
             this.layer.textLayout = null
         }
 
-    var edo_text: String? = null
+    var text: String? = null
         set(value) {
             field = value
             this.layer.textLayout = null
@@ -78,7 +78,7 @@ class UILabel: UIView() {
 
 fun KIMIPackage.installUILabel() {
     exporter.exportClass(UILabel::class.java, "UILabel", "UIView")
-    exporter.exportProperty(UILabel::class.java, "edo_text")
+    exporter.exportProperty(UILabel::class.java, "text")
     exporter.exportProperty(UILabel::class.java, "font")
     exporter.exportProperty(UILabel::class.java, "textColor")
     exporter.exportProperty(UILabel::class.java, "textAlignment")

@@ -2,6 +2,7 @@ package com.xt.kimi.coregraphics
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.text.Layout
 import android.text.TextUtils
@@ -18,16 +19,12 @@ class CATextLayer: CALayer() {
     override fun drawContent(ctx: Canvas) {
         super.drawContent(ctx)
         textLayout?.let {
-            val ty = (this.frame.height * scale - it.height) / 2.0
-            ctx.translate(0.0f, ty.toFloat())
-            this.setAlphaForPaint(it.paint, this)
-            it.draw(ctx)
-            ctx.translate(0.0f, -ty.toFloat())
+            this.drawText(ctx)
             return
         }
         val view = this.view as? UILabel ?: return
         val builder = TextLayoutBuilder()
-                .setText(view.edo_text ?: "")
+                .setText(view.text ?: "")
                 .setTextSize(((view.font?.pointSize ?: 17.0) * scale).toInt())
                 .setWidth((this.frame.width * scale).toInt())
                 .setTextColor(view.textColor?.toInt() ?: Color.BLACK)
@@ -48,7 +45,7 @@ class CATextLayer: CALayer() {
                         UITextAlignment.right -> Layout.Alignment.ALIGN_OPPOSITE
                     }
                 })
-                .setMaxLines(view.numberOfLines)
+                .setMaxLines(if (view.numberOfLines == 0) 999999 else view.numberOfLines)
                 .setEllipsize(kotlin.run {
                     if (view.numberOfLines == 1) {
                         when (view.lineBreakMode) {
@@ -72,7 +69,27 @@ class CATextLayer: CALayer() {
             }))
         }
         builder.build()?.let { layout ->
-            textLayout = layout
+            if (layout.height > this.frame.height * scale) {
+                var currentHeight = 0.0
+                var limitLine = 0
+                var bounds = Rect()
+                while (currentHeight + bounds.height() <= this.frame.height * scale) {
+                    layout.getLineBounds(limitLine, bounds)
+                    currentHeight += bounds.height()
+                    limitLine++
+                }
+                builder.maxLines = limitLine
+                builder.build()?.let { textLayout = it }
+            }
+            else {
+                textLayout = layout
+            }
+            this.drawText(ctx)
+        }
+    }
+
+    fun drawText(ctx: Canvas) {
+        textLayout?.let { layout ->
             val ty = (this.frame.height * scale - layout.height) / 2.0
             ctx.translate(0.0f, ty.toFloat())
             this.setAlphaForPaint(layout.paint, this)
