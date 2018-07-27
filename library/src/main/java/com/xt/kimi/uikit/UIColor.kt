@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.graphics.Color
 import com.xt.kimi.KIMIPackage
+import kotlin.math.abs
 
 /**
  * Created by cuiminghui on 2018/7/20.
@@ -9,6 +10,9 @@ import com.xt.kimi.KIMIPackage
 class UIColor(val r: Double, val g: Double, val b: Double, val a: Double) {
 
     fun toInt(): Int {
+        if (abs(this.a - 0.0) < 0.0001) {
+            return Color.TRANSPARENT
+        }
         return Color.argb(Math.ceil(this.a * 255.0).toInt(), Math.ceil(this.r * 255.0).toInt(), Math.ceil(this.g * 255.0).toInt(), Math.ceil(this.b * 255.0).toInt())
     }
 

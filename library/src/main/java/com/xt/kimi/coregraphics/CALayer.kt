@@ -250,15 +250,7 @@ open class CALayer {
         backgroundColor?.let {
             sharedBackgroundPaint.color = it.toInt()
         }
-        sharedBackgroundPaint.alpha = kotlin.run {
-            var current: CALayer? = this
-            var opacity = 1.0
-            while (current != null) {
-                opacity *= current.opacity
-                current = current.superlayer
-            }
-            return@run max(0, min(255, (opacity * 255.0).toInt()))
-        }
+        this.setAlphaForPaint(sharedBackgroundPaint, this)
         return sharedBackgroundPaint
     }
 
@@ -279,15 +271,7 @@ open class CALayer {
         this.borderColor?.let {
             sharedBackgroundPaint.color = it.toInt()
         }
-        sharedBackgroundPaint.alpha = kotlin.run {
-            var current: CALayer? = this
-            var opacity = 1.0
-            while (current != null) {
-                opacity *= current!!.opacity
-                current = current!!.superlayer
-            }
-            return@run max(0, min(255, (opacity * 255.0).toInt()))
-        }
+        this.setAlphaForPaint(sharedBackgroundPaint, this)
         return sharedBackgroundPaint
     }
 
@@ -311,6 +295,7 @@ open class CALayer {
                 canvas.translate((shadowRadius * scale).toFloat(), (shadowRadius * scale).toFloat())
                 canvas.drawPath(boundsPath, paint)
                 sharedBackgroundPaint.reset()
+                this.setAlphaForPaint(sharedBackgroundPaint, this)
                 ctx.drawBitmap(
                         shadowBitmap,
                         ((-shadowRadius + shadowOffset.width) * scale).toFloat(),
@@ -328,6 +313,7 @@ open class CALayer {
         val contentMode = this.view?.contentMode ?: return
         (contents as? UIImage)?.let {
             sharedContentPaint.reset()
+            this.setAlphaForPaint(sharedContentPaint, this)
             if (it.renderingMode == UIImageRenderingMode.alwaysTemplate) {
                 this.view?.tintColor?.let { tintColor ->
                     sharedContentPaint.colorFilter = PorterDuffColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
@@ -407,6 +393,18 @@ open class CALayer {
                     }
                 }
             }
+        }
+    }
+
+    protected fun setAlphaForPaint(paint: Paint, layer: CALayer) {
+        paint.alpha = kotlin.run {
+            var current: CALayer? = layer
+            var opacity = paint.alpha / 255.0
+            while (current != null) {
+                opacity *= current!!.opacity
+                current = current!!.superlayer
+            }
+            return@run max(0, min(255, (opacity * 255.0).toInt()))
         }
     }
 

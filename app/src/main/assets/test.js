@@ -2,24 +2,24 @@
 var main = new UIView
 main.frame = { x: 0, y: 88, width: 300, height: 300 }
 
-
-var sLayer = new CAGradientLayer
+var sLayer = new CAShapeLayer
 sLayer.frame = { x: 0, y: 0, width: 300, height: 300 }
-sLayer.colors = [UIColor.clear, UIColor.red]
-sLayer.locations = [0, 1]
-sLayer.startPoint = { x: 0.3, y: 0 }
-sLayer.endPoint = { x: 0.7, y: 0 }
+
+var path = new UIBezierPath
+path.moveTo({x: 100, y: 100})
+path.addLineTo({x: 200, y: 100})
+path.addLineTo({x: 200, y: 200})
+path.addLineTo({x: 100, y: 200})
+path.closePath()
+sLayer.path = path
+sLayer.fillColor = UIColor.red
+sLayer.lineWidth = 4.0
+sLayer.strokeColor = UIColor.blue
+sLayer.lineDashPattern = [10, 5]
+sLayer.lineDashPhase = 0
 
 main.layer.addSublayer(sLayer)
 
-var displayLink = new CADisplayLink(function () {
-    console.log(this.timestamp)
-})
-displayLink.active()
-
-DispatchQueue.main.asyncAfter(5.0, function () {
-    displayLink.invalidate()
-})
 
 // main.backgroundColor = UIColor.black
 

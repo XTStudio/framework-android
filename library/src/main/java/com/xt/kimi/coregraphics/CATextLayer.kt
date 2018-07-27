@@ -20,6 +20,7 @@ class CATextLayer: CALayer() {
         textLayout?.let {
             val ty = (this.frame.height * scale - it.height) / 2.0
             ctx.translate(0.0f, ty.toFloat())
+            this.setAlphaForPaint(it.paint, this)
             it.draw(ctx)
             ctx.translate(0.0f, -ty.toFloat())
             return
@@ -74,6 +75,7 @@ class CATextLayer: CALayer() {
             textLayout = layout
             val ty = (this.frame.height * scale - layout.height) / 2.0
             ctx.translate(0.0f, ty.toFloat())
+            this.setAlphaForPaint(layout.paint, this)
             layout.draw(ctx)
             ctx.translate(0.0f, -ty.toFloat())
         }

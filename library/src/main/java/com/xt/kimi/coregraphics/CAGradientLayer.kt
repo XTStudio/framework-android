@@ -36,8 +36,8 @@ class CAGradientLayer: CALayer() {
 
     override fun drawContent(ctx: Canvas) {
         super.drawContent(ctx)
-        sharedContentPaint.reset()
-        sharedContentPaint.shader = LinearGradient(
+        CALayer.sharedContentPaint.reset()
+        CALayer.sharedContentPaint.shader = LinearGradient(
                 (this.frame.width * this.startPoint.x * scale).toFloat(),
                 (this.frame.height * this.startPoint.y * scale).toFloat(),
                 (this.frame.width * this.endPoint.x * scale).toFloat(),
@@ -46,7 +46,8 @@ class CAGradientLayer: CALayer() {
                 this.locations.map { return@map it.toFloat() }.toFloatArray(),
                 Shader.TileMode.CLAMP
         )
-        ctx.drawPath(this.createBoundsPath(), sharedContentPaint)
+        this.setAlphaForPaint(CALayer.sharedContentPaint, this)
+        ctx.drawPath(this.createBoundsPath(), CALayer.sharedContentPaint)
     }
 
 }

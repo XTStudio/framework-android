@@ -36,6 +36,7 @@ class KIMIPackage : EDOPackage() {
         installUIImageView()
         installUILabel()
         installUIFont()
+        installUIBezierPath()
         UIScreen.main.scale = scale.toDouble()
         exporter.applicationContext?.let {
             UIScreen.main.bounds = CGRect(
