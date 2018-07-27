@@ -28,18 +28,28 @@ open class UIGestureRecognizer {
     }
 
     fun locationInView(view: UIView?): CGPoint {
+        this.touches.firstOrNull()?.let { touch ->
+            return touch.locationInView(view)
+        }
         return CGPoint(0.0, 0.0)
     }
 
     fun numberOfTouches(): Int {
-        return 0
+        return this.touches.count()
     }
 
     fun locationOfTouch(touchIndex: Int, view: UIView?): CGPoint {
+        this.touches.toList()[touchIndex]?.let { touch ->
+            return touch.locationInView(view)
+        }
         return CGPoint(0.0, 0.0)
     }
 
-    internal open fun handleTouch(touches: Set<UITouch>) { }
+    private var touches: Set<UITouch> = setOf()
+
+    internal open fun handleTouch(touches: Set<UITouch>) { this.touches = touches }
+
+    open fun handleEvent(name: String) { }
 
 }
 

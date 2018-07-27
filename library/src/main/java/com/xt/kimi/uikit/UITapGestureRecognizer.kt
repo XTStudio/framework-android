@@ -7,7 +7,7 @@ import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import kotlin.math.abs
 
-class UITapGestureRecognizer : UIGestureRecognizer() {
+open class UITapGestureRecognizer : UIGestureRecognizer() {
 
     var numberOfTapsRequired = 1
 
@@ -50,6 +50,7 @@ class UITapGestureRecognizer : UIGestureRecognizer() {
                     val handler = Handler()
                     UIView.recognizedGesture = this
                     this.state = UIGestureRecognizerState.ended
+                    this.handleEvent("touch")
                     EDOJavaHelper.emit(this, "touch", this)
                     handler.post {
                         UIView.recognizedGesture = null

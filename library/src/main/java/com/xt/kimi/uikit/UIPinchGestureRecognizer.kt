@@ -3,7 +3,7 @@ package com.xt.kimi.uikit
 import com.xt.kimi.KIMIPackage
 
 //todo: stub
-class UIPinchGestureRecognizer: UIGestureRecognizer() {
+open class UIPinchGestureRecognizer: UIGestureRecognizer() {
 
     var scale = 1.0
 

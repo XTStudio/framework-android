@@ -35,7 +35,9 @@ class UITouch {
         internal set
 
     fun locationInView(view: UIView?): CGPoint {
-        return CGPoint(0.0, 0.0)
+        val aView = view ?: this.view ?: return CGPoint(0.0, 0.0)
+        val windowPoint = this.windowPoint ?: return CGPoint(0.0, 0.0)
+        return aView.convertPointFromWindow(windowPoint) ?: return CGPoint(0.0, 0.0)
     }
 
     fun previousLocationInView(view: UIView?): CGPoint {

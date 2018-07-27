@@ -7,7 +7,7 @@ import com.xt.kimi.KIMIPackage
 import java.util.*
 import kotlin.math.abs
 
-class UILongPressGestureRecognizer: UIGestureRecognizer() {
+open class UILongPressGestureRecognizer: UIGestureRecognizer() {
 
     var numberOfTapsRequired = 1
 
@@ -36,6 +36,7 @@ class UILongPressGestureRecognizer: UIGestureRecognizer() {
                             if (UIView.recognizedGesture == null && this@UILongPressGestureRecognizer.state == UIGestureRecognizerState.possible) {
                                 UIView.recognizedGesture = this@UILongPressGestureRecognizer
                                 this@UILongPressGestureRecognizer.state = UIGestureRecognizerState.began
+                                this@UILongPressGestureRecognizer.handleEvent("began")
                                 EDOJavaHelper.emit(this@UILongPressGestureRecognizer, "began", this@UILongPressGestureRecognizer)
                             }
                             else {
@@ -58,6 +59,7 @@ class UILongPressGestureRecognizer: UIGestureRecognizer() {
                 }
                 else if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                     this.state = UIGestureRecognizerState.changed
+                    this.handleEvent("changed")
                     EDOJavaHelper.emit(this, "changed", this)
                 }
             }
@@ -67,6 +69,7 @@ class UILongPressGestureRecognizer: UIGestureRecognizer() {
                 if (it.identifier == 0) {
                     if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                         this.state = UIGestureRecognizerState.ended
+                        this.handleEvent("ended")
                         EDOJavaHelper.emit(this, "ended", this)
                         UIView.recognizedGesture = null
                     }
@@ -79,6 +82,7 @@ class UILongPressGestureRecognizer: UIGestureRecognizer() {
                 this.timerTask = null
                 if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                     this.state = UIGestureRecognizerState.cancelled
+                    this.handleEvent("cancelled")
                     EDOJavaHelper.emit(this, "cancelled", this)
                     UIView.recognizedGesture = null
                 }

@@ -402,6 +402,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun didMoveToSuperview() {
         EDOJavaHelper.invokeBindedMethod(this, "didMoveToSuperview")
+        this.tintColorDidChange()
     }
 
     fun setNeedsLayout() {
@@ -782,6 +783,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 (point.x - fromArr[2]) / (fromArr[0] + fromArr[3]),
                 (point.y - fromArr[5]) / (fromArr[1] + fromArr[4])
         )
+    }
+
+    open fun intrinsicContentSize(): CGSize? {
+        return null
     }
 
     companion object {

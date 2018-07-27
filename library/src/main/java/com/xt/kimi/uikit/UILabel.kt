@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.text.SpannableString
 import com.xt.endo.CGRect
+import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer
 import com.xt.kimi.coregraphics.CATextLayer
@@ -73,6 +74,15 @@ class UILabel: UIView() {
             this.layer.textLayout = null
             this.setNeedsDisplay()
         }
+
+    override fun intrinsicContentSize(): CGSize? {
+        if (this.text.isNullOrEmpty()) {
+            return CGSize(0.0, 0.0)
+        }
+        this.layer.view = this
+        val bounds = this.layer.textBounds(null)
+        return CGSize(bounds.width, bounds.height)
+    }
 
 }
 

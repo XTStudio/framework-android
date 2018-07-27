@@ -3,7 +3,7 @@ package com.xt.kimi.uikit
 import com.xt.kimi.KIMIPackage
 
 //todo: stub
-class UIRotationGestureRecognizer: UIGestureRecognizer() {
+open class UIRotationGestureRecognizer: UIGestureRecognizer() {
 
     var rotation = 1.0
 

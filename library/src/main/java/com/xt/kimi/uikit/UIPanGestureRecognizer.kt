@@ -5,7 +5,7 @@ import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import kotlin.math.abs
 
-class UIPanGestureRecognizer: UIGestureRecognizer() {
+open class UIPanGestureRecognizer: UIGestureRecognizer() {
 
     fun translationInView(view: UIView?): CGPoint {
         val windowPoint = this.firstTouch?.windowPoint ?: return CGPoint(0.0, 0.0)
@@ -53,6 +53,7 @@ class UIPanGestureRecognizer: UIGestureRecognizer() {
                             if (abs(beganPoint.x - windowPoint.x) >= 8.0 || abs(beganPoint.y - windowPoint.y) >= 8.0) {
                                 UIView.recognizedGesture = this
                                 this.state = UIGestureRecognizerState.began
+                                this.handleEvent("began")
                                 EDOJavaHelper.emit(this, "began", this)
                             }
                         }
@@ -60,12 +61,14 @@ class UIPanGestureRecognizer: UIGestureRecognizer() {
                 }
                 else if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                     this.state = UIGestureRecognizerState.changed
+                    this.handleEvent("changed")
                     EDOJavaHelper.emit(this, "changed", this)
                 }
             }
             else if (it.phase == UITouchPhase.ended) {
                 if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                     this.state = UIGestureRecognizerState.ended
+                    this.handleEvent("ended")
                     EDOJavaHelper.emit(this, "ended", this)
                     UIView.recognizedGesture = null
                 }
@@ -76,6 +79,7 @@ class UIPanGestureRecognizer: UIGestureRecognizer() {
             else if (it.phase == UITouchPhase.cancelled) {
                 if (this.state == UIGestureRecognizerState.began || this.state == UIGestureRecognizerState.changed) {
                     this.state = UIGestureRecognizerState.cancelled
+                    this.handleEvent("cancelled")
                     EDOJavaHelper.emit(this, "cancelled", this)
                     UIView.recognizedGesture = null
                 }
