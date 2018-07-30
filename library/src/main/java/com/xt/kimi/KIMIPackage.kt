@@ -1,6 +1,9 @@
 package com.xt.kimi
 
+import android.app.Activity
+import android.app.Application
 import android.content.Context.MODE_PRIVATE
+import android.os.Bundle
 import com.xt.endo.CGRect
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
@@ -11,17 +14,35 @@ import com.xt.kimi.uikit.*
 /**
  * Created by cuiminghui on 2018/7/20.
  */
+
+var currentActivity: Activity? = null
+    private set
+
 class KIMIPackage : EDOPackage() {
 
     val exporter = EDOExporter.sharedExporter
 
     override fun install() {
         super.install()
+        val applicationContext = exporter.applicationContext ?: return
         // Foundation
         installDispatchQueue()
         installUUID()
         // UIKit
-        scale = exporter.applicationContext?.resources?.displayMetrics?.density ?: 1.0f
+        (applicationContext as? Application)?.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityPaused(activity: Activity?) { }
+            override fun onActivityResumed(activity: Activity?) {
+                currentActivity = activity
+            }
+            override fun onActivityStarted(activity: Activity?) {
+                currentActivity = activity
+            }
+            override fun onActivityDestroyed(activity: Activity?) { }
+            override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) { }
+            override fun onActivityStopped(activity: Activity?) { }
+            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) { }
+        })
+        scale = applicationContext.resources.displayMetrics.density
         installUIView()
         installUISwitch()
         installUIColor()
@@ -39,26 +60,25 @@ class KIMIPackage : EDOPackage() {
         installUIBezierPath()
         installUIButton()
         UIScreen.main.scale = scale.toDouble()
-        exporter.applicationContext?.let {
-            UIScreen.main.bounds = CGRect(
-                    0.0,
-                    0.0,
-                    (it.resources.displayMetrics.widthPixels).toDouble() / scale,
-                    (it.resources.displayMetrics.heightPixels).toDouble() / scale
-            )
-        }
+        UIScreen.main.bounds = CGRect(
+                0.0,
+                0.0,
+                (applicationContext.resources.displayMetrics.widthPixels).toDouble() / scale,
+                (applicationContext.resources.displayMetrics.heightPixels).toDouble() / scale
+        )
         installUIScreen()
-        exporter.applicationContext?.let {
-            val sharedPreferences = it.getSharedPreferences("com.xt.kimi.installtion", MODE_PRIVATE)
-            sharedPreferences.getString("identifierForVendor", null)?.let {
-                UIDevice.current.identifierForVendor = UUID(it)
-            } ?: kotlin.run {
-                UIDevice.current.identifierForVendor = UUID()
-                sharedPreferences.edit().putString("identifierForVendor", UIDevice.current.identifierForVendor?.UUIDString).apply()
-            }
+        val sharedPreferences = applicationContext.getSharedPreferences("com.xt.kimi.installtion", MODE_PRIVATE)
+        sharedPreferences.getString("identifierForVendor", null)?.let {
+            UIDevice.current.identifierForVendor = UUID(it)
+        } ?: kotlin.run {
+            UIDevice.current.identifierForVendor = UUID()
+            sharedPreferences.edit().putString("identifierForVendor", UIDevice.current.identifierForVendor?.UUIDString).apply()
         }
         installUIDevice()
         installUIScrollView()
+        installUIAlert()
+        installUIPrompt()
+        installUIConfirm()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
