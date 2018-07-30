@@ -79,6 +79,8 @@ class KIMIPackage : EDOPackage() {
         installUIAlert()
         installUIPrompt()
         installUIConfirm()
+        installUIActivityIndicatorView()
+        installUISlider()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
