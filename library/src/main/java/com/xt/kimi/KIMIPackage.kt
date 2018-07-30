@@ -58,6 +58,7 @@ class KIMIPackage : EDOPackage() {
             }
         }
         installUIDevice()
+        installUIScrollView()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()

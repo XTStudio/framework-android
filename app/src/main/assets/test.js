@@ -1,24 +1,47 @@
 
 var main = new UIView
-main.frame = { x: 0, y: 88, width: 300, height: 300 }
+main.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: 400 }
 
-var button = new UIButton
-button.frame = { x: 44, y: 44, width: 100, height: 44 }
-button.setImage(new UIImage({ name: "location" }), UIControlState.normal)
-button.setTitle("Click me", UIControlState.normal)
-button.setTitleFont(new UIFont(14))
-button.imageEdgeInsets = { top: 0, left: 0, bottom: 0, right: 4 }
-button.titleEdgeInsets = { top: 0, left: 4, bottom: 0, right: 0 }
-button.on('touchUpInside', function () {
-    // button.setTitle("Nice!", UIControlState.normal)
-})
-// button.enabled = false
-button.backgroundColor = UIColor.yellow
-// button.contentVerticalAlignment = UIControlContentVerticalAlignment.bottom
-// button.contentHorizontalAlignment = UIControlContentHorizontalAlignment.right
-// var blueView = new UIView
-// blueView.frame = { x: 0, y: 0, width: 22, height: 22 }
-// blueView.backgroundColor = UIColor.blue
-// button.addSubview(blueView)
+var scrollView = new UIScrollView
+scrollView.frame = main.bounds
+scrollView.backgroundColor = UIColor.yellow
+scrollView.contentInset = { top: 0, left: 44, bottom: 0, right: 44 }
 
-main.addSubview(button)
+{
+    var redView = new UIView
+    redView.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+    redView.backgroundColor = UIColor.red
+    scrollView.addSubview(redView)
+}
+{
+    var redView = new UIView
+    redView.frame = { x: UIScreen.main.bounds.width, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+    redView.backgroundColor = UIColor.gray
+    scrollView.addSubview(redView)
+}
+{
+    var redView = new UIView
+    redView.frame = { x: UIScreen.main.bounds.width * 2, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+    redView.backgroundColor = UIColor.blue
+    scrollView.addSubview(redView)
+}
+{
+    var redView = new UIView
+    redView.frame = { x: UIScreen.main.bounds.width * 3, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+    redView.backgroundColor = UIColor.green
+    scrollView.addSubview(redView)
+}
+{
+    var redView = new UIView
+    redView.frame = { x: UIScreen.main.bounds.width * 4, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+    redView.backgroundColor = UIColor.black
+    scrollView.addSubview(redView)
+}
+scrollView.contentSize = { width: UIScreen.main.bounds.width * 5, height: 0 }
+
+// DispatchQueue.main.asyncAfter(3.0, function () {
+//     scrollView.scrollRectToVisible({ x: UIScreen.main.bounds.width * 3, y: 0, width: 100, height: 1 }, true)
+// })
+
+
+main.addSubview(scrollView)

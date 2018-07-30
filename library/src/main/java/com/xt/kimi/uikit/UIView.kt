@@ -221,10 +221,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             return null
         }
 
-    var subviews: List<UIView> = listOf()
-        private set
+    open var subviews: List<UIView> = listOf()
+        internal set
 
-    fun removeFromSuperview() {
+    open fun removeFromSuperview() {
         superview?.let { superview ->
             superview.willRemoveSubview(this)
             this.willMoveToSuperview(null)
@@ -240,7 +240,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
     }
 
-    fun insertSubviewAtIndex(view: UIView, index: Int) {
+    open fun insertSubviewAtIndex(view: UIView, index: Int) {
         if (this == view) { return }
         if (view.superview != null) {
             view.removeFromSuperview()
@@ -258,7 +258,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.didAddSubview(view)
     }
 
-    fun exchangeSubview(index1: Int, index2: Int) {
+    open fun exchangeSubview(index1: Int, index2: Int) {
         subviews = kotlin.run {
             val subviews = this.subviews.toMutableList()
             val view1 = subviews[index1]
@@ -288,7 +288,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.setNeedsDisplay()
     }
 
-    fun addSubview(view: UIView) {
+    open fun addSubview(view: UIView) {
         if (this == view) { return }
         if (view.superview != null) {
             view.removeFromSuperview()
@@ -306,7 +306,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.didAddSubview(view)
     }
 
-    fun insertSubviewBelowSubview(view: UIView, belowSubview: UIView) {
+    open fun insertSubviewBelowSubview(view: UIView, belowSubview: UIView) {
         if (this == view) { return }
         subviews.indexOf(belowSubview)?.let { targetIndex ->
             if (view.superview != null) {
@@ -326,7 +326,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
     }
 
-    fun insertSubviewAboveSubview(view: UIView, belowSubview: UIView) {
+    open fun insertSubviewAboveSubview(view: UIView, belowSubview: UIView) {
         if (this == view) { return }
         subviews.indexOf(belowSubview)?.let { targetIndex ->
             if (view.superview != null) {
@@ -346,7 +346,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
     }
 
-    fun bringSubviewToFront(view: UIView) {
+    open fun bringSubviewToFront(view: UIView) {
         if (subviews.count() <= 1) { return }
         subviews = kotlin.run {
             val subviews = this.subviews.toMutableList()
@@ -358,7 +358,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.setNeedsDisplay()
     }
 
-    fun sendSubviewToBack(view: UIView) {
+    open fun sendSubviewToBack(view: UIView) {
         if (subviews.count() <= 1) { return }
         subviews = kotlin.run {
             val subviews = this.subviews.toMutableList()
@@ -370,7 +370,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.setNeedsDisplay()
     }
 
-    fun isDescendantOfView(view: UIView): Boolean {
+    open fun isDescendantOfView(view: UIView): Boolean {
         if (this == view) { return true }
         var current = this.superview
         while (current != null) {
@@ -382,7 +382,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         return false
     }
 
-    fun viewWithTag(tag: Int): UIView? {
+    open fun viewWithTag(tag: Int): UIView? {
         subviews.firstOrNull{ it.tag == tag }?.let { return it }
         subviews.forEach { it.viewWithTag(tag)?.let { return it } }
         return null
@@ -667,9 +667,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.layer.drawInContext(it)
         }
         if (!this.clipsToBounds) {
-            val rect = canvas.clipBounds
-            rect.inset(-100000, -100000)
-            canvas.clipRect(rect, Region.Op.REPLACE)
+//            val rect = canvas.clipBounds
+//            rect.inset(-100000, -100000)
+//            canvas.clipRect(rect, Region.Op.REPLACE)
         }
         else {
             canvas.clipPath(this.layer.createBoundsPath())
@@ -690,22 +690,22 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     }
 
     open fun touchesBegan(touches: Set<UITouch>) {
-        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.gestureRecognizers.filter { it.enabled }.forEach { it.handleTouch(touches) }
         this.superview?.touchesBegan(touches)
     }
 
     open fun touchesMoved(touches: Set<UITouch>) {
-        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.gestureRecognizers.filter { it.enabled }.forEach { it.handleTouch(touches) }
         this.superview?.touchesMoved(touches)
     }
 
     open fun touchesEnded(touches: Set<UITouch>) {
-        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.gestureRecognizers.filter { it.enabled }.forEach { it.handleTouch(touches) }
         this.superview?.touchesEnded(touches)
     }
 
     open fun touchesCancelled(touches: Set<UITouch>) {
-        this.gestureRecognizers.forEach { it.handleTouch(touches) }
+        this.gestureRecognizers.filter { it.enabled }.forEach { it.handleTouch(touches) }
         this.superview?.touchesCancelled(touches)
     }
 

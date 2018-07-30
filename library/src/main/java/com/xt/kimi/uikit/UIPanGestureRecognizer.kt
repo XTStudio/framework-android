@@ -14,7 +14,8 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
     }
 
     fun setTranslation(translation: CGPoint, inView: UIView?) {
-        this.translationPoint = translation
+        val windowPoint = this.firstTouch?.windowPoint ?: return
+        this.translationPoint = CGPoint(windowPoint.x - translation.x, windowPoint.y - translation.y)
     }
 
     fun velocityInView(view: UIView?): CGPoint {

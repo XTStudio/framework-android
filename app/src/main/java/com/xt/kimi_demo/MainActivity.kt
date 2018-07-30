@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.Window
+import android.view.WindowManager
 import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.jscore.JSValue
@@ -20,6 +22,8 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         UULog.attachTo(context)
         EDOExporter.sharedExporter.exportWithContext(context)
         context.exceptionHandler = { _, exception ->
