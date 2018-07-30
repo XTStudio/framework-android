@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
 
 class UIImageView: UIView() {
@@ -10,6 +11,13 @@ class UIImageView: UIView() {
             this.layer.contents = value
             this.setNeedsDisplay()
         }
+
+    override fun intrinsicContentSize(): CGSize? {
+        image?.let {
+            return it.size
+        }
+        return super.intrinsicContentSize()
+    }
 
 }
 

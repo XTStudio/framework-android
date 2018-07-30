@@ -172,7 +172,7 @@ class UIButton(val buttonType: UIButtonType): UIView() {
                 }
             }
         }
-        longPressGesture.minimumPressDuration = 0.15
+        longPressGesture.minimumPressDuration = 0.05
         this.addGestureRecognizer(longPressGesture)
     }
 
@@ -193,8 +193,9 @@ class UIButton(val buttonType: UIButtonType): UIView() {
     private fun reloadContents() {
         this.titleLabel.text = this.titleForState(this.currentState())
         this.titleLabel.textColor = this.titleColorForState(this.currentState())
+        this.imageView.image = this.imageForState(this.currentState())
         if (this.buttonType == UIButtonType.system) {
-            UIAnimator.shared.linear(0.15, EDOCallback.createWithBlock {
+            UIAnimator.shared.linear(0.10, EDOCallback.createWithBlock {
                 if (this.highlighted) {
                     this.titleLabel.edo_alpha = 0.3
                     this.imageView.edo_alpha = 0.3
@@ -209,6 +210,11 @@ class UIButton(val buttonType: UIButtonType): UIView() {
     }
 
     private fun reloadLayouts() {
+        val imageViewSize = this.imageView.intrinsicContentSize() ?: CGSize(0.0, 0.0)
+        var imgX = 0.0
+        var imgY = 0.0
+        var imgWidth = imageViewSize.width
+        var imgHeight = imageViewSize.height
         val titleLabelSize = this.titleLabel.intrinsicContentSize() ?: CGSize(0.0, 0.0)
         var titleX = 0.0
         var titleY = 0.0
@@ -216,32 +222,49 @@ class UIButton(val buttonType: UIButtonType): UIView() {
         var titleHeight = titleLabelSize.height
         when (this.contentHorizontalAlignment) {
             UIControlContentHorizontalAlignment.left -> {
-                titleX = 0.0
+                imgX = 0.0
+                titleX = imgX + imageViewSize.width + 0.0
             }
             UIControlContentHorizontalAlignment.center -> {
-                titleX = (this.bounds.width - titleLabelSize.width) / 2.0
+                imgX = (this.bounds.width - (imageViewSize.width + titleLabelSize.width)) / 2.0
+                titleX = imgX + imageViewSize.width + 0.0
             }
             UIControlContentHorizontalAlignment.right -> {
-                titleX = this.bounds.width - titleLabelSize.width
+                imgX = this.bounds.width - (imageViewSize.width + titleLabelSize.width)
+                titleX = imgX + imageViewSize.width + 0.0
             }
             UIControlContentHorizontalAlignment.fill -> {
+                imgWidth = this.bounds.width
                 titleWidth = this.bounds.width
             }
         }
         when (this.contentVerticalAlignment) {
             UIControlContentVerticalAlignment.top -> {
+                imgY = 0.0
                 titleY = 0.0
             }
             UIControlContentVerticalAlignment.center -> {
+                imgY = (this.bounds.height - imageViewSize.height) / 2.0
                 titleY = (this.bounds.height - titleLabelSize.height) / 2.0
             }
             UIControlContentVerticalAlignment.bottom -> {
+                imgY = this.bounds.height - imageViewSize.height
                 titleY = this.bounds.height - titleLabelSize.height
             }
             UIControlContentVerticalAlignment.fill -> {
+                imgHeight = this.bounds.height
                 titleHeight = this.bounds.height
             }
         }
+        imgX += contentEdgeInsets.left + imageEdgeInsets.left
+        imgX -= contentEdgeInsets.right + imageEdgeInsets.right
+        imgY += contentEdgeInsets.top + imageEdgeInsets.top
+        imgY -= contentEdgeInsets.bottom + imageEdgeInsets.bottom
+        titleX += contentEdgeInsets.left + titleEdgeInsets.left
+        titleX -= contentEdgeInsets.right + titleEdgeInsets.right
+        titleY += contentEdgeInsets.top + titleEdgeInsets.top
+        titleY -= contentEdgeInsets.bottom + titleEdgeInsets.bottom
+        this.imageView.frame = CGRect(imgX, imgY, imgWidth, imgHeight)
         this.titleLabel.frame = CGRect(titleX, titleY, titleWidth, titleHeight)
     }
 
@@ -257,6 +280,10 @@ class UIButton(val buttonType: UIButtonType): UIView() {
             state = state or UIControlState.highlighted.rawValue
         }
         return state
+    }
+
+    private fun imageForState(state: Int): UIImage? {
+        return this.statedImages[state] ?: this.statedImages[0]
     }
 
     private fun titleForState(state: Int): String {
@@ -276,6 +303,11 @@ class UIButton(val buttonType: UIButtonType): UIView() {
 fun KIMIPackage.installUIButton() {
     exporter.exportClass(UIButton::class.java, "UIButton", "UIView")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitle")
+    exporter.exportMethodToJavaScript(UIButton::class.java, "setImage")
+    exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleFont")
+    exporter.exportProperty(UIButton::class.java, "contentEdgeInsets")
+    exporter.exportProperty(UIButton::class.java, "titleEdgeInsets")
+    exporter.exportProperty(UIButton::class.java, "imageEdgeInsets")
     exporter.exportProperty(UIButton::class.java, "edo_enabled")
     exporter.exportProperty(UIButton::class.java, "edo_selected")
     exporter.exportProperty(UIButton::class.java, "highlighted", true)

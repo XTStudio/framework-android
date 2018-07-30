@@ -18,11 +18,7 @@ enum class UIImageRenderingMode {
 
 class UIImage(val bitmap: Bitmap, val scale: Int = 1, val renderingMode: UIImageRenderingMode = UIImageRenderingMode.automatic) {
 
-    val size: CGSize
-
-    init {
-        this.size = CGSize(bitmap.width.toDouble() / this.scale, bitmap.height.toDouble() / this.scale)
-    }
+    val size: CGSize = CGSize(bitmap.width.toDouble() / this.scale, bitmap.height.toDouble() / this.scale)
 
     companion object {
 
@@ -40,7 +36,7 @@ class UIImage(val bitmap: Bitmap, val scale: Int = 1, val renderingMode: UIImage
 
 fun KIMIPackage.installUIImage() {
     exporter.exportClass(UIImage::class.java, "UIImage")
-    exporter.exportInitializer(UIImage::class.java, {
+    exporter.exportInitializer(UIImage::class.java) {
         (it.firstOrNull() as? Map<String, Any>)?.let { options ->
             val renderingMode = options["renderingMode"] as? UIImageRenderingMode ?: UIImageRenderingMode.automatic
             (options["base64"] as? String)?.let { base64 ->
@@ -58,8 +54,7 @@ fun KIMIPackage.installUIImage() {
                 val files = applicationContext.assets.list("images").filter { it.startsWith(name) }
                 if (files.contains(UIImage.fileName(name, currentScale))) {
                     targetFile = "images/${UIImage.fileName(name, currentScale)}"
-                }
-                else {
+                } else {
                     while (currentScale > 0) {
                         if (files.contains(UIImage.fileName(name, currentScale))) {
                             targetFile = "images/${UIImage.fileName(name, currentScale)}"
@@ -78,7 +73,7 @@ fun KIMIPackage.installUIImage() {
             }
         }
         return@exportInitializer UIImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
-    })
+    }
     exporter.exportProperty(UIImage::class.java, "size")
     exporter.exportProperty(UIImage::class.java, "scale")
     exporter.exportEnum("UIImageRenderingMode", mapOf(
