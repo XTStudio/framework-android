@@ -1,10 +1,8 @@
 package com.xt.kimi.uikit
 
-import android.text.SpannableString
 import com.xt.endo.CGRect
 import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
-import com.xt.kimi.coregraphics.CALayer
 import com.xt.kimi.coregraphics.CATextLayer
 
 enum class UITextAlignment {

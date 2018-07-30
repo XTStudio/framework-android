@@ -2,7 +2,6 @@ package com.xt.kimi.uikit
 
 import android.os.Handler
 import com.xt.endo.CGPoint
-import com.xt.endo.EDOCallback
 import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import kotlin.math.abs

@@ -3,13 +3,10 @@ package com.xt.kimi.uikit
 import android.app.Activity
 import android.graphics.*
 import android.os.Build
-import android.util.DisplayMetrics
 import android.view.VelocityTracker
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.facebook.rebound.SimpleSpringListener
-import com.facebook.rebound.Spring
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.coregraphics.CALayer

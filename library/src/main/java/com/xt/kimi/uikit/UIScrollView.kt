@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.os.Build
 import android.view.Choreographer
 import android.widget.EdgeEffect
-import android.widget.ScrollView
 import android.widget.Scroller
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage

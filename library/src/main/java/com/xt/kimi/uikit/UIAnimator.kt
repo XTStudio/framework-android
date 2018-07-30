@@ -1,14 +1,11 @@
 package com.xt.kimi.uikit
 
 import android.animation.Animator
-import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
-import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import com.facebook.rebound.*
 import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
-import kotlin.math.exp
 
 interface UIAnimation {
 

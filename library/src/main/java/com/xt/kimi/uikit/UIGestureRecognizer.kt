@@ -1,7 +1,6 @@
 package com.xt.kimi.uikit
 
 import com.xt.endo.CGPoint
-import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
 
 enum class UIGestureRecognizerState {

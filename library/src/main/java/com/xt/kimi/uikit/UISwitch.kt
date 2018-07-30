@@ -1,12 +1,8 @@
 package com.xt.kimi.uikit
 
 import android.graphics.Canvas
-import android.graphics.Color
-import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Switch
-import com.xt.endo.EDOExporter
 import com.xt.kimi.KIMIPackage
 
 /**

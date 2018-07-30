@@ -2,7 +2,6 @@ package com.xt.kimi.uikit
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.util.Base64
 import com.xt.endo.CGSize
 import com.xt.endo.EDOExporter

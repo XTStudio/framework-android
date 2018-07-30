@@ -1,6 +1,5 @@
 package com.xt.kimi.uikit
 
-import android.graphics.Canvas
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 
