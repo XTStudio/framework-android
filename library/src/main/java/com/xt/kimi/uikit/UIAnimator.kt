@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import com.facebook.rebound.*
 import com.xt.endo.EDOCallback
@@ -77,6 +78,30 @@ class UIAnimator {
 
     var animationCreater: (() -> UIAnimation)? = null
         private set
+
+    fun curve(duration: Double, animations: EDOCallback, completion: EDOCallback?) {
+        UIAnimator.activeAnimator = this
+        var completed = false
+        this.animationCreater = animationCreater@{
+            val animator = ValueAnimator()
+            animator.duration = (duration * 1000).toLong()
+            animator.interpolator = AccelerateDecelerateInterpolator()
+            animator.addListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animation: Animator?) {}
+                override fun onAnimationEnd(animation: Animator?) {
+                    if (!completed) {
+                        completed = true
+                        completion?.invoke()
+                    }
+                }
+                override fun onAnimationStart(animation: Animator?) { }
+                override fun onAnimationCancel(animation: Animator?) { }
+            })
+            return@animationCreater LinearAnimation(animator)
+        }
+        animations.invoke()
+        UIAnimator.activeAnimator = null
+    }
 
     fun linear(duration: Double, animations: EDOCallback, completion: EDOCallback?) {
         UIAnimator.activeAnimator = this
