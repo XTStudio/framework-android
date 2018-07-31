@@ -29,7 +29,7 @@ enum class UIControlState(val rawValue: Int) {
     selected(1 shl 2),
 }
 
-class UIButton(val buttonType: UIButtonType): UIView() {
+open class UIButton(val buttonType: UIButtonType): UIView() {
 
     val titleLabel: UILabel
 
@@ -185,7 +185,7 @@ class UIButton(val buttonType: UIButtonType): UIView() {
         }
     }
 
-    private fun sendEvent(name: String) {
+    protected open fun sendEvent(name: String) {
         EDOJavaHelper.emit(this, name, this)
     }
 

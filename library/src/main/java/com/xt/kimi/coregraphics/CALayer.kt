@@ -313,6 +313,8 @@ open class CALayer {
         val contentMode = this.view?.contentMode ?: return
         (contents as? UIImage)?.let {
             sharedContentPaint.reset()
+            sharedContentPaint.isAntiAlias = true
+            sharedContentPaint.isFilterBitmap = true
             this.setAlphaForPaint(sharedContentPaint, this)
             if (it.renderingMode == UIImageRenderingMode.alwaysTemplate) {
                 this.view?.tintColor?.let { tintColor ->

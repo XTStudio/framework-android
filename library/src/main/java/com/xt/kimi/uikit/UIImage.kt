@@ -29,6 +29,16 @@ class UIImage(val bitmap: Bitmap, val scale: Int = 1, val renderingMode: UIImage
             }
         }
 
+        fun fromBase64(base64EncodedString: String, scale: Int, renderingMode: UIImageRenderingMode = UIImageRenderingMode.automatic): UIImage? {
+            try {
+                val byteArray = Base64.decode(base64EncodedString, 0)
+                BitmapFactory.decodeByteArray(byteArray, 0, byteArray.count())?.let {
+                     return UIImage(it, scale, renderingMode)
+                }
+            } catch (e: Exception) {}
+            return null
+        }
+
     }
 
 }

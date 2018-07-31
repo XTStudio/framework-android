@@ -21,6 +21,9 @@ class UIWindow : UIView() {
             val pointerId = event.getPointerId(event.actionIndex)
             val point = CGPoint((event.getX(event.actionIndex) / scale).toDouble(), (event.getY(event.actionIndex) / scale).toDouble())
             val target = this.hitTest(point)
+            if (target is UINativeTouchView) {
+                return false
+            }
             val touch = kotlin.run {
                 val touch = UITouch()
                 touches[pointerId] = touch
@@ -91,7 +94,13 @@ class UIWindow : UIView() {
         return true
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+    override fun onInterceptTouchEvent(event: MotionEvent?): Boolean {
+        val event = event ?: return super.onInterceptTouchEvent(event)
+        val point = CGPoint((event.getX(event.actionIndex) / scale).toDouble(), (event.getY(event.actionIndex) / scale).toDouble())
+        val target = this.hitTest(point)
+        if (target is UINativeTouchView) {
+            return false
+        }
         return true
     }
 
