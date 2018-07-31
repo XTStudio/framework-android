@@ -56,7 +56,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 this.edo_frame_animations?.forEach { it.cancel() }
                 this.edo_frame_animations = null
             }
-            UIAnimator.activeAnimator?.let {
+            UIAnimator.activeAnimator?.takeIf { !UIAnimator.duringAnimationValueSet }?.let {
                 it.animationCreater?.let {
                     val animations = mutableListOf<UIAnimation>()
                     if (field.x != value.x) {
@@ -132,7 +132,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 this.edo_transform_animations?.forEach { it.cancel() }
                 this.edo_transform_animations = null
             }
-            UIAnimator.activeAnimator?.let {
+            UIAnimator.activeAnimator?.takeIf { !UIAnimator.duringAnimationValueSet }?.let {
                 it.animationCreater?.let {
                     val animations = mutableListOf<UIAnimation>()
                     val fieldUnmatrix = field.unmatrix()
@@ -439,7 +439,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 this.edo_backgroundColor_animations?.forEach { it.cancel() }
                 this.edo_backgroundColor_animations = null
             }
-            UIAnimator.activeAnimator?.let {
+            UIAnimator.activeAnimator?.takeIf { !UIAnimator.duringAnimationValueSet }?.let {
                 it.animationCreater?.let {
                     val field = field ?: return@let
                     val value = value ?: return@let
@@ -512,7 +512,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 this.edo_alpha_animation?.cancel()
                 this.edo_alpha_animation = null
             }
-            UIAnimator.activeAnimator?.let {
+            UIAnimator.activeAnimator?.takeIf { !UIAnimator.duringAnimationValueSet }?.let {
                 it.animationCreater?.let {
                     val animation = it()
                     this.edo_alpha_animation = animation

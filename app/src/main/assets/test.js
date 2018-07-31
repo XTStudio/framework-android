@@ -2,13 +2,21 @@
 var main = new UIView
 main.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: 400 }
 
-var a = new UISlider
-a.minimumValue = 0
-a.maximumValue = 100
-a.value = 20
+var a = new UISwitch
+a.frame = { x: 44, y: 44, width: 66, height: 44 }
+a.onTintColor = UIColor.yellow
+
 a.on('valueChanged', function (sender) {
-    console.log(sender.value)
+    if (sender.isOn) {
+        UIAnimator.linear(0.3, function () {
+            main.backgroundColor = UIColor.black
+        })
+    }
+    else {
+        UIAnimator.linear(0.3, function () {
+            main.backgroundColor = UIColor.white
+        })
+    }
 })
-a.frame = { x: 44, y: 44, width: 200, height: 44 }
 
 main.addSubview(a)
