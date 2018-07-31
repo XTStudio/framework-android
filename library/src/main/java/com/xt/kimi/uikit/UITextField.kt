@@ -5,9 +5,11 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
-import android.text.*
+import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
+import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
-import android.view.KeyEvent
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -266,8 +268,6 @@ class UITextField: UINativeTouchView() {
         resetInputType()
     }
 
-    private var beforeChangeTexts: String? = null
-
     private fun setupEvents() {
         nativeEditText.systemEditText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
@@ -446,6 +446,23 @@ class UITextField: UINativeTouchView() {
                 }
             }
             this.nativeEditText.systemEditText.inputType = inputType
+        }
+        when (this.returnKeyType) {
+            UIReturnKeyType.default -> {
+                this.nativeEditText.systemEditText.imeOptions = EditorInfo.IME_ACTION_NONE
+            }
+            UIReturnKeyType.next -> {
+                this.nativeEditText.systemEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+            }
+            UIReturnKeyType.done -> {
+                this.nativeEditText.systemEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+            }
+            UIReturnKeyType.send -> {
+                this.nativeEditText.systemEditText.imeOptions = EditorInfo.IME_ACTION_SEND
+            }
+            UIReturnKeyType.go -> {
+                this.nativeEditText.systemEditText.imeOptions = EditorInfo.IME_ACTION_GO
+            }
         }
     }
 
