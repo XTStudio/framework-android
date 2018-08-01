@@ -2,14 +2,21 @@
 var main = new UIView
 main.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: 400 }
 
-var a = new UITextField
-a.frame = { x: 44, y: 44, width: 200, height: 200 }
-a.backgroundColor = UIColor.yellow
+var tableView = new UITableView
+tableView.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: 400 }
+tableView.register(function (context) {
+    return new UITableViewCell(context)
+}, "TestCell")
+tableView.on('cellForRow', function (indexPath) {
+    var cell = tableView.dequeueReusableCell("TestCell", indexPath)
+    cell.contentView.backgroundColor = UIColor.red
+    cell.contentView.alpha = indexPath.row / 20.0
+    return cell
+})
+tableView.reloadData()
 
-a.returnKeyType = UIReturnKeyType.next
-
-main.addSubview(a)
-
-main.addGestureRecognizer(new UITapGestureRecognizer().on('touch', function () {
-    a.scrollRangeToVisible({ location: 0, length: 1 })
+tableView.addGestureRecognizer(new UITapGestureRecognizer().on('touch', function () {
+    tableView.backgroundColor = UIColor.yellow
 }))
+
+main.addSubview(tableView)

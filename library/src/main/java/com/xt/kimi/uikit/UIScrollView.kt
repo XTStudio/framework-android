@@ -9,9 +9,9 @@ import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import kotlin.math.*
 
-class UIScrollView: UIView() {
+open class UIScrollView: UIView() {
 
-    var edo_contentOffset: CGPoint = CGPoint(0.0, 0.0)
+    open var edo_contentOffset: CGPoint = CGPoint(0.0, 0.0)
         set(value) {
             field = value
             this.contentView.scrollX = (value.x * scale).toInt()
@@ -517,9 +517,8 @@ class UIScrollView: UIView() {
 
     // Proxy
 
-    override var subviews: List<UIView>
-        get() = this.contentView.subviews
-        set(value) { this.contentView.subviews = value }
+    val edo_subviews: List<UIView>
+        get() { return this.contentView.subviews }
 
     override fun insertSubviewAtIndex(view: UIView, index: Int) {
         this.contentView.insertSubviewAtIndex(view, index)
@@ -566,4 +565,5 @@ fun KIMIPackage.installUIScrollView() {
     exporter.exportProperty(UIScrollView::class.java, "showsVerticalScrollIndicator")
     exporter.exportMethodToJavaScript(UIScrollView::class.java, "setContentOffset")
     exporter.exportMethodToJavaScript(UIScrollView::class.java, "scrollRectToVisible")
+    exporter.exportProperty(UIScrollView::class.java, "edo_subviews", true)
 }

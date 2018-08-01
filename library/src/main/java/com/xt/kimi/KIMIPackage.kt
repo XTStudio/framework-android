@@ -83,6 +83,9 @@ class KIMIPackage : EDOPackage() {
         installUISlider()
         installUITextField()
         installUITextView()
+        installUITableView()
+        installUITableViewCell()
+        installUIIndexPath()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
