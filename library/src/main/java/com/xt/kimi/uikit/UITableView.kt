@@ -1,10 +1,16 @@
 package com.xt.kimi.uikit
 
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
+import com.xt.kimi.foundation.DispatchQueue
+import java.util.*
+import kotlin.concurrent.timerTask
+import kotlin.math.abs
 
 // @Reference https://github.com/BigZaphod/Chameleon/blob/master/UIKit/Classes/UITableView.m
 
@@ -15,8 +21,38 @@ class UITableView: UIScrollView() {
     var rowHeight: Double = 44.0
 
     var tableHeaderView: UIView? = null
+        set(value) {
+            field?.removeFromSuperview()
+            field = value
+            this._setContentSize()
+            value?.let { this.addSubview(it) }
+            this._layoutTableView()
+        }
 
     var tableFooterView: UIView? = null
+        set(value) {
+            field?.removeFromSuperview()
+            field = value
+            this._setContentSize()
+            value?.let { this.addSubview(it) }
+            this._layoutTableView()
+        }
+
+    var separatorColor: UIColor? = UIColor(224.0 / 255.0, 224.0 / 255.0, 224.0 / 255.0, 1.0)
+        set(value) {
+            field = value
+            this.setNeedsDisplay()
+        }
+
+    var separatorInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            this.setNeedsDisplay()
+        }
+
+    var allowsSelection: Boolean = true
+
+    var allowsMultipleSelection: Boolean = false
 
     fun register(initializer: EDOCallback, reuseIdentifier: String) {
         this._registeredCells[reuseIdentifier] = initializer
@@ -49,15 +85,15 @@ class UITableView: UIScrollView() {
     // DataSource & Delegate
 
     fun numberOfSections(): Int {
-        return 1
+        return EDOJavaHelper.value(this, "numberOfSections") as? Int ?: 1
     }
 
     fun numberOfRows(inSection: Int): Int {
-        return 20
+        return EDOJavaHelper.value(this, "numberOfRows", inSection) as? Int ?: 0
     }
 
     fun heightForRow(indexPath: UIIndexPath): Double {
-        return this.rowHeight
+        return (EDOJavaHelper.value(this, "heightForRow", indexPath) as? Number)?.toDouble() ?: this.rowHeight
     }
 
     fun cellForRow(indexPath: UIIndexPath): UITableViewCell {
@@ -89,8 +125,8 @@ class UITableView: UIScrollView() {
     private val _registeredCells: MutableMap<String, EDOCallback> = mutableMapOf()
     private val _reusableCells: MutableSet<UITableViewCell> = mutableSetOf()
     private val _cachedCells: MutableMap<String, UITableViewCell> = mutableMapOf()
-    private var _selectedRow: UIIndexPath? = null
-    private var _highlightedRow: UIIndexPath? = null
+    private var _selectedRows: MutableSet<String> = mutableSetOf()
+    private var _highlightedRow: String? = null
     private var _needsReload = false
     private val _sections: MutableList<UITableViewSection> = mutableListOf()
 
@@ -158,13 +194,13 @@ class UITableView: UIScrollView() {
                     val indexPath = UIIndexPath(row, section)
                     val rowRect = this._rectForRowAtIndexPath(indexPath)
                     if (CGRectIntersectsRect(rowRect, visibleBounds) && rowRect.height > 0) {
-                        val e = SystemClock.uptimeMillis()
                         var cell = availableCells[indexPath.mapKey()] ?: this.cellForRow(indexPath)
-                        System.out.println("used: " + (SystemClock.uptimeMillis() - e))
+                        cell.currentIndexPath = indexPath
+                        cell.currentSectionRecord = sectionRecord
                         this._cachedCells[indexPath.mapKey()] = cell
                         availableCells.remove(indexPath.mapKey())
-                        cell.edo_highlighted = this._highlightedRow?.isEqual(indexPath) ?: false
-                        cell.edo_selected = this._selectedRow?.isEqual(indexPath) ?: false
+                        cell.edo_highlighted = this._highlightedRow == indexPath.mapKey()
+                        cell.edo_selected = this._selectedRows.contains(indexPath.mapKey())
                         cell.frame = rowRect
                         cell.edo_backgroundColor = this.edo_backgroundColor
                         if (cell.superview == null) {
@@ -244,9 +280,98 @@ class UITableView: UIScrollView() {
         return CGRect(0.0, offset, this.bounds.width, height)
     }
 
+    override fun draw(canvas: Canvas?) {
+        super.draw(canvas)
+        val canvas = canvas ?: return
+        this.separatorColor?.takeIf { it.a > 0.0 }?.let { separatorColor ->
+            separatorPaint.reset()
+            separatorPaint.strokeWidth = 1f
+            separatorPaint.color = separatorColor.toInt()
+            this._cachedCells.values
+                    .filter { !it.hidden }
+                    .filter {
+                        val currentIndexPath = it.currentIndexPath ?: return@filter false
+                        val currentSectionRecord = it.currentSectionRecord ?: return@filter false
+                        return@filter currentIndexPath.row > 0 && currentIndexPath.row < currentSectionRecord.numberOfRows
+                    }
+                    .forEach {
+                canvas.drawLine(
+                        (this.separatorInset.left * scale).toFloat(),
+                        ((it.frame.y - this.edo_contentOffset.y) * scale).toFloat(),
+                        ((this.bounds.width - this.separatorInset.left - this.separatorInset.right) * scale).toFloat(),
+                        ((it.frame.y - this.edo_contentOffset.y) * scale).toFloat(),
+                        separatorPaint)
+            }
+        }
+    }
+
+    // Touches
+
+    private var firstTouchPoint: CGPoint? = null
+
+    override fun touchesBegan(touches: Set<UITouch>) {
+        super.touchesBegan(touches)
+        if (!this.tracking) {
+            val firstTouch = touches.firstOrNull() ?: return
+            var hitTestView = firstTouch.view
+            var cellShouldHighlighted = true
+            while (hitTestView != null) {
+                if (hitTestView is UITableViewCell) {
+                    break
+                }
+                if (hitTestView.gestureRecognizers.count() > 0) {
+                    cellShouldHighlighted = false
+                }
+                hitTestView = hitTestView.superview
+            }
+            if (cellShouldHighlighted) {
+                this.firstTouchPoint = firstTouch.windowPoint
+                (hitTestView as? UITableViewCell)?.let {
+                    this.postDelayed({
+                        if (this@UITableView.firstTouchPoint == null) { return@postDelayed }
+                        this@UITableView._highlightedRow = it.currentIndexPath?.mapKey()
+                        it.edo_highlighted = true
+                    }, 150)
+                }
+            }
+        }
+    }
+
+    override fun touchesMoved(touches: Set<UITouch>) {
+        super.touchesMoved(touches)
+        this.firstTouchPoint?.let { firstTouchPoint ->
+            val firstTouch = touches.firstOrNull() ?: return
+            if (abs((firstTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
+                this._highlightedRow = null
+                this._cachedCells.values.forEach { it.edo_highlighted = false }
+                this.firstTouchPoint = null
+            }
+        }
+    }
+
+    override fun touchesEnded(touches: Set<UITouch>) {
+        super.touchesEnded(touches)
+        this.firstTouchPoint = null
+        this._highlightedRow = null
+        this._cachedCells.values.forEach { it.edo_highlighted = false }
+    }
+
+    override fun touchesCancelled(touches: Set<UITouch>) {
+        super.touchesCancelled(touches)
+        this.firstTouchPoint = null
+        this._highlightedRow = null
+        this._cachedCells.values.forEach { it.edo_highlighted = false }
+    }
+
+    companion object {
+
+        private val separatorPaint = Paint()
+
+    }
+
 }
 
-private class UITableViewSection {
+internal class UITableViewSection {
 
     var rowsHeight: Double = 0.0
 
@@ -286,6 +411,12 @@ fun KIMIPackage.installUITableView() {
         tableView.kimi_context = JSContext.currentContext?.runtime
         return@exportInitializer tableView
     }
+    exporter.exportProperty(UITableView::class.java, "tableHeaderView")
+    exporter.exportProperty(UITableView::class.java, "tableFooterView")
+    exporter.exportProperty(UITableView::class.java, "separatorColor")
+    exporter.exportProperty(UITableView::class.java, "separatorInset")
+    exporter.exportProperty(UITableView::class.java, "allowsSelection")
+    exporter.exportProperty(UITableView::class.java, "allowsMultipleSelection")
     exporter.exportMethodToJavaScript(UITableView::class.java, "register")
     exporter.exportMethodToJavaScript(UITableView::class.java, "dequeueReusableCell")
     exporter.exportMethodToJavaScript(UITableView::class.java, "reloadData")

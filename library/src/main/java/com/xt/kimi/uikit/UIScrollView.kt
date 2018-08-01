@@ -9,6 +9,8 @@ import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
 import kotlin.math.*
 
+internal class UIScrollWrapperView: UIView()
+
 open class UIScrollView: UIView() {
 
     open var edo_contentOffset: CGPoint = CGPoint(0.0, 0.0)
@@ -108,7 +110,7 @@ open class UIScrollView: UIView() {
 
     private val panGestureRecognizer: UIPanGestureRecognizer
 
-    private val contentView = UIView()
+    private val contentView = UIScrollWrapperView()
 
     private val scroller = Scroller(this.context)
 

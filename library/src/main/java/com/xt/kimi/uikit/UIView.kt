@@ -732,6 +732,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             current = current.superview
         }
         routes.forEach {
+            (it.superview as? UIScrollWrapperView)?.let {
+                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
+            }
             matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
             if (!it.transform.isIdentity()) {
                 val unmatrix = it.transform.unmatrix()
@@ -762,6 +765,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             current = current.superview
         }
         routes.forEach {
+            (it.superview as? UIScrollWrapperView)?.let {
+                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
+            }
             matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
             if (!it.transform.isIdentity()) {
                 val unmatrix = it.transform.unmatrix()
