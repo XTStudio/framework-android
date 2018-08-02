@@ -28,6 +28,8 @@ class KIMIPackage : EDOPackage() {
         // Foundation
         installDispatchQueue()
         installUUID()
+        installURL()
+        installURLRequest()
         // UIKit
         (applicationContext as? Application)?.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityPaused(activity: Activity?) { }
@@ -86,6 +88,7 @@ class KIMIPackage : EDOPackage() {
         installUITableView()
         installUITableViewCell()
         installUIIndexPath()
+        installUIWebView()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
