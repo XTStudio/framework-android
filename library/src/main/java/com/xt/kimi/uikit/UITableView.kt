@@ -2,11 +2,14 @@ package com.xt.kimi.uikit
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.max
 
 // @Reference https://github.com/BigZaphod/Chameleon/blob/master/UIKit/Classes/UITableView.m
 
@@ -255,7 +258,31 @@ class UITableView: UIScrollView() {
                 sectionRecord.footerView?.let {
                     it.frame = footerRect
                 }
-                (0 until numberOfRows).forEach { row ->
+                var startIndex: Int
+                var left = 0
+                var right = max(0, sectionRecord.numberOfRows - 1)
+                while (true) {
+                    if (abs(right - left) <= 1) {
+                        startIndex = left
+                        break
+                    }
+                    val mid = ceil((right.toDouble() + left.toDouble()) / 2.0).toInt()
+                    val indexPath = UIIndexPath(mid, section)
+                    val rowRect = this._rectForRowAtIndexPath(indexPath)
+                    if (rowRect.y <= this.edo_contentOffset.y && rowRect.y + rowRect.height >= this.edo_contentOffset.y) {
+                        startIndex = mid
+                        break
+                    }
+                    else if (rowRect.y + rowRect.height < this.edo_contentOffset.y) {
+                        left = mid
+                    }
+                    else if (rowRect.y > this.edo_contentOffset.y) {
+                        right = mid
+                    }
+                }
+                var renderCount = 0
+                for (row in startIndex until numberOfRows) {
+                    renderCount++
                     val indexPath = UIIndexPath(row, section)
                     val rowRect = this._rectForRowAtIndexPath(indexPath)
                     if (CGRectIntersectsRect(rowRect, visibleBounds) && rowRect.height > 0) {
@@ -274,6 +301,9 @@ class UITableView: UIScrollView() {
                             this.addSubview(cell)
                         }
                         cell.hidden = false
+                    }
+                    else if (renderCount > 10) {
+                        break
                     }
                 }
             }
