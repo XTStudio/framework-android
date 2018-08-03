@@ -23,6 +23,10 @@ fun CGRectUnion(r1: CGRect, r2: CGRect): CGRect {
     return CGRect(x, y, width, height)
 }
 
+fun CGRectIsEmpty(rect: CGRect): Boolean {
+    return rect.width == 0.0 || rect.height == 0.0
+}
+
 internal class CGPointMutable(var x: Double, var y: Double) {}
 internal class CGRectMutable(var x: Double, var y: Double, var width: Double, var height: Double) {}
 internal class CGSizeMutable(var width: Double, var height: Double) {}

@@ -8,8 +8,21 @@ class UICollectionViewCell: UICollectionReusableView() {
 
     var edo_highlighted = false
 
-    fun applyLayoutAttributes(layoutAttributes: UICollectionViewLayoutAttributes) {
+    val contentView: UIView = UIView()
 
+    override fun prepareForReuse() {
+        super.prepareForReuse()
+        this.edo_selected = false
+        this.edo_highlighted = false
+    }
+
+    init {
+        addSubview(this.contentView)
+    }
+
+    override fun layoutSubviews() {
+        super.layoutSubviews()
+        this.contentView.frame = this.bounds
     }
 
 }

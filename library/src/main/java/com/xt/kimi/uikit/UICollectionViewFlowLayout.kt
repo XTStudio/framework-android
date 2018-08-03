@@ -16,6 +16,9 @@ private val UIFlowLayoutCommonRowHorizontalAlignmentKey = "UIFlowLayoutCommonRow
 private val UIFlowLayoutLastRowHorizontalAlignmentKey = "UIFlowLayoutLastRowHorizontalAlignmentKey"
 private val UIFlowLayoutRowVerticalAlignmentKey = "UIFlowLayoutRowVerticalAlignmentKey"
 
+val UICollectionElementKindSectionHeader = "UICollectionElementKindSectionHeader"
+val UICollectionElementKindSectionFooter = "UICollectionElementKindSectionFooter"
+
 enum class UIFlowLayoutHorizontalAlignment {
     left,
     center,
@@ -405,24 +408,164 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
     var footerReferenceSize: CGSize = CGSize(0.0, 0.0)
 
     var sectionInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            this.invalidateLayout()
+        }
 
     var scrollDirection: UICollectionViewScrollDirection = UICollectionViewScrollDirection.vertical
 
     var rowAlignmentOptions: Map<String, Any> = mapOf(
             Pair(UIFlowLayoutCommonRowHorizontalAlignmentKey, UIFlowLayoutHorizontalAlignment.justify),
             Pair(UIFlowLayoutLastRowHorizontalAlignmentKey, UIFlowLayoutHorizontalAlignment.justify),
-            Pair(UIFlowLayoutRowVerticalAlignmentKey, UIFlowLayoutHorizontalAlignment.center)
+            Pair(UIFlowLayoutRowVerticalAlignmentKey, 1)
     )
 
     override fun prepareLayout() {
         super.prepareLayout()
+        val data = UIGridLayoutInfo()
+        data.horizontal = this.scrollDirection == UICollectionViewScrollDirection.horizontal
+        _visibleBounds = this.collectionView?.visibleBoundRects ?: CGRect(0.0, 0.0, 0.0, 0.0)
+        data.dimension = if (data.horizontal) _visibleBounds.height else _visibleBounds.width
+        data.rowAlignmentOptions = this.rowAlignmentOptions
+        this.fetchItemsInfo()
     }
 
     override fun layoutAttributesForElementsInRect(rect: CGRect): List<UICollectionViewLayoutAttributes> {
         if (_data == null) {
             this.prepareLayout()
         }
-        return super.layoutAttributesForElementsInRect(rect)
+        val layoutAttributesArray: MutableList<UICollectionViewLayoutAttributes> = mutableListOf()
+        val _data = _data ?: return emptyList()
+        _data.sections.forEachIndexed { sectionIndex, section ->
+            if (CGRectIntersectsRect(section.frame, rect)) {
+                val rectCache = this.rectCache
+                val normalizedHeaderFrame = CGRect(section.headerFrame.x + section.frame.x, section.headerFrame.y + section.frame.y, section.headerFrame.width, section.headerFrame.height)
+                if (!CGRectIsEmpty(normalizedHeaderFrame) && CGRectIntersectsRect(normalizedHeaderFrame, rect)) {
+                    val layoutAttributes = this.layoutAttributesClass
+                            .getConstructor(UIIndexPath::class.java, String::class.java, UICollectionViewItemKey.ItemType::class.java)
+                            .newInstance(UIIndexPath(0, sectionIndex), UICollectionElementKindSectionHeader, UICollectionViewItemKey.ItemType.supplementaryView)
+                    layoutAttributes.frame = normalizedHeaderFrame
+                    layoutAttributesArray.add(layoutAttributes)
+                }
+                var itemRects = rectCache[sectionIndex]
+                if (itemRects == null && section.fixedItemSize && section.rows.count() > 0) {
+                    itemRects = section.rows[0].itemRects()
+                    if (itemRects != null) { rectCache[sectionIndex] = itemRects }
+                }
+                if (itemRects == null) { return@forEachIndexed }
+                section.rows.forEach { row ->
+                    val normalizedRowFrame = CGRect(row.rowFrame.x + section.frame.x, row.rowFrame.y + section.frame.y, row.rowFrame.width, row.rowFrame.height)
+                    if (CGRectIntersectsRect(normalizedRowFrame, rect)) {
+                        for (itemIndex in 0 until row.itemCount) {
+                            val layoutAttributes: UICollectionViewLayoutAttributes
+                            val sectionItemIndex: Int
+                            val itemFrame: CGRect
+                            if (row.fixedItemSize) {
+                                itemFrame = itemRects[itemIndex]
+                                sectionItemIndex = row.index * section.itemsByRowCount + itemIndex
+                            }
+                            else {
+                                val item = row.items[itemIndex]
+                                sectionItemIndex = section.items.indexOf(item)
+                                itemFrame = item.itemFrame
+                            }
+                            val normalizedItemFrame = CGRect(normalizedRowFrame.x + itemFrame.x, normalizedRowFrame.y + itemFrame.y, itemFrame.width, itemFrame.height)
+                            if (CGRectIntersectsRect(normalizedItemFrame, rect)) {
+                                layoutAttributes = this.layoutAttributesClass
+                                        .getConstructor(UIIndexPath::class.java, String::class.java, UICollectionViewItemKey.ItemType::class.java)
+                                        .newInstance(UIIndexPath(sectionItemIndex, sectionIndex), UICollectionElementKindCell, UICollectionViewItemKey.ItemType.cell)
+                                layoutAttributes.frame = normalizedItemFrame
+                                layoutAttributesArray.add(layoutAttributes)
+                            }
+                        }
+                    }
+                }
+                val normalizedFooterFrame = CGRect(section.footerFrame.x + section.frame.x, section.footerFrame.y + section.frame.y, section.footerFrame.width, section.footerFrame.height)
+                if (!CGRectIsEmpty(normalizedFooterFrame) && CGRectIntersectsRect(normalizedFooterFrame, rect)) {
+                    val layoutAttributes = this.layoutAttributesClass
+                            .getConstructor(UIIndexPath::class.java, String::class.java, UICollectionViewItemKey.ItemType::class.java)
+                            .newInstance(UIIndexPath(0, sectionIndex), UICollectionElementKindSectionFooter, UICollectionViewItemKey.ItemType.supplementaryView)
+                    layoutAttributes.frame = normalizedFooterFrame
+                    layoutAttributesArray.add(layoutAttributes)
+                }
+            }
+        }
+        return layoutAttributesArray.toList()
+    }
+
+    override fun layoutAttributesForItemAtIndexPath(indexPath: UIIndexPath): UICollectionViewLayoutAttributes? {
+        if (_data == null) {
+            this.prepareLayout()
+        }
+        val _data = _data ?: return null
+        val section = _data.sections[indexPath.section]
+        var row: UIGridLayoutRow? = null
+        var itemFrame = CGRect(0.0, 0.0, 0.0, 0.0)
+        if (section.fixedItemSize && section.itemsByRowCount > 0 && indexPath.row / section.itemsByRowCount < section.rows.count()) {
+            row = section.rows[(indexPath.row / section.itemsByRowCount)]
+            val itemIndex = (indexPath.row % section.itemsByRowCount)
+            val itemRects = row.itemRects()
+            itemFrame = itemRects[itemIndex]
+        }
+        else if (indexPath.row < section.items.count()) {
+            val item = section.items[indexPath.row]
+            row = item.rowObject
+            itemFrame = item.itemFrame
+        }
+        val layoutAttributes = this.layoutAttributesClass
+                .getConstructor(UIIndexPath::class.java, String::class.java, UICollectionViewItemKey.ItemType::class.java)
+                .newInstance(indexPath, UICollectionElementKindCell, UICollectionViewItemKey.ItemType.cell)
+        row?.let { row ->
+            val normalizedRowFrame = CGRect(row.rowFrame.x + section.frame.x, row.rowFrame.y + section.frame.y, row.rowFrame.width, row.rowFrame.height)
+            layoutAttributes.frame = CGRect(normalizedRowFrame.x + itemFrame.x, normalizedRowFrame.y + itemFrame.y, itemFrame.width, itemFrame.height)
+        }
+        return layoutAttributes
+    }
+
+    override fun layoutAttributesForSupplementaryViewOfKind(kind: String, indexPath: UIIndexPath): UICollectionViewLayoutAttributes? {
+        if (_data == null) {
+            this.prepareLayout()
+        }
+        val _data = _data ?: return null
+        val sectionIndex = indexPath.section
+        var layoutAttributes: UICollectionViewLayoutAttributes? = null
+        if (sectionIndex < _data.sections.count()) {
+            val section = _data.sections[sectionIndex]
+            var normalizedFrame = CGRect(0.0, 0.0, 0.0, 0.0)
+            if (kind == UICollectionElementKindSectionHeader) {
+                normalizedFrame = section.headerFrame
+            }
+            else if (kind == UICollectionElementKindSectionFooter) {
+                normalizedFrame = section.footerFrame
+            }
+            if (!CGRectIsEmpty(normalizedFrame)) {
+                normalizedFrame = CGRect(normalizedFrame.x + section.frame.x, normalizedFrame.y + section.frame.y, normalizedFrame.width, normalizedFrame.height)
+                layoutAttributes = this.layoutAttributesClass
+                        .getConstructor(UIIndexPath::class.java, String::class.java, UICollectionViewItemKey.ItemType::class.java)
+                        .newInstance(UIIndexPath(0, sectionIndex), kind, UICollectionViewItemKey.ItemType.supplementaryView)
+                layoutAttributes.frame = normalizedFrame
+            }
+        }
+        return layoutAttributes
+    }
+
+    override fun layoutAttributesForDecorationViewOfKind(kind: String, indexPath: UIIndexPath): UICollectionViewLayoutAttributes? {
+        return null
+    }
+
+    override fun collectionViewContentSize(): CGSize {
+        if (_data == null) {
+            this.prepareLayout()
+        }
+        val _data = _data ?: return super.collectionViewContentSize()
+        return _data.contentSize
+    }
+
+    override fun invalidateLayout() {
+        super.invalidateLayout()
+        this.rectCache.clear()
+        _data = null
     }
 
     internal fun sizeForItem(indexPath: UIIndexPath): CGSize {
@@ -447,6 +590,57 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
 
     internal fun referenceSizeForFooter(inSection: Int): CGSize {
         return this.footerReferenceSize
+    }
+
+    private var _visibleBounds: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
+    private var rectCache: MutableMap<Int, List<CGRect>> = mutableMapOf()
+
+    private fun fetchItemsInfo() {
+        this.getSizingInfos()
+        this.updateItemsLayout()
+    }
+
+    private fun getSizingInfos() {
+        val _data = _data ?: return
+        val collectionView = this.collectionView ?: return
+        assert(_data.sections.count() == 0)
+        val numberOfSections = collectionView.numberOfSections()
+        for (section in 0 until numberOfSections) {
+            val layoutSection = _data.addSection()
+            layoutSection.verticalInterstice = if (_data.horizontal) this.minimumInteritemSpacing(section) else this.minimumLineSpacing(section)
+            layoutSection.horizontalInterstice = if (!_data.horizontal) this.minimumInteritemSpacing(section) else this.minimumLineSpacing(section)
+            layoutSection.sectionMargins = this.insetForSection(section)
+            layoutSection.headerDimension = if (_data.horizontal) this.referenceSizeForHeader(section).width else this.referenceSizeForHeader(section).height
+            layoutSection.footerDimension = if (_data.horizontal) this.referenceSizeForFooter(section).width else this.referenceSizeForFooter(section).height
+            val numberOfItems = collectionView.numberOfItemsInSection(section)
+            for (item in 0 until numberOfItems) {
+                val indexPath = UIIndexPath(item, section)
+                val itemSize = this.sizeForItem(indexPath)
+                val layoutItem = layoutSection.addItem()
+                layoutItem.itemFrame = CGRect(0.0, 0.0, itemSize.width, itemSize.height)
+            }
+        }
+    }
+
+    private fun updateItemsLayout() {
+        val _data = _data ?: return
+        var contentSize = CGSizeMutable(0.0, 0.0)
+        _data.sections.forEach { section ->
+            section.computeLayout()
+            val sectionFrame = CGRectMutable(section.frame.x, section.frame.y, section.frame.width, section.frame.height)
+            if (_data.horizontal) {
+                sectionFrame.x += contentSize.width
+                contentSize.width += section.frame.width + section.frame.x
+                contentSize.height = max(contentSize.height, sectionFrame.height + section.frame.y + section.sectionMargins.top + section.sectionMargins.bottom)
+            }
+            else {
+                sectionFrame.y += contentSize.height
+                contentSize.height += section.headerDimension + section.frame.y
+                contentSize.width = max(contentSize.width, sectionFrame.width + section.frame.x + section.sectionMargins.left + section.sectionMargins.right)
+            }
+            section.frame = CGRect(sectionFrame.x, sectionFrame.y, sectionFrame.width, sectionFrame.height)
+        }
+        _data.contentSize = CGSize(contentSize.width, contentSize.height)
     }
 
 }

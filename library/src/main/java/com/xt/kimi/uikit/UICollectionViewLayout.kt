@@ -65,6 +65,22 @@ class UICollectionViewLayoutAttributes(val indexPath: UIIndexPath,
         return representedElementCategory == UICollectionViewItemKey.ItemType.cell
     }
 
+    companion object {
+
+        @JvmStatic fun layoutAttributesForCellWithIndexPath(indexPath: UIIndexPath): UICollectionViewLayoutAttributes {
+            return UICollectionViewLayoutAttributes(indexPath, UICollectionElementKindCell, UICollectionViewItemKey.ItemType.cell)
+        }
+
+        @JvmStatic fun layoutAttributesForSupplementaryViewOfKind(elementKind: String, indexPath: UIIndexPath): UICollectionViewLayoutAttributes {
+            return UICollectionViewLayoutAttributes(indexPath, elementKind, UICollectionViewItemKey.ItemType.supplementaryView)
+        }
+
+        @JvmStatic fun layoutAttributesForDecorationViewOfKind(elementKind: String, indexPath: UIIndexPath): UICollectionViewLayoutAttributes {
+            return UICollectionViewLayoutAttributes(indexPath, elementKind, UICollectionViewItemKey.ItemType.decorationView)
+        }
+
+    }
+
 }
 
 fun KIMIPackage.installUICollectionViewLayout() {

@@ -10,12 +10,18 @@ open class UICollectionReusableView: UIView() {
     var reuseIdentifier: String? = null
         internal set
 
-    fun prepareForReuse() {
-
+    open fun prepareForReuse() {
+        this.layoutAttributes = null
     }
 
-    fun applyLayoutAttributes(layoutAttributes: UICollectionViewLayoutAttributes) {
-
+    open fun applyLayoutAttributes(layoutAttributes: UICollectionViewLayoutAttributes) {
+        if (layoutAttributes != this.layoutAttributes) {
+            this.layoutAttributes = layoutAttributes
+            this.frame = layoutAttributes.frame
+            this.hidden = layoutAttributes.hidden
+            this.transform = layoutAttributes.transform
+            this.edo_alpha = layoutAttributes.alpha
+        }
     }
 
 }

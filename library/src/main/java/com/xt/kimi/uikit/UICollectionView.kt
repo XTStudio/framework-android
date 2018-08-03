@@ -34,6 +34,7 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
         val initializer = this._registeredCells[reuseIdentifier] ?: return UICollectionViewCell()
         val cell = UICollectionViewCell()
         cell.reuseIdentifier = reuseIdentifier
+        cell.collectionView = this
         EDOExporter.sharedExporter.scriptObjectWithObject(cell, kimi_context, true, initializer)
         cell.applyLayoutAttributes(attributes)
         return cell
