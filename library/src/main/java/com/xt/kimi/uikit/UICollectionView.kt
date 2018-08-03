@@ -285,6 +285,14 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
             return null
         }
 
+        override fun numberOfSections(collectionView: UICollectionView): Int {
+            return 1
+        }
+
+        override fun numberOfItemsInSection(collectionView: UICollectionView, inSection: Int): Int {
+            return 10
+        }
+
     }
 
 }

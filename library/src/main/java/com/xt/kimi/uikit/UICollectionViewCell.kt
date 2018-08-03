@@ -28,5 +28,8 @@ class UICollectionViewCell: UICollectionReusableView() {
 }
 
 fun KIMIPackage.installUICollectionViewCell() {
-    exporter.exportClass(UICollectionViewCell::class.java, "UICollectionViewCell", "UIView")
+    exporter.exportClass(UICollectionViewCell::class.java, "UICollectionViewCell", "UICollectionReusableView")
+    exporter.exportProperty(UICollectionViewCell::class.java, "contentView", true)
+    exporter.exportProperty(UICollectionViewCell::class.java, "edo_selected", true)
+    exporter.exportProperty(UICollectionViewCell::class.java, "edo_highlighted", true)
 }

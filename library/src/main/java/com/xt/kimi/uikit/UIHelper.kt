@@ -27,6 +27,10 @@ fun CGRectIsEmpty(rect: CGRect): Boolean {
     return rect.width == 0.0 || rect.height == 0.0
 }
 
+fun CGRectEqualToRect(r1: CGRect, r2: CGRect): Boolean {
+    return r1.x == r2.x && r1.y == r2.y && r1.width == r2.width && r1.height == r2.height
+}
+
 internal class CGPointMutable(var x: Double, var y: Double) {}
 internal class CGRectMutable(var x: Double, var y: Double, var width: Double, var height: Double) {}
 internal class CGSizeMutable(var width: Double, var height: Double) {}

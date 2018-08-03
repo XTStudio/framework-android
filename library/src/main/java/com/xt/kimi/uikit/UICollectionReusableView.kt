@@ -1,5 +1,7 @@
 package com.xt.kimi.uikit
 
+import com.xt.kimi.KIMIPackage
+
 open class UICollectionReusableView: UIView() {
 
     var collectionView: UICollectionView? = null
@@ -24,4 +26,10 @@ open class UICollectionReusableView: UIView() {
         }
     }
 
+}
+
+fun KIMIPackage.installUICollectionReusableView() {
+    exporter.exportClass(UICollectionReusableView::class.java, "UICollectionReusableView", "UIView")
+    exporter.exportProperty(UICollectionReusableView::class.java, "collectionView", true)
+    exporter.exportProperty(UICollectionReusableView::class.java, "reuseIdentifier", true)
 }
