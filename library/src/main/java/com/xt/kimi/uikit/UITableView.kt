@@ -559,10 +559,6 @@ internal class UITableViewSection {
 
     var footerView: UIView? = null
 
-    var headerTitle: String? = null
-
-    var footerTitle: String? = null
-
     fun sectionHeight(): Double {
         return this.headerHeight + this.rowsHeight + this.footerHeight
     }

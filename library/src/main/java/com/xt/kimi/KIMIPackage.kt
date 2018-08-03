@@ -90,6 +90,9 @@ class KIMIPackage : EDOPackage() {
         installUIIndexPath()
         installUIWebView()
         installUIStackView()
+        installUICollectionView()
+        installUICollectionViewLayout()
+        installUICollectionViewCell()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
