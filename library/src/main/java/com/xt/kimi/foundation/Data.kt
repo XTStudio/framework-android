@@ -111,7 +111,7 @@ fun KIMIPackage.installData() {
     exporter.exportClass(MutableData::class.java, "MutableData", "Data")
     exporter.exportInitializer(MutableData::class.java) {
         if (0 < it.count()) {
-            (it[0] as? MutableData)?.let {
+            (it[0] as? Data)?.let {
                 return@exportInitializer MutableData(it.byteArray)
             }
             (it[0] as? ByteBuffer)?.let {
