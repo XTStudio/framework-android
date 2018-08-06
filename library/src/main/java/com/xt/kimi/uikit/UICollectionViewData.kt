@@ -79,7 +79,7 @@ internal class UICollectionViewData(val collectionView: UICollectionView, val la
     }
 
     fun collectionViewContentRect(): CGRect {
-        return CGRect(0.0, 0.0, 0.0, 0.0)
+        return CGRect(0.0, 0.0, this.contentSize.width, this.contentSize.height)
     }
 
     var layoutIsPrepared: Boolean = false
@@ -115,7 +115,7 @@ internal class UICollectionViewData(val collectionView: UICollectionView, val la
             sectionItemCounts.add(cellCount)
             _numItems += cellCount
         }
-        this._sectionItemCounts = _sectionItemCounts.toList()
+        this._sectionItemCounts = sectionItemCounts.toList()
         this.itemCountsAreValid = true
     }
 

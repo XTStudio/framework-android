@@ -20,9 +20,10 @@ open class UICollectionReusableView: UIView() {
         if (layoutAttributes != this.layoutAttributes) {
             this.layoutAttributes = layoutAttributes
             this.frame = layoutAttributes.frame
-            this.hidden = layoutAttributes.hidden
             this.transform = layoutAttributes.transform
-            this.edo_alpha = layoutAttributes.alpha
+            // we will ignore following properties
+//            this.hidden = layoutAttributes.hidden
+//            this.edo_alpha = layoutAttributes.alpha
         }
     }
 

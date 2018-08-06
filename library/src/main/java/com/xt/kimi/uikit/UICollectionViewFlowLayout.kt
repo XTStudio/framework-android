@@ -1,9 +1,6 @@
 package com.xt.kimi.uikit
 
-import com.xt.endo.CGPoint
-import com.xt.endo.CGRect
-import com.xt.endo.CGSize
-import com.xt.endo.UIEdgeInsets
+import com.xt.endo.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -51,6 +48,7 @@ class UIGridLayoutInfo {
 
     fun addSection(): UIGridLayoutSection {
         val section = UIGridLayoutSection()
+        section.rowAlignmentOptions = this.rowAlignmentOptions
         section.layoutInfo = this
         this.sections.add(section)
         this.invalidate(false)
@@ -164,7 +162,7 @@ class UIGridLayoutSection {
                         }
                         row.layoutRow()
                         if (layoutInfo.horizontal) {
-                            row.rowFrame = CGRect(sectionSize.width, this.sectionMargins.top, row.rowFrame.width, row.rowSize.height)
+                            row.rowFrame = CGRect(sectionSize.width, this.sectionMargins.top, row.rowSize.width, row.rowSize.height)
                             sectionSize.height = max(row.rowSize.height, sectionSize.height)
                             sectionSize.width += row.rowSize.width + (if (finishCycle) 0.0 else this.horizontalInterstice)
                         }
@@ -428,6 +426,7 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
         _visibleBounds = this.collectionView?.visibleBoundRects ?: CGRect(0.0, 0.0, 0.0, 0.0)
         data.dimension = if (data.horizontal) _visibleBounds.height else _visibleBounds.width
         data.rowAlignmentOptions = this.rowAlignmentOptions
+        this._data = data
         this.fetchItemsInfo()
     }
 
@@ -453,7 +452,6 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
                     itemRects = section.rows[0].itemRects()
                     if (itemRects != null) { rectCache[sectionIndex] = itemRects }
                 }
-                if (itemRects == null) { return@forEachIndexed }
                 section.rows.forEach { row ->
                     val normalizedRowFrame = CGRect(row.rowFrame.x + section.frame.x, row.rowFrame.y + section.frame.y, row.rowFrame.width, row.rowFrame.height)
                     if (CGRectIntersectsRect(normalizedRowFrame, rect)) {
@@ -462,7 +460,7 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
                             val sectionItemIndex: Int
                             val itemFrame: CGRect
                             if (row.fixedItemSize) {
-                                itemFrame = itemRects[itemIndex]
+                                itemFrame = itemRects?.get(itemIndex) ?: CGRect(0.0, 0.0, 0.0, 0.0)
                                 sectionItemIndex = row.index * section.itemsByRowCount + itemIndex
                             }
                             else {
@@ -569,19 +567,30 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
     }
 
     internal fun sizeForItem(indexPath: UIIndexPath): CGSize {
+        (EDOJavaHelper.value(this, "sizeForItem", indexPath) as? Map<String, Any>)?.let {
+            return CGSize((it["width"] as? Number)?.toDouble() ?: 0.0, (it["height"] as? Number)?.toDouble() ?: 0.0)
+        }
         return this.itemSize
     }
 
     internal fun insetForSection(inSection: Int): UIEdgeInsets {
+        (EDOJavaHelper.value(this, "insetForSection", inSection) as? Map<String, Any>)?.let {
+            return UIEdgeInsets(
+                    (it["top"] as? Number)?.toDouble() ?: 0.0,
+                    (it["left"] as? Number)?.toDouble() ?: 0.0,
+                    (it["bottom"] as? Number)?.toDouble() ?: 0.0,
+                    (it["right"] as? Number)?.toDouble() ?: 0.0
+            )
+        }
         return this.sectionInset
     }
 
     internal fun minimumLineSpacing(inSection: Int): Double {
-        return this.minimumLineSpacing
+        return (EDOJavaHelper.value(this, "minimumLineSpacing", inSection) as? Number)?.toDouble() ?: this.minimumLineSpacing
     }
 
     internal fun minimumInteritemSpacing(inSection: Int): Double {
-        return this.minimumInteritemSpacing
+        return (EDOJavaHelper.value(this, "minimumInteritemSpacing", inSection) as? Number)?.toDouble() ?: this.minimumInteritemSpacing
     }
 
     internal fun referenceSizeForHeader(inSection: Int): CGSize {
@@ -635,7 +644,7 @@ class UICollectionViewFlowLayout: UICollectionViewLayout() {
             }
             else {
                 sectionFrame.y += contentSize.height
-                contentSize.height += section.headerDimension + section.frame.y
+                contentSize.height += sectionFrame.height + section.frame.y
                 contentSize.width = max(contentSize.width, sectionFrame.width + section.frame.x + section.sectionMargins.left + section.sectionMargins.right)
             }
             section.frame = CGRect(sectionFrame.x, sectionFrame.y, sectionFrame.width, sectionFrame.height)

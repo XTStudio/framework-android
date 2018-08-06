@@ -107,10 +107,13 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                     return
                 }
             }
+            val boundsChanged = field.width != value.width || field.height != value.height
             field = value
             this.layer.frame = frame
-            this.bounds = CGRect(0.0, 0.0, frame.width, frame.height)
-            this.setNeedsLayout()
+            if (boundsChanged) {
+                this.bounds = CGRect(0.0, 0.0, frame.width, frame.height)
+            }
+            this.setNeedsLayout(boundsChanged)
         }
 
     var bounds: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
@@ -402,9 +405,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         this.tintColorDidChange()
     }
 
-    fun setNeedsLayout() {
+    fun setNeedsLayout(layoutSubviews: Boolean = true) {
         this.requestLayout()
-        this.layoutSubviews()
+        if (layoutSubviews) {
+            this.layoutSubviews()
+        }
     }
 
     fun layoutIfNeeded() {

@@ -1,8 +1,11 @@
 package com.xt.kimi.uikit
 
+import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
+import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
+import java.lang.reflect.Executable
 
 class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScrollView() {
 
@@ -24,11 +27,12 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     }
 
     fun dequeueReusableCell(reuseIdentifier: String, indexPath: UIIndexPath): UICollectionViewCell? {
-        val attributes = this.collectionViewLayout.layoutAttributesForItemAtIndexPath(indexPath) ?: return null
-        this._reusableCells.firstOrNull { it.reuseIdentifier == reuseIdentifier }?.let {
-            this._reusableCells.remove(it)
-            it.applyLayoutAttributes(attributes)
-            return it
+        this._cellReuseQueues[reuseIdentifier]?.let { reusableCells ->
+            if (reusableCells.count() > 0) {
+                (reusableCells.removeAt(0) as? UICollectionViewCell)?.let { cell ->
+                    return cell
+                }
+            }
         }
         val kimi_context = this.kimi_context?.takeIf { !it.isReleased } ?: return UICollectionViewCell()
         val initializer = this._registeredCells[reuseIdentifier] ?: return UICollectionViewCell()
@@ -36,7 +40,6 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
         cell.reuseIdentifier = reuseIdentifier
         cell.collectionView = this
         EDOExporter.sharedExporter.scriptObjectWithObject(cell, kimi_context, true, initializer)
-        cell.applyLayoutAttributes(attributes)
         return cell
     }
 
@@ -54,7 +57,9 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
 
     fun reloadData() {
         this.invalidateLayout()
-        _allVisibleViewsDict.forEach { it.value.removeFromSuperview() }
+        _allVisibleViewsDict.forEach {
+            it.value.hidden = true
+        }
         _allVisibleViewsDict.clear()
         _indexPathsForSelectedItems.forEach {
             this.cellForItemAtIndexPath(it)?.let {
@@ -141,7 +146,6 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     private var _indexPathsForSelectedItems: MutableSet<UIIndexPath> = mutableSetOf()
     private var _indexPathsForHighlightedItems: MutableSet<UIIndexPath> = mutableSetOf()
     private val _registeredCells: MutableMap<String, EDOCallback> = mutableMapOf()
-    private val _reusableCells: MutableSet<UICollectionViewCell> = mutableSetOf()
     internal val _collectionViewData: UICollectionViewData = UICollectionViewData(this, this.collectionViewLayout)
     private val _cellReuseQueues: MutableMap<String, MutableList<UICollectionReusableView>> = mutableMapOf()
     private val _supplementaryViewReuseQueues: MutableMap<String, MutableList<UICollectionReusableView>> = mutableMapOf()
@@ -149,7 +153,7 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
 
     val visibleBoundRects: CGRect
         get() {
-            return CGRect(0.0, this.edo_contentOffset.y, this.bounds.width, this.bounds.height)
+            return CGRect(this.edo_contentOffset.x, this.edo_contentOffset.y, this.bounds.width, this.bounds.height)
         }
 
     override fun layoutSubviews() {
@@ -163,11 +167,9 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     private fun layoutCollectionViews() {
         _collectionViewData.validateLayoutInRect(this.visibleBoundRects)
         val contentRect = _collectionViewData.collectionViewContentRect()
-        if (this.contentSize.width != contentRect.width || this.contentSize.height != contentRect.height) {
-            this.contentSize = CGSize(contentRect.width, contentRect.height)
-            _collectionViewData.validateLayoutInRect(this.visibleBoundRects)
-            this.updateVisibleCellsNow(true)
-        }
+        this.contentSize = CGSize(contentRect.width, contentRect.height)
+        _collectionViewData.validateLayoutInRect(this.visibleBoundRects)
+        this.updateVisibleCellsNow(true)
     }
 
     private fun invalidateLayout() {
@@ -176,6 +178,7 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     }
 
     private fun updateVisibleCellsNow(now: Boolean = false) {
+        val e = SystemClock.uptimeMillis()
         val layoutAttributesArray = _collectionViewData.layoutAttributesForElementsInRect(this.visibleBoundRects)
         if (layoutAttributesArray.count() == 0) {
             return
@@ -206,11 +209,13 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
                 }
             }
         }
-        val allVisibleItemKeys = _allVisibleViewsDict.keys.toMutableSet()
-        allVisibleItemKeys.minus(itemKeysToAddDict.keys)
+        val allVisibleItemKeys: MutableSet<UICollectionViewItemKey> = this._allVisibleViewsDict.keys.toMutableSet()
+        itemKeysToAddDict.keys.forEach {
+            allVisibleItemKeys.remove(it)
+        }
         allVisibleItemKeys.forEach { itemKey ->
             _allVisibleViewsDict[itemKey]?.let { reusableView ->
-                reusableView.removeFromSuperview()
+                reusableView.hidden = true
                 _allVisibleViewsDict.remove(itemKey)
                 when (itemKey.type) {
                     UICollectionViewItemKey.ItemType.cell -> {
@@ -227,11 +232,11 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
                 }
             }
         }
+        System.out.println("total used:" + (SystemClock.uptimeMillis() - e))
     }
 
     private fun createPreparedCellForItemAtIndexPath(indexPath: UIIndexPath, layoutAttributes: UICollectionViewLayoutAttributes): UICollectionViewCell {
         val cell = this.dataSource.cellForItemAtIndexPath(this, indexPath)
-        cell.applyLayoutAttributes(layoutAttributes)
         cell.edo_highlighted = _indexPathsForHighlightedItems.firstOrNull { it.isEqual(indexPath) } != null
         cell.edo_selected = _indexPathsForSelectedItems.firstOrNull { it.isEqual(indexPath) } != null
         return cell
@@ -247,13 +252,15 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
         if (subview.superview == null) {
             this.addSubview(subview)
         }
+        subview.hidden = false
     }
 
     private fun queueReusableView(reusableView: UICollectionReusableView, queue: MutableMap<String, MutableList<UICollectionReusableView>>, identifier: String) {
-        reusableView.removeFromSuperview()
+        reusableView.hidden = true
         reusableView.prepareForReuse()
         val reusableViews = queue[identifier] ?: mutableListOf()
         reusableViews.add(reusableView)
+        queue[identifier] = reusableViews
     }
 
     private fun reuseCell(cell: UICollectionViewCell) {
@@ -278,6 +285,9 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     var dataSource: UICollectionViewDataSource = object : UICollectionViewDataSource {
 
         override fun cellForItemAtIndexPath(collectionView: UICollectionView, indexPath: UIIndexPath): UICollectionViewCell {
+            (EDOJavaHelper.value(collectionView, "cellForItem", indexPath) as? UICollectionViewCell)?.let {
+                return it
+            }
             return UICollectionViewCell()
         }
 
@@ -286,11 +296,11 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
         }
 
         override fun numberOfSections(collectionView: UICollectionView): Int {
-            return 1
+            return (EDOJavaHelper.value(collectionView, "numberOfSections") as? Number)?.toInt() ?: 1
         }
 
         override fun numberOfItemsInSection(collectionView: UICollectionView, inSection: Int): Int {
-            return 10
+            return (EDOJavaHelper.value(collectionView, "numberOfItems", inSection) as? Number)?.toInt() ?: 0
         }
 
     }
@@ -302,6 +312,17 @@ val UICollectionElementKindCell = "UICollectionElementKindCell"
 class UICollectionViewItemKey(val type: ItemType = ItemType.cell,
                                        val indexPath: UIIndexPath,
                                        val identifier: String) {
+
+    override fun equals(other: Any?): Boolean {
+        val right = other as? UICollectionViewItemKey ?: return false
+        val leftKey = "${this.type.name}_${this.indexPath.mapKey()}_${this.identifier}"
+        val rightKey = "${right.type.name}_${right.indexPath.mapKey()}_${right.identifier}"
+        return leftKey == rightKey
+    }
+
+    override fun hashCode(): Int {
+        return "${this.type.name}_${this.indexPath.mapKey()}_${this.identifier}".hashCode()
+    }
 
     enum class ItemType {
         cell,
@@ -336,4 +357,12 @@ fun KIMIPackage.installUICollectionView() {
     exporter.exportProperty(UICollectionView::class.java, "collectionViewLayout", true)
     exporter.exportProperty(UICollectionView::class.java, "allowsSelection")
     exporter.exportProperty(UICollectionView::class.java, "allowsMultipleSelection")
+    exporter.exportMethodToJavaScript(UICollectionView::class.java, "register")
+    exporter.exportMethodToJavaScript(UICollectionView::class.java, "dequeueReusableCell")
+    exporter.exportMethodToJavaScript(UICollectionView::class.java, "reloadData")
+    exporter.exportInitializer(UICollectionView::class.java) {
+        val collectionView = UICollectionView(it.firstOrNull() as? UICollectionViewLayout ?: UICollectionViewFlowLayout())
+        collectionView.kimi_context = JSContext.currentContext?.runtime
+        return@exportInitializer collectionView
+    }
 }
