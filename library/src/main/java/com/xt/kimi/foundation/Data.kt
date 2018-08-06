@@ -10,10 +10,10 @@ import java.util.*
 
 open class Data(open val byteArray: ByteArray) {
 
-    fun arrayBuffer(): V8ArrayBuffer? {
-        val runtime = JSContext.currentContext?.runtime ?: return null
-        val byteBuffer = ByteBuffer.wrap(this.byteArray)
-        return V8ArrayBuffer(runtime, byteBuffer)
+    fun arrayBuffer(): ByteBuffer? {
+        val byteBuffer = ByteBuffer.allocateDirect(this.byteArray.size)
+        byteBuffer.put(this.byteArray)
+        return byteBuffer
     }
 
     fun utf8String(): String? {
@@ -52,8 +52,10 @@ class MutableData(byteArray: ByteArray): Data(byteArray) {
         this.byteArrayOutputStream.write(data.byteArray)
     }
 
-    fun appendArrayBuffer(arrayBuffer: V8ArrayBuffer) {
-        this.byteArrayOutputStream.write(arrayBuffer.backingStore.array())
+    fun appendArrayBuffer(arrayBuffer: ByteBuffer) {
+        val byteArray = ByteArray(arrayBuffer.capacity())
+        arrayBuffer.get(byteArray)
+        this.byteArrayOutputStream.write(byteArray)
     }
 
     fun setData(data: Data) {
@@ -74,11 +76,10 @@ fun KIMIPackage.installData() {
             (it[0] as? Data)?.let {
                 return@exportInitializer Data(it.byteArray)
             }
-            (it[0] as? V8ArrayBuffer)?.let {
-                return@exportInitializer Data(it.backingStore.array())
-            }
-            (it[0] as? ByteArray)?.let {
-                return@exportInitializer Data(it)
+            (it[0] as? ByteBuffer)?.let {
+                val byteArray = ByteArray(it.capacity())
+                it.get(byteArray)
+                return@exportInitializer Data(byteArray)
             }
             (it[0] as? Map<String, Any>)?.let {
                 (it["utf8String"] as? String)?.let {
@@ -113,11 +114,10 @@ fun KIMIPackage.installData() {
             (it[0] as? MutableData)?.let {
                 return@exportInitializer MutableData(it.byteArray)
             }
-            (it[0] as? V8ArrayBuffer)?.let {
-                return@exportInitializer MutableData(it.backingStore.array())
-            }
-            (it[0] as? ByteArray)?.let {
-                return@exportInitializer MutableData(it)
+            (it[0] as? ByteBuffer)?.let {
+                val byteArray = ByteArray(it.capacity())
+                it.get(byteArray)
+                return@exportInitializer MutableData(byteArray)
             }
             (it[0] as? Map<String, Any>)?.let {
                 (it["utf8String"] as? String)?.let {
