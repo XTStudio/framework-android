@@ -4,10 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Kimi-Android.iml" filepath="$PROJECT_DIR$/Kimi-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/Kimi-SDK-Android.iml" filepath="$PROJECT_DIR$/Kimi-SDK-Android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Kimi-SDK-Android.iml" filepath="$PROJECT_DIR$/Kimi-SDK-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
     </modules>
   </component>

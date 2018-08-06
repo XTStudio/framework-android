@@ -12,6 +12,15 @@ class UIIndexPath(val row: Int, val section: Int) {
         return row == to.row && section == to.section
     }
 
+    override fun equals(other: Any?): Boolean {
+        val right = other as? UIIndexPath ?: return false
+        return this.row == right.row && this.section == right.section
+    }
+
+    override fun hashCode(): Int {
+        return "$row.$section".hashCode()
+    }
+
 }
 
 fun KIMIPackage.installUIIndexPath() {

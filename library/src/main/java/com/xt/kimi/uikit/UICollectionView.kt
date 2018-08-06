@@ -6,6 +6,7 @@ import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
 import java.lang.reflect.Executable
+import kotlin.math.abs
 
 class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScrollView() {
 
@@ -73,11 +74,44 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     }
 
     fun selectItem(indexPath: UIIndexPath, animated: Boolean) {
-
+        if (!this.allowsMultipleSelection) {
+            this._indexPathsForSelectedItems.forEach { indexPath ->
+                (this._allVisibleViewsDict.values.firstOrNull { indexPath == (it as? UICollectionViewCell)?.currentIndexPath } as? UICollectionViewCell)?.let {
+                    it.edo_selected = false
+                    EDOJavaHelper.emit(this, "didDeselectItem", it.currentIndexPath, it)
+                }
+            }
+            this._indexPathsForSelectedItems.clear()
+        }
+        this._indexPathsForSelectedItems.add(indexPath)
+        if (animated) {
+            UIAnimator.shared.linear(0.5, EDOCallback.createWithBlock {
+                this._allVisibleViewsDict.values.first { indexPath == (it as? UICollectionViewCell)?.currentIndexPath }?.let {
+                    (it as? UICollectionViewCell)?.edo_selected = true
+                }
+            }, null)
+        }
+        else {
+            this._allVisibleViewsDict.values.first { indexPath == (it as? UICollectionViewCell)?.currentIndexPath }?.let {
+                (it as? UICollectionViewCell)?.edo_selected = true
+            }
+        }
     }
 
     fun deselectItem(indexPath: UIIndexPath, animated: Boolean) {
-
+        this._indexPathsForSelectedItems.remove(indexPath)
+        if (animated) {
+            UIAnimator.shared.linear(0.5, EDOCallback.createWithBlock {
+                this._allVisibleViewsDict.values.first { indexPath == (it as? UICollectionViewCell)?.currentIndexPath }?.let {
+                    (it as? UICollectionViewCell)?.edo_selected = false
+                }
+            }, null)
+        }
+        else {
+            this._allVisibleViewsDict.values.first { indexPath == (it as? UICollectionViewCell)?.currentIndexPath }?.let {
+                (it as? UICollectionViewCell)?.edo_selected = false
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +212,6 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     }
 
     private fun updateVisibleCellsNow(now: Boolean = false) {
-        val e = SystemClock.uptimeMillis()
         val layoutAttributesArray = _collectionViewData.layoutAttributesForElementsInRect(this.visibleBoundRects)
         if (layoutAttributesArray.count() == 0) {
             return
@@ -189,11 +222,21 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
             itemKeysToAddDict[itemKey] = layoutAttributes
             var view = _allVisibleViewsDict[itemKey]
             (view as? UICollectionReusableView)?.let {
+                (it as? UICollectionViewCell)?.let {
+                    it.currentIndexPath = itemKey.indexPath
+                    it.edo_highlighted = this._indexPathsForHighlightedItems.contains(itemKey.indexPath)
+                    it.edo_selected = this._indexPathsForSelectedItems.contains(itemKey.indexPath)
+                }
                 it.applyLayoutAttributes(layoutAttributes)
             } ?: kotlin.run {
                 when (itemKey.type) {
                     UICollectionViewItemKey.ItemType.cell -> {
                         view = this.createPreparedCellForItemAtIndexPath(itemKey.indexPath, layoutAttributes)
+                        (view as? UICollectionViewCell)?.let {
+                            it.currentIndexPath = itemKey.indexPath
+                            it.edo_highlighted = this._indexPathsForHighlightedItems.contains(itemKey.indexPath)
+                            it.edo_selected = this._indexPathsForSelectedItems.contains(itemKey.indexPath)
+                        }
                     }
                     UICollectionViewItemKey.ItemType.supplementaryView -> {
                         view = this.createPreparedSupplementaryViewForElementOfKind(layoutAttributes.representedElementKind, layoutAttributes.indexPath, layoutAttributes)
@@ -232,13 +275,10 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
                 }
             }
         }
-        System.out.println("total used:" + (SystemClock.uptimeMillis() - e))
     }
 
     private fun createPreparedCellForItemAtIndexPath(indexPath: UIIndexPath, layoutAttributes: UICollectionViewLayoutAttributes): UICollectionViewCell {
         val cell = this.dataSource.cellForItemAtIndexPath(this, indexPath)
-        cell.edo_highlighted = _indexPathsForHighlightedItems.firstOrNull { it.isEqual(indexPath) } != null
-        cell.edo_selected = _indexPathsForSelectedItems.firstOrNull { it.isEqual(indexPath) } != null
         return cell
     }
 
@@ -258,9 +298,11 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     private fun queueReusableView(reusableView: UICollectionReusableView, queue: MutableMap<String, MutableList<UICollectionReusableView>>, identifier: String) {
         reusableView.hidden = true
         reusableView.prepareForReuse()
+        if (queue[identifier] == null) {
+            queue[identifier] = mutableListOf()
+        }
         val reusableViews = queue[identifier] ?: mutableListOf()
         reusableViews.add(reusableView)
-        queue[identifier] = reusableViews
     }
 
     private fun reuseCell(cell: UICollectionViewCell) {
@@ -278,6 +320,138 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
     private fun reuseDecorationView(decorationView: UICollectionReusableView) {
         val reuseIdentifier = decorationView.reuseIdentifier ?: return
         this.queueReusableView(decorationView, _decorationViewReuseQueues, reuseIdentifier)
+    }
+
+    // Touches
+
+    override fun touchesBegan(touches: Set<UITouch>) {
+        super.touchesBegan(touches)
+        val firstTouch = touches.firstOrNull() ?: return
+        this.handleTouch(UITouchPhase.began, firstTouch)
+    }
+
+    override fun touchesMoved(touches: Set<UITouch>) {
+        super.touchesMoved(touches)
+        val firstTouch = touches.firstOrNull() ?: return
+        this.handleTouch(UITouchPhase.moved, firstTouch)
+    }
+
+    override fun touchesEnded(touches: Set<UITouch>) {
+        super.touchesEnded(touches)
+        val firstTouch = touches.firstOrNull() ?: return
+        this.handleTouch(UITouchPhase.ended, firstTouch)
+    }
+
+    override fun touchesCancelled(touches: Set<UITouch>) {
+        super.touchesCancelled(touches)
+        val firstTouch = touches.firstOrNull() ?: return
+        this.handleTouch(UITouchPhase.cancelled, firstTouch)
+    }
+
+    private var firstTouchPoint: CGPoint? = null
+
+    private var firstTouchCell: UICollectionViewCell? = null
+
+    private fun handleTouch(phase: UITouchPhase, currentTouch: UITouch) {
+        if (!this.allowsSelection) { return }
+        when (phase) {
+            UITouchPhase.began -> {
+                if (!this.tracking) {
+                    var hitTestView = currentTouch.view
+                    var cellShouldHighlighted = true
+                    while (hitTestView != null) {
+                        if (hitTestView is UICollectionViewCell) {
+                            break
+                        }
+                        if (hitTestView.gestureRecognizers.count() > 0) {
+                            cellShouldHighlighted = false
+                        }
+                        hitTestView = hitTestView.superview
+                    }
+                    if (cellShouldHighlighted) {
+                        this.firstTouchPoint = currentTouch.windowPoint
+                        (hitTestView as? UICollectionViewCell)?.let {
+                            this.firstTouchCell = it
+                            this.postDelayed({
+                                if (this@UICollectionView.firstTouchPoint == null) { return@postDelayed }
+                                it.currentIndexPath?.let { this@UICollectionView._indexPathsForHighlightedItems.add(it) }
+                                it.edo_highlighted = true
+                            }, 150)
+                        }
+                    }
+                }
+            }
+            UITouchPhase.moved -> {
+                this.firstTouchPoint?.let { firstTouchPoint ->
+                    if (abs((currentTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
+                        this._indexPathsForHighlightedItems.clear()
+                        this._allVisibleViewsDict.values.forEach {
+                            (it as? UICollectionViewCell)?.let {
+                                it.edo_highlighted = false
+                            }
+                        }
+                        this.firstTouchPoint = null
+                        this.firstTouchCell = null
+                    }
+                }
+            }
+            UITouchPhase.ended -> {
+                this.firstTouchCell?.let { cell ->
+                    this._indexPathsForHighlightedItems.clear()
+                    if (!this.allowsMultipleSelection) {
+                        this._indexPathsForSelectedItems.forEach { indexPath ->
+                            (this._allVisibleViewsDict.values.firstOrNull { indexPath == (it as? UICollectionViewCell)?.currentIndexPath } as? UICollectionViewCell)?.let {
+                                it.edo_selected = false
+                                EDOJavaHelper.emit(this, "didDeselectItem", it.currentIndexPath, it)
+                            }
+                        }
+                        this._indexPathsForSelectedItems.clear()
+                    }
+                    this.firstTouchPoint = null
+                    this.firstTouchCell = null
+                    this._indexPathsForHighlightedItems.clear()
+                    this._allVisibleViewsDict.values.forEach {
+                        (it as? UICollectionViewCell)?.let {
+                            it.edo_highlighted = false
+                        }
+                    }
+                    cell.currentIndexPath?.let {
+                        if (this._indexPathsForSelectedItems.contains(it)) {
+                            this._indexPathsForSelectedItems.remove(it)
+                        }
+                        else {
+                            this._indexPathsForSelectedItems.add(it)
+                        }
+                    }
+                    cell.edo_selected = !cell.edo_selected
+                    if (cell.edo_selected) {
+                        EDOJavaHelper.emit(this, "didSelectItem", cell.currentIndexPath, cell)
+                    }
+                    else {
+                        EDOJavaHelper.emit(this, "didDeselectItem", cell.currentIndexPath, cell)
+                    }
+                } ?: kotlin.run {
+                    this.firstTouchPoint = null
+                    this.firstTouchCell = null
+                    this._indexPathsForHighlightedItems.clear()
+                    this._allVisibleViewsDict.values.forEach {
+                        (it as? UICollectionViewCell)?.let {
+                            it.edo_highlighted = false
+                        }
+                    }
+                }
+            }
+            UITouchPhase.cancelled -> {
+                this.firstTouchPoint = null
+                this.firstTouchCell = null
+                this._indexPathsForHighlightedItems.clear()
+                this._allVisibleViewsDict.values.forEach {
+                    (it as? UICollectionViewCell)?.let {
+                        it.edo_highlighted = false
+                    }
+                }
+            }
+        }
     }
 
     // DataSource & Delegate
@@ -360,6 +534,8 @@ fun KIMIPackage.installUICollectionView() {
     exporter.exportMethodToJavaScript(UICollectionView::class.java, "register")
     exporter.exportMethodToJavaScript(UICollectionView::class.java, "dequeueReusableCell")
     exporter.exportMethodToJavaScript(UICollectionView::class.java, "reloadData")
+    exporter.exportMethodToJavaScript(UICollectionView::class.java, "selectItem")
+    exporter.exportMethodToJavaScript(UICollectionView::class.java, "deselectItem")
     exporter.exportInitializer(UICollectionView::class.java) {
         val collectionView = UICollectionView(it.firstOrNull() as? UICollectionViewLayout ?: UICollectionViewFlowLayout())
         collectionView.kimi_context = JSContext.currentContext?.runtime

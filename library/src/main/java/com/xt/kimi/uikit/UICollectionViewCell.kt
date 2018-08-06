@@ -1,14 +1,27 @@
 package com.xt.kimi.uikit
 
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 class UICollectionViewCell: UICollectionReusableView() {
 
     var edo_selected = false
+        set(value) {
+            if (field == value) { return }
+            field = value
+            EDOJavaHelper.emit(this, "selected", this, value)
+        }
 
     var edo_highlighted = false
+        set(value) {
+            if (field == value) { return }
+            field = value
+            EDOJavaHelper.emit(this, "highlighted", this, value)
+        }
 
     val contentView: UIView = UIView()
+
+    internal var currentIndexPath: UIIndexPath? = null
 
     override fun prepareForReuse() {
         super.prepareForReuse()
