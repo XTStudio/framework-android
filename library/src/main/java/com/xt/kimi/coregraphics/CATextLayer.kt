@@ -26,7 +26,7 @@ class CATextLayer: CALayer() {
         }
         val view = this.view as? UILabel ?: return
         val builder = TextLayoutBuilder()
-                .setText(view.text ?: "")
+                .setText(view.attributedText?.spannableString ?: view.text ?: "")
                 .setTextSize(((view.font?.pointSize ?: 17.0) * scale).toInt())
                 .setWidth((this.frame.width * scale).toInt())
                 .setTextColor(view.textColor?.toInt() ?: Color.BLACK)

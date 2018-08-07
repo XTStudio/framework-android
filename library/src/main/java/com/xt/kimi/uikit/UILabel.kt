@@ -38,6 +38,14 @@ class UILabel: UIView() {
             this.setNeedsDisplay()
         }
 
+    var attributedText: UIAttributedString? = null
+        set(value) {
+            field = value
+            value?.let {
+                this.text = it.string
+            }
+        }
+
     var font: UIFont? = UIFont(17.0)
         set(value) {
             field = value
@@ -87,6 +95,7 @@ class UILabel: UIView() {
 fun KIMIPackage.installUILabel() {
     exporter.exportClass(UILabel::class.java, "UILabel", "UIView")
     exporter.exportProperty(UILabel::class.java, "text")
+    exporter.exportProperty(UILabel::class.java, "attributedText")
     exporter.exportProperty(UILabel::class.java, "font")
     exporter.exportProperty(UILabel::class.java, "textColor")
     exporter.exportProperty(UILabel::class.java, "textAlignment")

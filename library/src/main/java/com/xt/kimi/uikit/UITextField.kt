@@ -305,12 +305,12 @@ class UITextField: UINativeTouchView() {
         })
         val inputFilter = InputFilter { source, start, end, dest, dstart, dend ->
             if (dstart != dend) {
-                if (!this.shouldChange(UIRange(dend.toDouble(), (dstart - dend).toDouble()), source?.toString())) {
+                if (!this.shouldChange(UIRange(dend, (dstart - dend)), source?.toString())) {
                     return@InputFilter ""
                 }
             }
             else {
-                if (!this.shouldChange(UIRange(dstart.toDouble(), end.toDouble()), source?.toString())) {
+                if (!this.shouldChange(UIRange(dstart, end), source?.toString())) {
                     return@InputFilter ""
                 }
             }
