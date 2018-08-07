@@ -7,11 +7,7 @@ import com.xt.kimi.KIMIPackage
 
 class UserDefaults(val suite: String?) {
 
-    val sharedPreferences: SharedPreferences?
-
-    init {
-        this.sharedPreferences = EDOExporter.sharedExporter.applicationContext?.getSharedPreferences("com.xt.userdefaults.${this.suite ?: "standard"}", Context.MODE_PRIVATE)
-    }
+    private val sharedPreferences: SharedPreferences? = EDOExporter.sharedExporter.applicationContext?.getSharedPreferences("com.xt.userdefaults.${this.suite ?: "standard"}", Context.MODE_PRIVATE)
 
     fun valueForKey(forKey: String): Any? {
         return this.sharedPreferences?.all?.get(forKey)
