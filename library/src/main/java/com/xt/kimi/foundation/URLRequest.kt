@@ -1,5 +1,6 @@
 package com.xt.kimi.foundation
 
+import android.net.Uri
 import com.eclipsesource.v8.V8
 import com.xt.kimi.KIMIPackage
 
@@ -19,7 +20,7 @@ open class URLRequest(val URL: URL, val cachePolicy: URLRequestCachePolicy = URL
         internal set
 
     fun valueForHTTPHeaderField(field: String): Any? {
-        return null
+        return allHTTPHeaderFields?.get(field)
     }
 
     open var HTTPBody: Any? = null
@@ -65,7 +66,14 @@ class MutableURLRequest(URL: URL, cachePolicy: URLRequestCachePolicy = URLReques
 fun KIMIPackage.installURLRequest() {
     exporter.exportClass(URLRequest::class.java, "URLRequest")
     exporter.exportInitializer(URLRequest::class.java) {
-        val url = if (0 < it.count()) it[0] as? URL ?: return@exportInitializer V8.getUndefined() else return@exportInitializer V8.getUndefined()
+        val url = kotlin.run {
+            (it.getOrNull(0) as? String)?.let {
+                return@run URL(Uri.parse(it))
+            }
+            (it.getOrNull(0) as? URL)?.let {
+                return@run it
+            }
+        } ?: return@exportInitializer V8.getUndefined()
         val cachePolicy = if (1 < it.count()) it[1] as? URLRequestCachePolicy ?: URLRequestCachePolicy.useProtocol else URLRequestCachePolicy.useProtocol
         val timeout = if (2 < it.count()) (it[2] as? Number)?.toDouble() ?: 15.0 else 15.0
         return@exportInitializer URLRequest(url, cachePolicy, timeout)
@@ -88,7 +96,14 @@ fun KIMIPackage.installURLRequest() {
     exporter.exportMethodToJavaScript(MutableURLRequest::class.java, "setValueForHTTPHeaderField")
     exporter.exportProperty(MutableURLRequest::class.java, "HTTPBody")
     exporter.exportInitializer(MutableURLRequest::class.java) {
-        val url = if (0 < it.count()) it[0] as? URL ?: return@exportInitializer V8.getUndefined() else return@exportInitializer V8.getUndefined()
+        val url = kotlin.run {
+            (it.getOrNull(0) as? String)?.let {
+                return@run URL(Uri.parse(it))
+            }
+            (it.getOrNull(0) as? URL)?.let {
+                return@run it
+            }
+        } ?: return@exportInitializer V8.getUndefined()
         val cachePolicy = if (1 < it.count()) it[1] as? URLRequestCachePolicy ?: URLRequestCachePolicy.useProtocol else URLRequestCachePolicy.useProtocol
         val timeout = if (2 < it.count()) (it[2] as? Number)?.toDouble() ?: 15.0 else 15.0
         return@exportInitializer MutableURLRequest(url, cachePolicy, timeout)

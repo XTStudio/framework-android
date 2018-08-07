@@ -30,6 +30,8 @@ class KIMIPackage : EDOPackage() {
         installUUID()
         installURL()
         installURLRequest()
+        installURLResponse()
+        installURLSession()
         installData()
         installUserDefaults()
         installBundle()
