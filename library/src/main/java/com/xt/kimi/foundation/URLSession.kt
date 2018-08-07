@@ -186,14 +186,14 @@ enum class URLSessionTaskState {
 
 fun KIMIPackage.installURLSession() {
     exporter.exportClass(URLSession::class.java, "URLSession")
-    exporter.exportStaticProperty(URLSession::class.java, "shared")
+    exporter.exportStaticProperty(URLSession::class.java, "shared", true)
     exporter.exportMethodToJavaScript(URLSession::class.java, "dataTask")
     exporter.exportClass(URLSessionTask::class.java, "URLSessionTask")
-    exporter.exportProperty(URLSessionTask::class.java, "state")
-    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesExpectedToReceive")
-    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesReceived")
-    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesExpectedToSend")
-    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesSent")
+    exporter.exportProperty(URLSessionTask::class.java, "state", true)
+    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesExpectedToReceive", true)
+    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesReceived", true)
+    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesExpectedToSend", true)
+    exporter.exportProperty(URLSessionTask::class.java, "countOfBytesSent", true)
     exporter.exportMethodToJavaScript(URLSessionTask::class.java, "cancel")
     exporter.exportMethodToJavaScript(URLSessionTask::class.java, "resume")
     exporter.exportEnum("URLSessionTaskState", mapOf(

@@ -49,8 +49,8 @@ class Bundle(val bundleType: BundleType) {
 
 fun KIMIPackage.installBundle() {
     exporter.exportClass(Bundle::class.java, "Bundle")
-    exporter.exportStaticProperty(Bundle::class.java, "native")
-    exporter.exportStaticProperty(Bundle::class.java, "js")
+    exporter.exportStaticProperty(Bundle::class.java, "native", true)
+    exporter.exportStaticProperty(Bundle::class.java, "js", true)
     exporter.exportMethodToJavaScript(Bundle::class.java, "resourcePath")
     exporter.exportMethodToJavaScript(Bundle::class.java, "resourceURL")
 }

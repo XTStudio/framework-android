@@ -63,7 +63,7 @@ fun KIMIPackage.installTimer() {
         val block = it.getOrNull(1) as? EDOCallback ?: return@exportInitializer V8.getUndefined()
         return@exportInitializer Timer(timeInterval, block, (it.getOrNull(2) as? Boolean) ?: false)
     }
-    exporter.exportProperty(Timer::class.java, "valid")
+    exporter.exportProperty(Timer::class.java, "valid", true)
     exporter.exportMethodToJavaScript(Timer::class.java, "fire")
     exporter.exportMethodToJavaScript(Timer::class.java, "invalidate")
 }

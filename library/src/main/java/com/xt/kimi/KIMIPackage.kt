@@ -36,6 +36,7 @@ class KIMIPackage : EDOPackage() {
         installUserDefaults()
         installBundle()
         installTimer()
+        installFileManager()
         // UIKit
         (applicationContext as? Application)?.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityPaused(activity: Activity?) { }
