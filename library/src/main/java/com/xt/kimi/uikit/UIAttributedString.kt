@@ -1,11 +1,19 @@
 package com.xt.kimi.uikit
 
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.os.Build
+import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
+import android.text.TextPaint
+import android.text.style.*
 import com.eclipsesource.v8.V8
 import com.xt.endo.UIRange
 import com.xt.kimi.KIMIPackage
+import kotlin.math.max
 
 enum class UIAttributedStringKey {
     foregroundColor,      // value: UIColor
@@ -41,6 +49,63 @@ class UIAttributedString(str: String, attributes: Map<String, Any>?) {
                 (foregroundColor as? UIColor)?.let {
                     spannableString.setSpan(ForegroundColorSpan(it.toInt()), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 }
+            }
+            attributes[UIAttributedStringKey.font.name]?.let { font ->
+                (font as? UIFont)?.let {
+                    font.fontName?.let {
+                        spannableString.setSpan(TypefaceSpan(it), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                    font.fontStyle?.let {
+                        spannableString.setSpan(StyleSpan(kotlin.run {
+                            when (it) {
+                                "bold" -> return@run Typeface.BOLD
+                                "heavy" -> return@run Typeface.BOLD
+                                "black" -> return@run Typeface.BOLD
+                                "italic" -> return@run Typeface.ITALIC
+                                else -> return@run Typeface.NORMAL
+                            }
+                        }), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    }
+                    spannableString.setSpan(AbsoluteSizeSpan((it.pointSize * scale).toInt(), true), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+            attributes[UIAttributedStringKey.backgroundColor.name]?.let { backgroundColor ->
+                (backgroundColor as? UIColor)?.let {
+                    spannableString.setSpan(BackgroundColorSpan(it.toInt()), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+            attributes[UIAttributedStringKey.kern.name]?.let { kern ->
+                (kern as? Number)?.let {
+                    spannableString.setSpan(object : CharacterStyle() {
+                        override fun updateDrawState(textPaint: TextPaint) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                textPaint.letterSpacing = (it.toDouble() / 16.0 * scale).toFloat()
+                            }
+                        }
+                    }, targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+            attributes[UIAttributedStringKey.strikethroughStyle.name]?.let {
+                (it as? Int)?.takeIf { it == 1 }?.let {
+                    spannableString.setSpan(StrikethroughSpan(), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+            attributes[UIAttributedStringKey.underlineStyle.name]?.let {
+                (it as? Int)?.takeIf { it == 1 }?.let {
+                    spannableString.setSpan(UnderlineSpan(), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            }
+            attributes[UIAttributedStringKey.paragraphStyle.name]?.let {
+                (it as? UIParagraphStyle)?.let {
+                    spannableString.setSpan(AlignmentSpan.Standard(kotlin.run {
+                        when (it.alignment) {
+                            UITextAlignment.left -> return@run Layout.Alignment.ALIGN_NORMAL
+                            UITextAlignment.center -> return@run Layout.Alignment.ALIGN_CENTER
+                            UITextAlignment.right -> return@run Layout.Alignment.ALIGN_OPPOSITE
+                        }
+                    }), targetRange.location, targetRange.location + targetRange.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+                //todo
             }
         }
     }

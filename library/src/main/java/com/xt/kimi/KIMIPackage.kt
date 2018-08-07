@@ -102,6 +102,7 @@ class KIMIPackage : EDOPackage() {
         installUICollectionViewCell()
         installUICollectionReusableView()
         installUIAttributedString()
+        installUIParagraphStyle()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
