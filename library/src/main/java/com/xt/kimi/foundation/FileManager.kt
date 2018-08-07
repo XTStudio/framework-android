@@ -7,8 +7,8 @@ import java.io.File
 
 class FileManager {
 
-    fun subpaths(atPath: String, deepSearch: Boolean = false): List<String> {
-        if (deepSearch) {
+    fun subpaths(atPath: String, deepSearch: Boolean?): List<String> {
+        if (deepSearch == true) {
             val result: MutableList<String> = mutableListOf()
             this.subpathsWithDeepSearch(File(atPath), File(atPath), result)
             return result.toList()
