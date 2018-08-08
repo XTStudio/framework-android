@@ -1,19 +1,36 @@
-var main = new UIView
-main.frame = { x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height }
+class FooViewController extends UIViewController {
 
-var attributedString = new UIAttributedString("Hello, World!", {
-    [UIAttributedStringKey.foregroundColor]: UIColor.red,
-    [UIAttributedStringKey.font]: new UIFont(28),
-    [UIAttributedStringKey.backgroundColor]: UIColor.yellow,
-    [UIAttributedStringKey.kern]: 2,
-//    [UIAttributedStringKey.strikethroughStyle]: 1,
-//    [UIAttributedStringKey.underlineStyle]: 1,
-    [UIAttributedStringKey.strokeWidth]: 2,
-    [UIAttributedStringKey.strokeColor]: UIColor.blue,
-})
+    viewDidLoad() {
+        super.viewDidLoad()
+        this.view.backgroundColor = UIColor.yellow
+        this.redView = new UIView
+        this.redView.backgroundColor = UIColor.red
+        this.redView.addGestureRecognizer(new UITapGestureRecognizer().on('touch', function () {
+            this.redView.backgroundColor = UIColor.green
+        }.bind(this)))
+        this.view.addSubview(this.redView)
+        this.barViewController = new BarViewController
+        this.addChildViewController(this.barViewController)
+        this.view.addSubview(this.barViewController.view)
+        this.childViewControllers[0].view.backgroundColor = UIColor.green
+    }
 
-var label = new UILabel
-label.frame = { x: 0, y: 0, width: 400, height: 200 }
-label.attributedText = attributedString
+    viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        this.redView.frame = { x: 0, y: 0, width: this.view.bounds.width / 2.0, height: 88 }
+        this.barViewController.view.frame = { x: 0, y: 128, width: this.view.bounds.width / 2.0, height: 88 }
+    }
 
-main.addSubview(label)
+}
+
+class BarViewController extends UIViewController {
+
+    viewDidLoad() {
+        super.viewDidLoad()
+        this.view.backgroundColor = UIColor.gray
+    }
+
+}
+
+
+var main = new FooViewController

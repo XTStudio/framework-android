@@ -12,6 +12,7 @@ import com.xt.jscore.JSContext
 import com.xt.jscore.JSValue
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.uikit.UIView
+import com.xt.kimi.uikit.UIViewController
 import com.xt.kimi.uikit.UIWindow
 import com.xt.uulog.UULog
 import java.io.File
@@ -22,8 +23,8 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+//        requestWindowFeature(Window.FEATURE_NO_TITLE)
+//        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         UULog.attachTo(context)
         EDOExporter.sharedExporter.exportWithContext(context)
         context.exceptionHandler = { _, exception ->
@@ -40,7 +41,7 @@ class MainActivity : Activity() {
         val script = String(buffer)
         context.evaluateScript(script)
         val mainValue = context["main"] as JSValue
-        val main = EDOObjectTransfer.convertToJavaObjectWithJSValue(mainValue, mainValue, null) as? UIView
+        val main = EDOObjectTransfer.convertToJavaObjectWithJSValue(mainValue, mainValue, null) as? UIViewController
         main?.attachToActivity(this)
         Log.d("MainActivity", main.toString())
     }

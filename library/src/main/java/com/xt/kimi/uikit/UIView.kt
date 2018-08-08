@@ -46,6 +46,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open val layer = CALayer()
 
+    internal var viewDelegate: UIViewController? = null
+
     // Geometry
 
     private var edo_frame_animations: List<UIAnimation>? = null
@@ -418,7 +420,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     }
 
     open fun layoutSubviews() {
+        this.viewDelegate?.viewWillLayoutSubviews()
         EDOJavaHelper.invokeBindedMethod(this, "layoutSubviews")
+        this.viewDelegate?.viewDidLayoutSubviews()
     }
 
     // Rendering

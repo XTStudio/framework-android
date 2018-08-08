@@ -3,6 +3,7 @@ package com.xt.kimi.uikit
 import android.os.SystemClock
 import android.view.MotionEvent
 import com.xt.endo.CGPoint
+import com.xt.endo.CGRect
 import kotlin.math.abs
 
 /**
@@ -106,6 +107,33 @@ class UIWindow : UIView() {
 
     override fun pointInside(point: CGPoint): Boolean {
         return true
+    }
+
+    // Private
+
+    internal var rootViewController: UIViewController? = null
+        set(value) {
+            field?.let {
+                it.view.removeFromSuperview()
+            }
+            field = value
+            field?.let {
+                this.addSubview(it.view)
+            }
+        }
+
+    override fun layoutSubviews() {
+        super.layoutSubviews()
+        this.rootViewController?.let {
+            it.view.frame = this.bounds
+        }
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (changed) {
+            this.frame = CGRect(0.0, 0.0, (this.width / scale).toDouble(), (this.height / scale).toDouble())
+        }
     }
 
 }
