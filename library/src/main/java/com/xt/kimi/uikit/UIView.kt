@@ -350,9 +350,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun bringSubviewToFront(view: UIView) {
         if (subviews.count() <= 1) { return }
+        val viewIndex = subviews.indexOf(view)
+        if (viewIndex < 0) { return }
         subviews = kotlin.run {
             val subviews = this.subviews.toMutableList()
-            subviews.add(subviews.removeAt(0))
+            subviews.add(subviews.removeAt(viewIndex))
             return@run subviews.toList()
         }
         this.removeView(view)
@@ -362,9 +364,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun sendSubviewToBack(view: UIView) {
         if (subviews.count() <= 1) { return }
+        val viewIndex = subviews.indexOf(view)
+        if (viewIndex < 0) { return }
         subviews = kotlin.run {
             val subviews = this.subviews.toMutableList()
-            subviews.add(0, subviews.removeAt(subviews.count() - 1))
+            subviews.add(0, subviews.removeAt(viewIndex))
             return@run subviews.toList()
         }
         this.removeView(view)
@@ -392,6 +396,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun didAddSubview(subview: UIView) {
         EDOJavaHelper.invokeBindedMethod(this, "didAddSubview", subview)
+        this.viewDelegate?.didAddSubview(subview)
     }
 
     open fun willRemoveSubview(subview: UIView) {

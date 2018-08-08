@@ -155,19 +155,44 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
                 if (name == "began") {
                     this@UIButton.tracking = true
                     this@UIButton.highlighted = true
+                    this@UIButton.sendEvent("touchDown")
                 }
                 else if (name == "changed") {
                     val location = this.locationInView(null)
-                    this@UIButton.touchInside = this@UIButton.highlightedPointInside(location)
+                    val inside = this@UIButton.highlightedPointInside(location)
+                    if (this@UIButton.touchInside != inside) {
+                        if (inside) {
+                            this@UIButton.sendEvent("touchDragEnter")
+                        }
+                        else {
+                            this@UIButton.sendEvent("touchDragExit")
+                        }
+                    }
+                    this@UIButton.touchInside = inside
                     this@UIButton.highlighted = this@UIButton.touchInside
+                    if (inside) {
+                        this@UIButton.sendEvent("touchDragInside")
+                    }
+                    else {
+                        this@UIButton.sendEvent("touchDragOutside")
+                    }
                 }
                 else if (name == "ended") {
                     this@UIButton.highlighted = false
                     this@UIButton.tracking = false
+                    val location = this.locationInView(null)
+                    val inside = this@UIButton.highlightedPointInside(location)
+                    if (inside) {
+                        this@UIButton.sendEvent("touchUpInside")
+                    }
+                    else {
+                        this@UIButton.sendEvent("touchUpOutside")
+                    }
                 }
                 else if (name == "cancelled") {
                     this@UIButton.highlighted = false
                     this@UIButton.tracking = false
+                    this@UIButton.sendEvent("touchCancel")
                 }
             }
         }

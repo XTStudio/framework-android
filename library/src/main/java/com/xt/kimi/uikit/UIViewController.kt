@@ -2,7 +2,10 @@ package com.xt.kimi.uikit
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
+import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import com.xt.endo.EDOCallback
 import com.xt.endo.EDOJavaHelper
 import com.xt.endo.UIEdgeInsets
@@ -11,6 +14,11 @@ import com.xt.kimi.KIMIPackage
 open class UIViewController {
 
     var title: String? = null
+        set(value) {
+            field = value
+            this.navigationItem.viewController = this
+            this.navigationItem.setNeedsUpdate()
+        }
 
     private var _view: UIView? = null
         get() {
@@ -35,12 +43,44 @@ open class UIViewController {
         }
 
     var safeAreaInsets: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            if (field.top == value.top && field.left == value.left && field.bottom == value.bottom && field.right == value.right) {
+                return
+            }
+            field = value
+            this.view.setNeedsLayout(true)
+        }
 
-    fun attachToActivity(activity: Activity) {
+    fun attachToActivity(activity: Activity, statusBarTransparent: Boolean) {
+        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         val rootView = UIWindow()
+        if (statusBarTransparent) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                activity.window.statusBarColor = Color.TRANSPARENT
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                rootView.transparentStatusBar = true
+                rootView.statusBarHeight = this.getStatusBarHeight(activity)
+            }
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                rootView.transparentStatusBar = true
+                rootView.statusBarHeight = this.getStatusBarHeight(activity)
+            }
+        }
         rootView.setBackgroundColor(Color.WHITE)
         rootView.rootViewController = this
         activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+    }
+
+    private fun getStatusBarHeight(activity: Activity): Double {
+        var result = 0
+        val resourceId = activity.resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = activity.resources.getDimensionPixelSize(resourceId)
+        }
+        return (result / scale).toDouble()
     }
 
     protected open fun loadView() {
@@ -134,6 +174,27 @@ open class UIViewController {
         EDOJavaHelper.invokeBindedMethod(this, "didMoveToParentViewController", parent)
     }
 
+    internal open fun didAddSubview(subview: UIView) { }
+
+    val navigationController: UINavigationController?
+        get() {
+            var current: UIViewController? = this
+            while (current != null) {
+                (current as? UINavigationController)?.let {
+                    return it
+                }
+                current = current.parentViewController
+            }
+            return null
+        }
+
+    val navigationItem = UINavigationItem()
+
+    internal var window: UIWindow? = null
+        get() {
+            return field ?: parentViewController?.window
+        }
+
 }
 
 fun KIMIPackage.installUIViewController() {
@@ -157,4 +218,5 @@ fun KIMIPackage.installUIViewController() {
     exporter.exportMethodToJavaScript(UIViewController::class.java, "removeFromParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "willMoveToParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "didMoveToParentViewController")
+    exporter.exportProperty(UIViewController::class.java, "navigationController")
 }

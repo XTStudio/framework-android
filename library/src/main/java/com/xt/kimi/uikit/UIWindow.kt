@@ -111,13 +111,19 @@ class UIWindow : UIView() {
 
     // Private
 
+    internal var transparentStatusBar = false
+
+    internal var statusBarHeight: Double = 0.0
+
     internal var rootViewController: UIViewController? = null
         set(value) {
             field?.let {
+                it.window = null
                 it.view.removeFromSuperview()
             }
             field = value
             field?.let {
+                it.window = this
                 this.addSubview(it.view)
             }
         }
