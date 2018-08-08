@@ -7,6 +7,8 @@ import com.xt.endo.CGAffineTransform
 import com.xt.endo.CGRect
 import com.xt.endo.CGSize
 import com.xt.endo.EDOCallback
+import com.xt.kimi.KIMIPackage
+import kotlin.math.exp
 
 class UINavigationBar: UIView() {
 
@@ -214,4 +216,13 @@ class UINavigationBar: UIView() {
         this.layoutItems()
     }
 
+}
+
+fun KIMIPackage.installUINavigationBar() {
+    exporter.exportClass(UINavigationBar::class.java, "UINavigationBar", "UIView")
+    exporter.exportProperty(UINavigationBar::class.java, "translucent")
+    exporter.exportProperty(UINavigationBar::class.java, "barTintColor")
+    exporter.exportProperty(UINavigationBar::class.java, "titleTextAttributes")
+    exporter.exportProperty(UINavigationBar::class.java, "backIndicatorImage")
+    exporter.exportProperty(UINavigationBar::class.java, "backIndicatorTransitionMaskImage")
 }

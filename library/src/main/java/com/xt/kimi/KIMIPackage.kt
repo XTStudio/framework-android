@@ -105,6 +105,8 @@ class KIMIPackage : EDOPackage() {
         installUIParagraphStyle()
         installUIViewController()
         installUINavigationController()
+        installUINavigationBar()
+        installUIBarButtonItem()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
