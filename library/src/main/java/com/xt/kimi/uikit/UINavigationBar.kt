@@ -80,16 +80,14 @@ class UINavigationBar: UIView() {
                 val fromItem = this.items.getOrNull(this.items.count() - 2) ?: return@run
                 val toItem = this.items.getOrNull(this.items.count() - 1) ?: return@run
                 fromItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                     it.edo_alpha = 1.0
                 }
                 toItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, this.bounds.width, 0.0)
+                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, it.bounds.width, 0.0)
                     it.edo_alpha = 1.0
                 }
                 UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
                     fromItem.allViews().forEach {
-                        it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, -this.bounds.width, 0.0)
                         it.edo_alpha = 0.0
                     }
                     toItem.allViews().forEach {
@@ -112,20 +110,16 @@ class UINavigationBar: UIView() {
         }
         if (animated) {
             fromItem.allViews().forEach {
-                it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                 it.edo_alpha = 1.0
             }
             toItem.allViews().forEach {
-                it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, -this.bounds.width, 0.0)
                 it.edo_alpha = 0.0
             }
             UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
                 fromItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, this.bounds.width, 0.0)
                     it.edo_alpha = 0.0
                 }
                 toItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                     it.edo_alpha = 1.0
                 }
             }, EDOCallback.createWithBlock {
@@ -149,20 +143,16 @@ class UINavigationBar: UIView() {
         if (animated) {
             val fromItem = fromItems.last()
             fromItem.allViews().forEach {
-                it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                 it.edo_alpha = 1.0
             }
             toItem.allViews().forEach {
-                it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, -this.bounds.width, 0.0)
                 it.edo_alpha = 0.0
             }
             UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
                 fromItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, this.bounds.width, 0.0)
                     it.edo_alpha = 0.0
                 }
                 toItem.allViews().forEach {
-                    it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
                     it.edo_alpha = 1.0
                 }
             }, EDOCallback.createWithBlock {
@@ -192,7 +182,17 @@ class UINavigationBar: UIView() {
             if (it.backButton.superview != this) {
                 this.addSubview(it.backButton)
             }
-            it.backButton.hidden = it.hidesBackButton || index == 0
+            it.leftViews().forEach {
+                if (it.superview != this) {
+                    this.addSubview(it)
+                }
+            }
+            it.rightViews().forEach {
+                if (it.superview != this) {
+                    this.addSubview(it)
+                }
+            }
+            it.backButton.hidden = it.hidesBackButton || index == 0 || it.leftBarButtonItems.count() > 0
             it.backButton.setImage(this.backIndicatorImage, UIControlState.normal.rawValue)
         }
         this.layoutItems()
@@ -201,10 +201,31 @@ class UINavigationBar: UIView() {
     private fun layoutItems() {
         val lastItemIndex = this.items.count() - 1
         this.items.forEachIndexed { index, item ->
-            val backButtonHidden = item.backButton.hidden
-            item.backButton.frame = CGRect(0.0, this.bounds.height - barHeight, 44.0, barHeight)
+            var leftX = 16.0
+            if (!item.backButton.hidden) {
+                item.backButton.frame = CGRect(0.0, this.bounds.height - barHeight, 44.0, barHeight)
+                leftX += 32.0
+            }
+            kotlin.run {
+                item.leftBarButtonItems.forEach { barButtonItem ->
+                    barButtonItem.customView?.let {
+                        it.frame = CGRect(leftX, this.bounds.height - barHeight, barButtonItem.width, barHeight)
+                        leftX += barButtonItem.width + 8.0
+                    }
+                }
+            }
             val titleViewSize = item.titleView.intrinsicContentSize() ?: CGSize(0.0, 0.0)
-            item.titleView.frame = CGRect(if (!backButtonHidden) 48.0 else 16.0, (this.bounds.height - barHeight) + ((barHeight - titleViewSize.height) / 2.0), titleViewSize.width, titleViewSize.height)
+            item.titleView.frame = CGRect(leftX, (this.bounds.height - barHeight) + ((barHeight - titleViewSize.height) / 2.0), titleViewSize.width, titleViewSize.height)
+            kotlin.run {
+                var x = this.bounds.width - 16.0
+                item.rightBarButtonItems.forEach { barButtonItem ->
+                    barButtonItem.customView?.let {
+                        x -= barButtonItem.width
+                        it.frame = CGRect(x, this.bounds.height - barHeight, barButtonItem.width, barHeight)
+                        x -= 8.0
+                    }
+                }
+            }
             item.allViews().forEach {
                 it.edo_alpha = if (index < lastItemIndex) 0.0 else 1.0
             }

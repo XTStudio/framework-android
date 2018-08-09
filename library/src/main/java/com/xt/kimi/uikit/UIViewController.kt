@@ -219,4 +219,5 @@ fun KIMIPackage.installUIViewController() {
     exporter.bindMethodToJavaScript(UIViewController::class.java, "willMoveToParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "didMoveToParentViewController")
     exporter.exportProperty(UIViewController::class.java, "navigationController")
+    exporter.exportProperty(UIViewController::class.java, "navigationItem", true)
 }

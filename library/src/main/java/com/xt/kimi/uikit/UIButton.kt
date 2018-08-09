@@ -103,8 +103,9 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
         this.reloadContents()
     }
 
-    fun setAttributedTitle(title: Any, state: UIControlState) {
-        //todo
+    fun setAttributedTitle(title: UIAttributedString?, state: Int) {
+        title?.let { this.statedTitles[state] = it } ?: kotlin.run { this.statedTitles.remove(state) }
+        this.reloadContents()
     }
 
     var contentEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
@@ -127,7 +128,7 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
 
     // Implementation
 
-    private val statedTitles: MutableMap<Int, String> = mutableMapOf()
+    private val statedTitles: MutableMap<Int, Any> = mutableMapOf()
     private val statedTitleColors: MutableMap<Int, UIColor> = mutableMapOf()
     private val statedImages: MutableMap<Int, UIImage> = mutableMapOf()
 
@@ -215,7 +216,19 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
     }
 
     private fun reloadContents() {
-        this.titleLabel.text = this.titleForState(this.currentState())
+        val title = this.titleForState(this.currentState())
+        kotlin.run {
+            (title as? String)?.let {
+                this.titleLabel.text = it
+                return@run
+            }
+            (title as? UIAttributedString)?.let {
+                this.titleLabel.attributedText = it
+                return@run
+            }
+            this.titleLabel.text = null
+            this.titleLabel.attributedText = null
+        }
         this.titleLabel.textColor = this.titleColorForState(this.currentState())
         this.imageView.image = this.imageForState(this.currentState())
         if (this.buttonType == UIButtonType.system) {
@@ -310,7 +323,7 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
         return this.statedImages[state] ?: this.statedImages[0]
     }
 
-    private fun titleForState(state: Int): String {
+    private fun titleForState(state: Int): Any {
         return this.statedTitles[state] ?: this.statedTitles[0] ?: ""
     }
 
@@ -328,6 +341,7 @@ fun KIMIPackage.installUIButton() {
     exporter.exportClass(UIButton::class.java, "UIButton", "UIView")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitle")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setImage")
+    exporter.exportMethodToJavaScript(UIButton::class.java, "setAttributedTitle")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleFont")
     exporter.exportProperty(UIButton::class.java, "contentEdgeInsets")
     exporter.exportProperty(UIButton::class.java, "titleEdgeInsets")

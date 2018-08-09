@@ -1,5 +1,7 @@
 package com.xt.kimi.uikit
 
+import com.xt.kimi.KIMIPackage
+
 class UINavigationItem {
 
     internal var viewController: UIViewController? = null
@@ -50,6 +52,7 @@ class UINavigationItem {
 
     var leftBarButtonItems: List<UIBarButtonItem> = listOf()
         set(value) {
+            field.forEach { it.customView?.removeFromSuperview() }
             field = value
             this.setNeedsUpdate()
         }
@@ -68,6 +71,7 @@ class UINavigationItem {
 
     var rightBarButtonItems: List<UIBarButtonItem> = listOf()
         set(value) {
+            field.forEach { it.customView?.removeFromSuperview() }
             field = value
             this.setNeedsUpdate()
         }
@@ -80,11 +84,21 @@ class UINavigationItem {
         this.navigationBar?.displayItems()
     }
 
-    fun allViews(): List<UIView> {
-        return listOf(
-                backButton,
-                titleView
-        )
+    internal fun allViews(): List<UIView> {
+        val views = mutableListOf<UIView>()
+        views.add(backButton)
+        views.add(titleView)
+        this.leftViews().forEach { views.add(it) }
+        this.rightViews().forEach { views.add(it) }
+        return views.toList()
+    }
+
+    internal fun leftViews(): List<UIView> {
+        return leftBarButtonItems.mapNotNull { it.customView }
+    }
+
+    internal fun rightViews(): List<UIView> {
+        return rightBarButtonItems.mapNotNull { it.customView }
     }
 
     companion object {
@@ -93,4 +107,14 @@ class UINavigationItem {
 
     }
 
+}
+
+fun KIMIPackage.installUINavigationItem() {
+    exporter.exportClass(UINavigationItem::class.java, "UINavigationItem")
+    exporter.exportProperty(UINavigationItem::class.java, "title")
+    exporter.exportProperty(UINavigationItem::class.java, "hidesBackButton")
+    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItem")
+    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItems")
+    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItem")
+    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItems")
 }

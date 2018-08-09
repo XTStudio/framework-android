@@ -3,6 +3,7 @@ class FooViewController extends UIViewController {
     viewDidLoad() {
         super.viewDidLoad()
         this.title = "星巴克用星说"
+        this.setupNavigationItem()
         // this.view.backgroundColor = UIColor.yellow
         this.redView = new UIView
         this.redView.backgroundColor = UIColor.red
@@ -11,6 +12,20 @@ class FooViewController extends UIViewController {
             // this.redView.backgroundColor = UIColor.green
         }.bind(this)))
         this.view.addSubview(this.redView)
+    }
+
+    setupNavigationItem() {
+        var a = new UIBarButtonItem()
+        a.title = "发布"
+        a.tintColor = UIColor.red
+        a.width = 32
+        a.on("touchUpInside", function () {
+            this.navigationController.pushViewController(new BarViewController, true)
+        }.bind(this))
+        var b = new UIBarButtonItem()
+        // b.title = "测试"
+        b.image = new UIImage({name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate})
+        this.navigationItem.rightBarButtonItems = [a, b]
     }
 
     viewWillLayoutSubviews() {
