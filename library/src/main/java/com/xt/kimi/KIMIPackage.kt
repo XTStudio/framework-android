@@ -111,6 +111,7 @@ class KIMIPackage : EDOPackage() {
         installUITabBarController()
         installUITabBar()
         installUITabBarItem()
+        installUIPageViewController()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()
