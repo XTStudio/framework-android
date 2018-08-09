@@ -121,17 +121,29 @@ open class UIViewController {
         private set
 
     var presentedViewController: UIViewController? = null
-        private set
+        internal set
 
     var presentingViewController: UIViewController? = null
-        private set
+        internal set
 
     open fun presentViewController(viewController: UIViewController, animated: Boolean? = true, completion: EDOCallback? = null) {
-
+        val window = this.window ?: return
+        val visibleViewController = this.visibleViewController ?: return
+        if (visibleViewController.presentedViewController != null || viewController.presentingViewController != null || viewController.parentViewController != null) {
+            return
+        }
+        viewController.presentingViewController = visibleViewController
+        visibleViewController.presentedViewController = viewController
+        window.presentViewController(viewController, animated != false) {
+            completion?.invoke()
+        }
     }
 
     open fun dismissViewController(animated: Boolean? = true, completion: EDOCallback? = null) {
-
+        val window = this.window ?: return
+        window.dismissViewController(animated != false) {
+            completion?.invoke()
+        }
     }
 
     var childViewControllers: List<UIViewController> = listOf()
@@ -194,6 +206,33 @@ open class UIViewController {
         get() {
             return field ?: parentViewController?.window
         }
+
+    internal val visibleViewController: UIViewController?
+        get() {
+            return window?.presentedViewControllers?.lastOrNull() ?: window?.rootViewController
+        }
+
+    // Device Back Button Support
+
+    fun canGoBack(): Boolean {
+        if (this.window?.presentedViewControllers?.count() ?: 0 > 0) {
+            return true
+        }
+        (this as? UINavigationController)?.let {
+            return it.childViewControllers.count() > 1
+        }
+        return false
+    }
+
+    fun goBack() {
+        if (this.window?.presentedViewControllers?.count() ?: 0 > 0) {
+            this.window?.dismissViewController(true)
+            return
+        }
+        (this as? UINavigationController)?.let {
+            it.popViewController(true)
+        }
+    }
 
 }
 

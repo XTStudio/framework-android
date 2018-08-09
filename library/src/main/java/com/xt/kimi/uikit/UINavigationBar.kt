@@ -10,7 +10,16 @@ import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
 import kotlin.math.exp
 
-class UINavigationBar: UIView() {
+class UINavigationBar(): UIView() {
+
+    internal var navigationController: UINavigationController? = null
+
+    override var hidden: Boolean
+        get() = super.hidden
+        set(value) {
+            super.hidden = value
+            this.navigationController?.view?.setNeedsLayout(true)
+        }
 
     val barHeight = 48.0
 
@@ -28,7 +37,7 @@ class UINavigationBar: UIView() {
 
     var backIndicatorTransitionMaskImage: UIImage? = null
 
-    val shadowPaint = Paint()
+    internal val shadowPaint = Paint()
 
     init {
         this.barTintColor = UIColor.white
@@ -86,7 +95,7 @@ class UINavigationBar: UIView() {
                     it.transform = CGAffineTransform(1.0, 0.0, 0.0, 1.0, it.bounds.width, 0.0)
                     it.edo_alpha = 1.0
                 }
-                UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+                UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
                     fromItem.allViews().forEach {
                         it.edo_alpha = 0.0
                     }
@@ -115,7 +124,7 @@ class UINavigationBar: UIView() {
             toItem.allViews().forEach {
                 it.edo_alpha = 0.0
             }
-            UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+            UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
                 fromItem.allViews().forEach {
                     it.edo_alpha = 0.0
                 }
@@ -148,7 +157,7 @@ class UINavigationBar: UIView() {
             toItem.allViews().forEach {
                 it.edo_alpha = 0.0
             }
-            UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+            UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
                 fromItem.allViews().forEach {
                     it.edo_alpha = 0.0
                 }

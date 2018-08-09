@@ -16,15 +16,8 @@ open class UINavigationController(rootViewController: UIViewController? = null):
 
     override fun viewDidLoad() {
         super.viewDidLoad()
+        this.navigationBar.navigationController = this
         this.view.addSubview(this.navigationBar)
-    }
-
-    fun canGoBack(): Boolean {
-        return this.childViewControllers.count() > 1
-    }
-
-    fun goBack() {
-        this.popViewController(true)
     }
 
     fun pushViewController(viewController: UIViewController, animated: Boolean? = true) {
@@ -107,6 +100,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             this.view.addSubview(it.view)
             it.view.frame = contentFrame
         }
+        this.navigationBar.setItems(viewControllers.map { it.navigationItem }, animated != false)
     }
 
     override fun viewWillLayoutSubviews() {
@@ -119,6 +113,9 @@ open class UINavigationController(rootViewController: UIViewController? = null):
 
     private val barFrame: CGRect
         get() {
+            if (this.navigationBar.hidden) {
+                return CGRect(0.0, 0.0, this.view.bounds.width, 0.0)
+            }
             return CGRect(0.0, 0.0, this.view.bounds.width, (this.window?.statusBarHeight ?: 0.0) + this.navigationBar.barHeight)
         }
 
@@ -130,7 +127,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     private fun doPushAnimation(fromViewController: UIViewController, toViewController: UIViewController, complete: () -> Unit) {
         fromViewController.view.frame = contentFrame
         toViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
-        UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+        UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
             fromViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
             toViewController.view.frame = contentFrame
         }, EDOCallback.createWithBlock {
@@ -141,7 +138,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     private fun doPopAnimation(fromViewController: UIViewController, toViewController: UIViewController, complete: () -> Unit) {
         fromViewController.view.frame = contentFrame
         toViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
-        UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+        UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
             fromViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
             toViewController.view.frame = contentFrame
         }, EDOCallback.createWithBlock {
@@ -154,6 +151,17 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         this.view.bringSubviewToFront(this.navigationBar)
     }
 
+    fun setNavigationBarHidden(hidden: Boolean, animated: Boolean) {
+        if (animated) {
+            UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+                this.navigationBar.hidden = hidden
+            }, null)
+        }
+        else {
+            this.navigationBar.hidden = hidden
+        }
+    }
+
 }
 
 fun KIMIPackage.installUINavigationController() {
@@ -162,6 +170,7 @@ fun KIMIPackage.installUINavigationController() {
         return@exportInitializer UINavigationController(it.firstOrNull() as? UIViewController)
     }
     exporter.exportProperty(UINavigationController::class.java, "navigationBar", true)
+    exporter.exportMethodToJavaScript(UINavigationController::class.java, "setNavigationBarHidden")
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "pushViewController")
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "popViewController")
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "popToViewController")

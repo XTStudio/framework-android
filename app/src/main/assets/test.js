@@ -20,11 +20,11 @@ class FooViewController extends UIViewController {
         a.tintColor = UIColor.red
         a.width = 32
         a.on("touchUpInside", function () {
-            this.navigationController.pushViewController(new BarViewController, true)
+            this.presentViewController(new BarViewController)
         }.bind(this))
         var b = new UIBarButtonItem()
         // b.title = "测试"
-        b.image = new UIImage({name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate})
+        b.image = new UIImage({ name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate })
         this.navigationItem.rightBarButtonItems = [a, b]
     }
 
@@ -41,9 +41,27 @@ class BarViewController extends UIViewController {
     viewDidLoad() {
         super.viewDidLoad()
         this.title = "第二页"
-        // this.view.backgroundColor = UIColor.gray
+        this.view.backgroundColor = UIColor.gray
         this.view.addGestureRecognizer(new UITapGestureRecognizer().on('touch', function () {
-            this.navigationController.popToRootViewController()
+            // this.navigationController.popToRootViewController()
+            this.presentViewController(new XXXViewController, true, function () {
+                console.log("presented")
+            })
+        }.bind(this)))
+    }
+
+}
+
+class XXXViewController extends UIViewController {
+
+    viewDidLoad() {
+        super.viewDidLoad()
+        this.title = "第三页"
+        this.view.backgroundColor = UIColor.yellow
+        this.view.addGestureRecognizer(new UITapGestureRecognizer().on('touch', function () {
+            this.dismissViewController(true, function () {
+                console.log("dismissed")
+            })
         }.bind(this)))
     }
 
@@ -52,9 +70,6 @@ class BarViewController extends UIViewController {
 
 var main = new UINavigationController(new FooViewController)
 
-// DispatchQueue.main.asyncAfter(2.0, function () {
-//     main.pushViewController(new UIViewController, true)
-// })
 
 // DispatchQueue.main.asyncAfter(4.0, function () {
 //     main.popToRootViewController()

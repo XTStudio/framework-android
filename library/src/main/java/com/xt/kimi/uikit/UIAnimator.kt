@@ -67,7 +67,7 @@ class SpringAnimation(private val spring: Spring): UIAnimation {
     }
 
     override fun cancel() {
-        spring.destroy()
+        spring.removeAllListeners()
     }
 
 }
@@ -133,6 +133,29 @@ class UIAnimator {
         this.animationCreater = animationCreater@{
             val spring = this.springSystem.createSpring()
             spring.springConfig = SpringConfig(tension, friction)
+            spring.addListener(object : SpringListener {
+                override fun onSpringUpdate(spring: Spring?) { }
+                override fun onSpringEndStateChange(spring: Spring?) { }
+                override fun onSpringAtRest(spring: Spring?) {
+                    if (!completed) {
+                        completed = true
+                        completion?.invoke()
+                    }
+                }
+                override fun onSpringActivate(spring: Spring?) { }
+            })
+            return@animationCreater SpringAnimation(spring)
+        }
+        animations.invoke()
+        UIAnimator.activeAnimator = null
+    }
+
+    fun bouncy(bounciness: Double, speed: Double, animations: EDOCallback, completion: EDOCallback?) {
+        UIAnimator.activeAnimator = this
+        var completed = false
+        this.animationCreater = animationCreater@{
+            val spring = this.springSystem.createSpring()
+            spring.springConfig = SpringConfig.fromBouncinessAndSpeed(bounciness, speed)
             spring.addListener(object : SpringListener {
                 override fun onSpringUpdate(spring: Spring?) { }
                 override fun onSpringEndStateChange(spring: Spring?) { }

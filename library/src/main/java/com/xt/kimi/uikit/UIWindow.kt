@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import com.xt.endo.CGPoint
 import com.xt.endo.CGRect
+import com.xt.endo.EDOCallback
 import kotlin.math.abs
 
 /**
@@ -128,9 +129,62 @@ class UIWindow : UIView() {
             }
         }
 
+    internal var presentedViewControllers: List<UIViewController> = listOf()
+
+    internal fun presentViewController(viewController: UIViewController, animated: Boolean, complete: (() -> Unit)? = null) {
+        this.presentedViewControllers = kotlin.run {
+            val presentedViewControllers = this.presentedViewControllers.toMutableList()
+            presentedViewControllers.add(viewController)
+            return@run presentedViewControllers.toList()
+        }
+        viewController.window = this
+        this.addSubview(viewController.view)
+        if (animated) {
+            viewController.view.frame = CGRect(0.0, this.bounds.height, this.bounds.width, this.bounds.height)
+            UIAnimator.shared.bouncy(0.0, 24.0, EDOCallback.createWithBlock {
+                viewController.view.frame = this.bounds
+            }, EDOCallback.createWithBlock {
+                complete?.invoke()
+            })
+        }
+        else {
+            viewController.view.frame = this.bounds
+            complete?.invoke()
+        }
+    }
+
+    internal fun dismissViewController(animated: Boolean, complete: (() -> Unit)? = null) {
+        if (this.presentedViewControllers.count() > 0) {
+            val fromViewController = this.presentedViewControllers[this.presentedViewControllers.count() - 1]
+            this.presentedViewControllers = kotlin.run {
+                val presentedViewControllers = this.presentedViewControllers.toMutableList()
+                presentedViewControllers.remove(fromViewController)
+                return@run presentedViewControllers.toList()
+            }
+            fromViewController.presentingViewController?.presentedViewController = null
+            fromViewController.presentingViewController = null
+            fromViewController.window = null
+            if (animated) {
+                UIAnimator.shared.bouncy(0.0, 24.0, EDOCallback.createWithBlock {
+                    fromViewController.view.frame = CGRect(0.0, this.bounds.height, this.bounds.width, this.bounds.height)
+                }, EDOCallback.createWithBlock {
+                    fromViewController.view.removeFromSuperview()
+                    complete?.invoke()
+                })
+            }
+            else {
+                fromViewController.view.removeFromSuperview()
+                complete?.invoke()
+            }
+        }
+    }
+
     override fun layoutSubviews() {
         super.layoutSubviews()
         this.rootViewController?.let {
+            it.view.frame = this.bounds
+        }
+        this.presentedViewControllers.forEach {
             it.view.frame = this.bounds
         }
     }
