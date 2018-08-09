@@ -67,8 +67,19 @@ class XXXViewController extends UIViewController {
 
 }
 
-
-var main = new UINavigationController(new FooViewController)
+var main = new UITabBarController()
+var a = new UINavigationController(new FooViewController)
+a.tabBarItem.image = new UIImage({ name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate })
+a.tabBarItem.title = "首页"
+a.tabBarItem.imageInsets = { top: 2, left: 0, bottom: 0, right: 0 }
+var b = new XXXViewController
+b.tabBarItem.image = new UIImage({ name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate })
+b.tabBarItem.title = "我的"
+b.tabBarItem.imageInsets = { top: 2, left: 0, bottom: 0, right: 0 }
+main.setViewControllers([
+    a,
+    b,
+])
 
 
 // DispatchQueue.main.asyncAfter(4.0, function () {

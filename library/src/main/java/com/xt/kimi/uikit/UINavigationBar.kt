@@ -10,7 +10,7 @@ import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
 import kotlin.math.exp
 
-class UINavigationBar(): UIView() {
+class UINavigationBar: UIView() {
 
     internal var navigationController: UINavigationController? = null
 
@@ -37,7 +37,7 @@ class UINavigationBar(): UIView() {
 
     var backIndicatorTransitionMaskImage: UIImage? = null
 
-    internal val shadowPaint = Paint()
+    private val shadowPaint = Paint()
 
     init {
         this.barTintColor = UIColor.white

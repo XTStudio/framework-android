@@ -1,8 +1,10 @@
 package com.xt.kimi.uikit
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -62,6 +64,7 @@ open class UIViewController {
                 activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 rootView.transparentStatusBar = true
                 rootView.statusBarHeight = this.getStatusBarHeight(activity)
+                rootView.softButtonBarHeight = this.getSoftButtonsBarHeight(activity)
             }
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 activity.window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
@@ -81,6 +84,38 @@ open class UIViewController {
             result = activity.resources.getDimensionPixelSize(resourceId)
         }
         return (result / scale).toDouble()
+    }
+
+    private fun getSoftButtonsBarHeight(activity: Activity): Double {
+        if ((activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS) == 0) {
+            return 0.0
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            val metrics = DisplayMetrics()
+            activity?.let {
+                if (it.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    it.windowManager.defaultDisplay.getMetrics(metrics)
+                    val usableHeight = metrics.heightPixels
+                    it.windowManager.defaultDisplay.getRealMetrics(metrics)
+                    val realHeight = metrics.heightPixels
+                    return if (realHeight > usableHeight)
+                        ((realHeight - usableHeight) / activity.resources.displayMetrics.density).toDouble()
+                    else
+                        0.0
+                }
+                else if (it.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    it.windowManager.defaultDisplay.getMetrics(metrics)
+                    val usableHeight = metrics.widthPixels
+                    it.windowManager.defaultDisplay.getRealMetrics(metrics)
+                    val realHeight = metrics.widthPixels
+                    return if (realHeight > usableHeight)
+                        ((realHeight - usableHeight) / activity.resources.displayMetrics.density).toDouble()
+                    else
+                        0.0
+                }
+            }
+        }
+        return 0.0
     }
 
     protected open fun loadView() {
@@ -202,6 +237,20 @@ open class UIViewController {
 
     val navigationItem = UINavigationItem()
 
+    val tabBarController: UITabBarController?
+        get() {
+            var current: UIViewController? = this
+            while (current != null) {
+                (current as? UITabBarController)?.let {
+                    return it
+                }
+                current = current.parentViewController
+            }
+            return null
+        }
+
+    val tabBarItem = UITabBarItem()
+
     internal var window: UIWindow? = null
         get() {
             return field ?: parentViewController?.window
@@ -221,6 +270,9 @@ open class UIViewController {
         (this as? UINavigationController)?.let {
             return it.childViewControllers.count() > 1
         }
+        (this as? UITabBarController)?.let {
+            return it.selectedViewController?.canGoBack() ?: false
+        }
         return false
     }
 
@@ -231,6 +283,9 @@ open class UIViewController {
         }
         (this as? UINavigationController)?.let {
             it.popViewController(true)
+        }
+        (this as? UITabBarController)?.let {
+            it.selectedViewController?.goBack()
         }
     }
 
@@ -257,6 +312,8 @@ fun KIMIPackage.installUIViewController() {
     exporter.exportMethodToJavaScript(UIViewController::class.java, "removeFromParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "willMoveToParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "didMoveToParentViewController")
-    exporter.exportProperty(UIViewController::class.java, "navigationController")
+    exporter.exportProperty(UIViewController::class.java, "navigationController", true)
     exporter.exportProperty(UIViewController::class.java, "navigationItem", true)
+    exporter.exportProperty(UIViewController::class.java, "tabBarController", true)
+    exporter.exportProperty(UIViewController::class.java, "tabBarItem", true)
 }

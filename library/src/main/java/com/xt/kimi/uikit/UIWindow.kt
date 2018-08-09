@@ -1,5 +1,9 @@
 package com.xt.kimi.uikit
 
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.os.SystemClock
 import android.view.MotionEvent
 import com.xt.endo.CGPoint
@@ -116,6 +120,8 @@ class UIWindow : UIView() {
 
     internal var statusBarHeight: Double = 0.0
 
+    internal var softButtonBarHeight: Double = 0.0
+
     internal var rootViewController: UIViewController? = null
         set(value) {
             field?.let {
@@ -192,7 +198,19 @@ class UIWindow : UIView() {
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
         if (changed) {
-            this.frame = CGRect(0.0, 0.0, (this.width / scale).toDouble(), (this.height / scale).toDouble())
+            this.frame = CGRect(0.0, 0.0, (this.width / scale).toDouble(), (this.height / scale).toDouble() - this.softButtonBarHeight)
+        }
+    }
+
+    private val softButtonBarPaint = Paint()
+
+    override fun draw(canvas: Canvas?) {
+        super.draw(canvas)
+        if (this.softButtonBarHeight > 0.0) {
+            val canvas = canvas ?: return
+            this.softButtonBarPaint.reset()
+            this.softButtonBarPaint.color = Color.BLACK
+            canvas.drawRect(RectF(0f, (canvas.height - this.softButtonBarHeight * scale).toFloat(), canvas.width.toFloat(), canvas.height.toFloat()), this.softButtonBarPaint)
         }
     }
 
