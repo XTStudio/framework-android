@@ -39,11 +39,11 @@ class MainActivity : Activity() {
         inputStream.close()
         val script = String(buffer)
         context.evaluateScript(script)
-        val mainValue = context["main"] as JSValue
-        val main = EDOObjectTransfer.convertToJavaObjectWithJSValue(mainValue, mainValue, null) as? UITabBarController
-        main?.attachToActivity(this, true)
-        this.main = main
-        Log.d("MainActivity", main.toString())
+//        val mainValue = context["main"] as JSValue
+//        val main = EDOObjectTransfer.convertToJavaObjectWithJSValue(mainValue, mainValue, null) as? UITabBarController
+//        main?.attachToActivity(this, true)
+//        this.main = main
+//        Log.d("MainActivity", main.toString())
     }
 
     override fun onBackPressed() {

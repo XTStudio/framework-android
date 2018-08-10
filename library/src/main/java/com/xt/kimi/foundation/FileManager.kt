@@ -1,24 +1,59 @@
 package com.xt.kimi.foundation
 
 import android.content.Context
+import android.util.Base64
 import com.xt.endo.EDOExporter
+import com.xt.endo.EDOObjectTransfer
+import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
 import java.io.File
+import java.util.*
 
 class FileManager {
 
     fun subpaths(atPath: String, deepSearch: Boolean?): List<String> {
-        if (deepSearch == true) {
-            val result: MutableList<String> = mutableListOf()
-            this.subpathsWithDeepSearch(File(atPath), File(atPath), result)
-            return result.toList()
+        if (atPath.startsWith("/com.xt.bundle.js/")) {
+            val bundleRef = JSContext.currentContext?.evaluateScript("Bundle.js") ?: return emptyList()
+            val bundle = EDOObjectTransfer.convertToJavaObjectWithJSValue(bundleRef, bundleRef, null) as? JSBundle ?: return emptyList()
+            val basePath = atPath.replaceFirst("/com.xt.bundle.js/", "")
+            return bundle.resources.keys.filter { aKey ->
+                if (basePath.isEmpty() || aKey.startsWith(basePath)) {
+                    var trimPath = aKey.substring(basePath.length)
+                    if (trimPath.startsWith("/")) {
+                        trimPath = trimPath.substring(1)
+                    }
+                    if (trimPath.contains("/")) {
+                        if (deepSearch == true) {
+                            return@filter true
+                        }
+                    }
+                    else {
+                        return@filter true
+                    }
+                }
+                return@filter false
+            }
+        }
+        else if (atPath.startsWith("/android_assets/")) {
+            val basePath = atPath.replaceFirst("/android_assets/", "")
+            val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return emptyList()
+            return try {
+                applicationContext.assets.list(basePath).toList()
+            } catch (e: Exception) { emptyList() }
         }
         else {
-            try {
-                val file = File(atPath)
-                return file.list().toList()
-            } catch (e: Exception) {
-                return emptyList()
+            if (deepSearch == true) {
+                val result: MutableList<String> = mutableListOf()
+                this.subpathsWithDeepSearch(File(atPath), File(atPath), result)
+                return result.toList()
+            }
+            else {
+                try {
+                    val file = File(atPath)
+                    return file.list().toList()
+                } catch (e: Exception) {
+                    return emptyList()
+                }
             }
         }
     }
@@ -38,6 +73,9 @@ class FileManager {
     }
 
     fun createDirectory(atPath: String, withIntermediateDirectories: Boolean): Error? {
+        if (atPath.startsWith("/com.xt.bundle.js/") || atPath.startsWith("/android_assets/")) {
+            return Error("readonly")
+        }
         try {
             val file = File(atPath)
             if (withIntermediateDirectories) {
@@ -53,6 +91,9 @@ class FileManager {
     }
 
     fun createFile(atPath: String, data: Data): Error? {
+        if (atPath.startsWith("/com.xt.bundle.js/") || atPath.startsWith("/android_assets/")) {
+            return Error("readonly")
+        }
         try {
             val file = File(atPath)
             mkdirs(file)
@@ -64,14 +105,41 @@ class FileManager {
     }
 
     fun readFile(atPath: String): Data? {
-        try {
-            val file = File(atPath)
-            return Data(file.readBytes())
-        } catch (e: Exception) { }
-        return null
+        if (atPath.startsWith("/com.xt.bundle.js/")) {
+            val fileName = atPath.replaceFirst("/com.xt.bundle.js/", "")
+            val bundleRef = JSContext.currentContext?.evaluateScript("Bundle.js") ?: return null
+            val bundle = EDOObjectTransfer.convertToJavaObjectWithJSValue(bundleRef, bundleRef, null) as? JSBundle ?: return null
+            bundle.resources[fileName]?.let {
+                return Data(Base64.decode(it, 0))
+            }
+            return null
+        }
+        else if (atPath.startsWith("/android_assets/")) {
+            val fileName = atPath.replaceFirst("/android_assets/", "")
+            val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return null
+            try {
+                applicationContext.assets.open(fileName)?.use {
+                    val byteArray = ByteArray(it.available())
+                    it.read(byteArray)
+                    return Data(byteArray)
+                }
+            } catch (e: Exception) {}
+            return null
+        }
+        else {
+            return try {
+                val file = File(atPath)
+                Data(file.readBytes())
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     fun removeItem(atPath: String): Error? {
+        if (atPath.startsWith("/com.xt.bundle.js/") || atPath.startsWith("/android_assets/")) {
+            return Error("readonly")
+        }
         try {
             val file = File(atPath)
             file.delete()
@@ -82,6 +150,10 @@ class FileManager {
     }
 
     fun copyItem(atPath: String, toPath: String): Error? {
+        if (atPath.startsWith("/com.xt.bundle.js/")) {
+            val fromFileData = this.readFile(atPath) ?: return Error("file not exists.")
+            return this.createFile(toPath, fromFileData)
+        }
         try {
             val fromFile = File(atPath)
             val toFile = File(toPath)
@@ -93,6 +165,9 @@ class FileManager {
     }
 
     fun moveItem(atPath: String, toPath: String): Error? {
+        if (atPath.startsWith("/com.xt.bundle.js/") || atPath.startsWith("/android_assets/")) {
+            return Error("readonly")
+        }
         try {
             val fromFile = File(atPath)
             val toFile = File(toPath)
@@ -105,13 +180,42 @@ class FileManager {
     }
 
     fun fileExists(atPath: String): Boolean {
-        val file = File(atPath)
-        return try {
-            file.isFile
-        } catch (e: Exception) { false }
+        if (atPath.startsWith("/com.xt.bundle.js/")) {
+            val fileName = atPath.replaceFirst("/com.xt.bundle.js/", "")
+            val bundleRef = JSContext.currentContext?.evaluateScript("Bundle.js") ?: return false
+            val bundle = EDOObjectTransfer.convertToJavaObjectWithJSValue(bundleRef, bundleRef, null) as? JSBundle ?: return false
+            return bundle.resources.containsKey(fileName)
+        }
+        else if (atPath.startsWith("/android_assets/")) {
+            val fileName = atPath.replaceFirst("/android_assets/", "")
+            val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return false
+            return if (fileName.contains("/")) {
+                try {
+                    var coms = fileName.split("/")
+                    applicationContext.assets.list(coms.filterIndexed { index, s -> index < coms.count() - 1 }.joinToString("/")).contains(fileName)
+                } catch (e: Exception) {
+                    false
+                }
+            } else {
+                try {
+                    applicationContext.assets.list("").contains(fileName)
+                } catch (e: Exception) {
+                    false
+                }
+            }
+        }
+        else {
+            val file = File(atPath)
+            return try {
+                file.isFile
+            } catch (e: Exception) { false }
+        }
     }
 
     fun dirExists(atPath: String): Boolean {
+        if (atPath.startsWith("/com.xt.bundle.js/") || atPath.startsWith("/android_assets/")) {
+            return false
+        }
         val file = File(atPath)
         return try {
             file.isDirectory
@@ -130,6 +234,8 @@ class FileManager {
 
         @JvmField val temporaryDirectory: String = (EDOExporter.sharedExporter.applicationContext?.cacheDir?.absolutePath ?: "") + "/tmp"
 
+        @JvmField val jsBundleDirectory: String = "/com.xt.bundle.js/"
+
         private fun mkdirs(file: File) {
             file.parentFile.mkdirs()
         }
@@ -145,6 +251,7 @@ fun KIMIPackage.installFileManager() {
     exporter.exportStaticProperty(FileManager::class.java, "libraryDirectory", true)
     exporter.exportStaticProperty(FileManager::class.java, "cacheDirectory", true)
     exporter.exportStaticProperty(FileManager::class.java, "temporaryDirectory", true)
+    exporter.exportStaticProperty(FileManager::class.java, "jsBundleDirectory", true)
     exporter.exportMethodToJavaScript(FileManager::class.java, "subpaths")
     exporter.exportMethodToJavaScript(FileManager::class.java, "createDirectory")
     exporter.exportMethodToJavaScript(FileManager::class.java, "createFile")

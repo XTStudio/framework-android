@@ -10,9 +10,44 @@ enum class BundleType {
     js,
 }
 
-class Bundle(val bundleType: BundleType) {
+class JSBundle: Bundle(BundleType.js) {
 
-    fun resourcePath(name: String, type: String?, inDirectory: String?): String? {
+    internal val resources: MutableMap<String, String> = mutableMapOf()
+
+    override fun resourcePath(name: String, type: String?, inDirectory: String?): String? {
+        val files = inDirectory?.let { inDirectory ->
+            return@let this.resources.keys.filter { it.startsWith("$inDirectory/") }
+        } ?: kotlin.run {
+            return@run this.resources.keys
+        }
+        files.firstOrNull { fileName ->
+            if (fileName.startsWith(name)){
+                type?.let {
+                    if (fileName.endsWith(".$it")) {
+                        return@firstOrNull true
+                    }
+                }
+            }
+            return@firstOrNull false
+        }?.let {
+            inDirectory?.let { inDirectory ->
+                return "/com.xt.bundle.js/$inDirectory/$it"
+            } ?: kotlin.run {
+                return "/com.xt.bundle.js/$it"
+            }
+        }
+        return null
+    }
+
+    override fun addResource(path: String, base64String: String) {
+        this.resources[path] = base64String
+    }
+
+}
+
+open class Bundle(val bundleType: BundleType) {
+
+    open fun resourcePath(name: String, type: String?, inDirectory: String?): String? {
         if (this.bundleType == BundleType.native) {
             val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return null
             applicationContext.assets.list(inDirectory ?: "").firstOrNull { fileName ->
@@ -25,23 +60,31 @@ class Bundle(val bundleType: BundleType) {
                 }
                 return@firstOrNull false
             }?.let {
-                return "/android_assets${inDirectory ?: ""}/$it"
+                inDirectory?.let { inDirectory ->
+                    return "/android_assets/$inDirectory/$it"
+                } ?: kotlin.run {
+                    return "/android_assets/$it"
+                }
             }
         }
         return null
     }
 
-    fun resourceURL(name: String, type: String, inDirectory: String?): URL? {
+    open fun resourceURL(name: String, type: String, inDirectory: String?): URL? {
         this.resourcePath(name, type, inDirectory)?.let {
             return URL(Uri.fromFile(File(it)))
         }
         return null
     }
 
+    open fun addResource(path: String, base64String: String) {
+
+    }
+
     companion object {
 
         val native = Bundle(BundleType.native)
-        val js = Bundle(BundleType.js)
+        val js = JSBundle()
 
     }
 
@@ -53,4 +96,5 @@ fun KIMIPackage.installBundle() {
     exporter.exportStaticProperty(Bundle::class.java, "js", true)
     exporter.exportMethodToJavaScript(Bundle::class.java, "resourcePath")
     exporter.exportMethodToJavaScript(Bundle::class.java, "resourceURL")
+    exporter.exportMethodToJavaScript(Bundle::class.java, "addResource")
 }
