@@ -71,6 +71,16 @@ fun KIMIPackage.installUIImage() {
                         }
                         currentScale--
                     }
+                    if (targetFile == null) {
+                        currentScale = floor(scale).toInt() + 1
+                        while (currentScale < 5) {
+                            if (files.contains(UIImage.fileName(name, currentScale))) {
+                                targetFile = "images/${UIImage.fileName(name, currentScale)}"
+                                break
+                            }
+                            currentScale++
+                        }
+                    }
                 }
                 targetFile?.let { targetFile ->
                     try {
