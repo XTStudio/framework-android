@@ -188,12 +188,16 @@ class UIAnimator {
 
 fun KIMIPackage.installUIAnimator() {
     exporter.exportClass(UIAnimator::class.java, "UIAnimator")
-    exporter.exportInitializer(UIAnimator::class.java, {
+    exporter.exportInitializer(UIAnimator::class.java) {
         return@exportInitializer UIAnimator.shared
-    })
+    }
+    exporter.exportMethodToJavaScript(UIAnimator::class.java, "curve")
     exporter.exportMethodToJavaScript(UIAnimator::class.java, "linear")
     exporter.exportMethodToJavaScript(UIAnimator::class.java, "spring")
+    exporter.exportMethodToJavaScript(UIAnimator::class.java, "bouncy")
     exporter.exportStaticProperty(UIAnimator::class.java, "shared")
+    exporter.exportScript(UIAnimator::class.java, "UIAnimator.curve = function(){ UIAnimator.shared.curve.apply(UIAnimator.shared, arguments) }", false)
     exporter.exportScript(UIAnimator::class.java, "UIAnimator.linear = function(){ UIAnimator.shared.linear.apply(UIAnimator.shared, arguments) }", false)
     exporter.exportScript(UIAnimator::class.java, "UIAnimator.spring = function(){ UIAnimator.shared.spring.apply(UIAnimator.shared, arguments) }", false)
+    exporter.exportScript(UIAnimator::class.java, "UIAnimator.bouncy = function(){ UIAnimator.shared.bouncy.apply(UIAnimator.shared, arguments) }", false)
 }
