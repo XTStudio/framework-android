@@ -133,6 +133,7 @@ open class UIScrollView: UIView() {
             override fun handleEvent(name: String) {
                 super.handleEvent(name)
                 if (name == "began") {
+                    this@UIScrollView.deceleratingWasCancelled = false
                     this@UIScrollView.currentLockedDirection = null
                     this.setTranslation(CGPoint(0.0, 0.0), null)
                     this@UIScrollView.willBeginDragging()
@@ -202,12 +203,16 @@ open class UIScrollView: UIView() {
         this.setupScrollIndicators()
     }
 
+    private var deceleratingWasCancelled = false
+
     override fun touchesBegan(touches: Set<UITouch>) {
         super.touchesBegan(touches)
+        this.deceleratingWasCancelled = false
         if (!this.scroller.isFinished) {
             this.scroller.abortAnimation()
             this.tracking = true
             if (this.decelerating) {
+                this.deceleratingWasCancelled = true
                 this.didEndDecelerating()
             }
         }
@@ -216,6 +221,17 @@ open class UIScrollView: UIView() {
     override fun touchesEnded(touches: Set<UITouch>) {
         super.touchesEnded(touches)
         this.tracking = false
+        if (this.deceleratingWasCancelled && this.pagingEnabled) {
+            this.startDecelerating(CGPoint(0.0, 0.0))
+        }
+    }
+
+    override fun touchesCancelled(touches: Set<UITouch>) {
+        super.touchesCancelled(touches)
+        this.tracking = false
+        if (this.deceleratingWasCancelled && this.pagingEnabled) {
+            this.startDecelerating(CGPoint(0.0, 0.0))
+        }
     }
 
     open fun didScroll() {

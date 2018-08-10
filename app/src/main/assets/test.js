@@ -72,7 +72,30 @@ var a = new UINavigationController(new FooViewController)
 a.tabBarItem.image = new UIImage({ name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate })
 a.tabBarItem.title = "首页"
 a.tabBarItem.imageInsets = { top: 2, left: 0, bottom: 0, right: 0 }
-var b = new XXXViewController
+var b = new UIPageViewController()
+{
+    var yellowViewController = new UIViewController
+    yellowViewController.view.backgroundColor = UIColor.yellow
+    var greenViewController = new UIViewController
+    greenViewController.view.backgroundColor = UIColor.green
+    var grayViewController = new UIViewController
+    grayViewController.view.backgroundColor = UIColor.gray
+    var blueViewController = new UIViewController
+    blueViewController.view.backgroundColor = UIColor.blue
+    // b.loops = true
+    // b.pageItems = [yellowViewController, greenViewController, grayViewController, blueViewController]
+    b.currentPage = yellowViewController
+    b.on('beforeViewController', function (currentPage) {
+        if (currentPage == yellowViewController) {
+            return greenViewController
+        }
+    })
+    b.on('afterViewController', function (currentPage) {
+        if (currentPage == yellowViewController) {
+            return grayViewController
+        }
+    })
+}
 b.tabBarItem.image = new UIImage({ name: "location", renderingMode: UIImageRenderingMode.alwaysTemplate })
 b.tabBarItem.title = "我的"
 b.tabBarItem.imageInsets = { top: 2, left: 0, bottom: 0, right: 0 }
@@ -81,7 +104,6 @@ main.setViewControllers([
     b,
 ])
 
-
 // DispatchQueue.main.asyncAfter(4.0, function () {
-//     main.popToRootViewController()
+//     b.scrollToNextPage(false)
 // })
