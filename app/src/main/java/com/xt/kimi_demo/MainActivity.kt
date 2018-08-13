@@ -1,19 +1,14 @@
 package com.xt.kimi_demo
 
 import android.app.Activity
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
-import com.xt.endo.*
+import com.xt.endo.EDOExporter
+import com.xt.endo.EDOObjectTransfer
 import com.xt.jscore.JSContext
 import com.xt.jscore.JSValue
-import com.xt.kimi.KIMIPackage
-import com.xt.kimi.uikit.*
+import com.xt.kimi.uikit.UINavigationController
 import com.xt.uulog.UULog
-import java.io.File
 
 class MainActivity : Activity() {
 
