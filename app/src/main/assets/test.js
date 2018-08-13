@@ -1,7 +1,23 @@
-Bundle.js.addResource("ttt/foo.txt", "SGVsbG8sIFdvcmxkIQ==");
+class FooViewController extends UIViewController {
 
-var path = Bundle.native.resourcePath("eee", "txt")
+    viewDidLoad() {
+        super.viewDidLoad()
+        this.title = "Test"
+        this.view.addGestureRecognizer(new UITapGestureRecognizer().on("touch", function(){
+                var sub = new UINavigationBarViewController
+                sub.navigationBar.backgroundColor = UIColor.yellow
+                sub.view.backgroundColor = UIColor.green
+                this.navigationController.pushViewController(sub)
+            }.bind(this)))
+    }
 
-// console.log(FileManager.defaultManager.subpaths(FileManager.jsBundleDirectory, false))
-//var data = FileManager.defaultManager.readFile(FileManager.jsBundleDirectory + "foo.txt")
-console.log(FileManager.defaultManager.subpaths(path).utf8String());
+}
+
+
+var main = new UINavigationController(new FooViewController)
+
+
+
+//sub.view.addGestureRecognizer(new UITapGestureRecognizer().on("touch", function(){
+//                                                              sub.navigationController.pushViewController(new UIViewController())
+//                                                              }))

@@ -8,6 +8,8 @@ open class UINavigationController(rootViewController: UIViewController? = null):
 
     val navigationBar = UINavigationBar()
 
+    private var beingAnimating = false
+
     init {
         rootViewController?.let {
             this.pushViewController(it, false)
@@ -21,6 +23,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     }
 
     fun pushViewController(viewController: UIViewController, animated: Boolean? = true) {
+        if (this.beingAnimating) { return }
         this.addChildViewController(viewController)
         this.view.addSubview(viewController.view)
         viewController.view.frame = contentFrame
@@ -29,9 +32,11 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         if (animated != false && fromViewController != null && toViewController != null) {
             fromViewController.viewWillDisappear(true)
             toViewController.viewWillAppear(true)
+            this.beingAnimating = true
             this.doPushAnimation(fromViewController, toViewController) {
                 fromViewController.viewDidDisappear(true)
                 toViewController.viewDidAppear(true)
+                this.beingAnimating = false
             }
             this.navigationBar.pushNavigationItem(toViewController.navigationItem, true)
         }
@@ -47,23 +52,34 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     }
 
     fun popViewController(animated: Boolean? = true): UIViewController? {
+        if (this.beingAnimating) { return null }
         val fromViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 1) ?: return null
         val toViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 2) ?: return null
-        fromViewController.removeFromParentViewController()
+        fromViewController.viewWillDisappear(animated ?: true)
+        toViewController.viewWillAppear(animated ?: true)
         if (animated != false) {
+            this.beingAnimating = true
             this.doPopAnimation(fromViewController, toViewController) {
+                fromViewController.removeFromParentViewController()
                 fromViewController.view.removeFromSuperview()
+                fromViewController.viewDidDisappear(true)
+                toViewController.viewDidAppear(true)
+                this.beingAnimating = false
             }
         }
         else {
+            fromViewController.removeFromParentViewController()
             fromViewController.view.removeFromSuperview()
             toViewController.view.frame = contentFrame
+            fromViewController.viewDidDisappear(true)
+            toViewController.viewDidAppear(true)
         }
         this.navigationBar.popNavigationItem(animated != false)
         return fromViewController
     }
 
     fun popToViewController(viewController: UIViewController, animated: Boolean? = true): List<UIViewController> {
+        if (this.beingAnimating) { return emptyList() }
         if (!this.childViewControllers.contains(viewController)) { return emptyList() }
         val targetIndex = this.childViewControllers.indexOf(viewController)
         val fromViewControllers = this.childViewControllers.filterIndexed { index, _ -> index > targetIndex }
@@ -71,15 +87,24 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             return emptyList()
         }
         val toViewController = viewController
-        fromViewControllers.forEach { it.removeFromParentViewController() }
+        fromViewControllers.forEach { it.viewWillDisappear(animated ?: true) }
+        toViewController.viewWillAppear(animated ?: true)
         if (animated != false) {
+            this.beingAnimating = true
             this.doPopAnimation(fromViewControllers.last(), toViewController) {
+                fromViewControllers.forEach { it.removeFromParentViewController() }
                 fromViewControllers.forEach { it.view.removeFromSuperview() }
+                fromViewControllers.forEach { it.viewDidDisappear(true) }
+                toViewController.viewDidAppear(true)
+                this.beingAnimating = false
             }
         }
         else {
+            fromViewControllers.forEach { it.removeFromParentViewController() }
             fromViewControllers.forEach { it.view.removeFromSuperview() }
             toViewController.view.frame = contentFrame
+            fromViewControllers.forEach { it.viewDidDisappear(false) }
+            toViewController.viewDidAppear(false)
         }
         this.navigationBar.popToNavigationItem(toViewController.navigationItem, animated != false)
         return fromViewControllers
@@ -91,6 +116,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     }
 
     fun edo_setViewControllers(viewControllers: List<UIViewController>, animated: Boolean? = false) {
+        if (this.beingAnimating) { return }
         this.childViewControllers.forEach {
             it.removeFromParentViewController()
             it.view.removeFromSuperview()
@@ -136,10 +162,20 @@ open class UINavigationController(rootViewController: UIViewController? = null):
     }
 
     private fun doPopAnimation(fromViewController: UIViewController, toViewController: UIViewController, complete: () -> Unit) {
-        fromViewController.view.frame = contentFrame
+        if (fromViewController is UINavigationBarViewController) {
+            fromViewController.view.frame = this.view.bounds
+        }
+        else {
+            fromViewController.view.frame = contentFrame
+        }
         toViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
         UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
-            fromViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+            if (fromViewController is UINavigationBarViewController) {
+                fromViewController.view.frame = CGRect(contentFrame.width, this.view.frame.y, this.view.frame.width, this.view.frame.height)
+            }
+            else {
+                fromViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+            }
             toViewController.view.frame = contentFrame
         }, EDOCallback.createWithBlock {
             complete()
@@ -151,10 +187,19 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         this.view.bringSubviewToFront(this.navigationBar)
     }
 
-    fun setNavigationBarHidden(hidden: Boolean, animated: Boolean) {
+    fun setNavigationBarHidden(hidden: Boolean, animated: Boolean, fadeAnimation: Boolean = false) {
         if (animated) {
-            UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+            if (fadeAnimation) {
                 this.navigationBar.hidden = hidden
+                this.navigationBar.edo_alpha = if (hidden) 1.0 else 0.0
+            }
+            UIAnimator.shared.curve(0.25, EDOCallback.createWithBlock {
+                if (fadeAnimation) {
+                    this.navigationBar.edo_alpha = if (hidden) 0.0 else 1.0
+                }
+                else {
+                    this.navigationBar.hidden = hidden
+                }
             }, null)
         }
         else {
