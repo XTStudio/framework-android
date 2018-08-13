@@ -1,10 +1,8 @@
 package com.xt.kimi.uikit
 
 import android.graphics.PorterDuff
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import com.xt.kimi.KIMIPackage
 

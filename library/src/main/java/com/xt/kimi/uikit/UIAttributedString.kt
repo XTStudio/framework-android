@@ -1,9 +1,6 @@
 package com.xt.kimi.uikit
 
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Typeface
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.text.Layout
 import android.text.Spannable
@@ -13,7 +10,6 @@ import android.text.style.*
 import com.eclipsesource.v8.V8
 import com.xt.endo.UIRange
 import com.xt.kimi.KIMIPackage
-import kotlin.math.max
 
 enum class UIAttributedStringKey {
     foregroundColor,      // value: UIColor

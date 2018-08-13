@@ -2,7 +2,6 @@ package com.xt.kimi.uikit
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext

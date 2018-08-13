@@ -1,11 +1,9 @@
 package com.xt.kimi.uikit
 
-import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext
 import com.xt.kimi.KIMIPackage
-import java.lang.reflect.Executable
 import kotlin.math.abs
 
 class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScrollView() {

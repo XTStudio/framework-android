@@ -1,12 +1,7 @@
 package com.xt.kimi.uikit
 
-import android.graphics.Canvas
-import android.view.ViewGroup
-import android.widget.Switch
 import com.xt.endo.*
 import com.xt.kimi.KIMIPackage
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Created by cuiminghui on 2018/7/20.

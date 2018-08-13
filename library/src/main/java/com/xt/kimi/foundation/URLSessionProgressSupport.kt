@@ -4,11 +4,8 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import okio.*
-import java.io.IOException
-import okio.Okio
-import okio.BufferedSink
-import okio.Sink
 import java.io.FilterOutputStream
+import java.io.IOException
 import java.io.OutputStream
 
 

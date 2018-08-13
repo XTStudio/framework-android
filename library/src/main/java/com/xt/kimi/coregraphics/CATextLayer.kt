@@ -8,7 +8,6 @@ import android.text.Layout
 import android.text.TextUtils
 import com.facebook.fbui.textlayoutbuilder.TextLayoutBuilder
 import com.xt.endo.CGRect
-import com.xt.endo.CGSize
 import com.xt.kimi.uikit.UILabel
 import com.xt.kimi.uikit.UILineBreakMode
 import com.xt.kimi.uikit.UITextAlignment

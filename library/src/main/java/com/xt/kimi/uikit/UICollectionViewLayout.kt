@@ -1,6 +1,9 @@
 package com.xt.kimi.uikit
 
-import com.xt.endo.*
+import com.xt.endo.CGAffineTransform
+import com.xt.endo.CGPoint
+import com.xt.endo.CGRect
+import com.xt.endo.CGSize
 import com.xt.kimi.KIMIPackage
 
 open class UICollectionViewLayout {

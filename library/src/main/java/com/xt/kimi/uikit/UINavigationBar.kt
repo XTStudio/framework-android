@@ -8,7 +8,6 @@ import com.xt.endo.CGRect
 import com.xt.endo.CGSize
 import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
-import kotlin.math.exp
 
 class UINavigationBar: UIView() {
 

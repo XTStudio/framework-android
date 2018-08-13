@@ -1,6 +1,9 @@
 package com.xt.kimi.uikit
 
-import com.xt.endo.*
+import com.xt.endo.CGRect
+import com.xt.endo.CGSize
+import com.xt.endo.EDOJavaHelper
+import com.xt.endo.UIEdgeInsets
 import kotlin.math.max
 import kotlin.math.min
 

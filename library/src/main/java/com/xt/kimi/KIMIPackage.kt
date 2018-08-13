@@ -7,8 +7,12 @@ import android.os.Bundle
 import com.xt.endo.CGRect
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
-import com.xt.kimi.coregraphics.*
+import com.xt.kimi.coregraphics.installCADisplayLink
+import com.xt.kimi.coregraphics.installCAGradientLayer
+import com.xt.kimi.coregraphics.installCALayer
+import com.xt.kimi.coregraphics.installCAShapeLayer
 import com.xt.kimi.foundation.*
+import com.xt.kimi.kimi.installKMCore
 import com.xt.kimi.uikit.*
 
 /**
@@ -25,6 +29,8 @@ class KIMIPackage : EDOPackage() {
     override fun install() {
         super.install()
         val applicationContext = exporter.applicationContext ?: return
+        // KIMI
+        installKMCore()
         // Foundation
         installDispatchQueue()
         installUUID()
