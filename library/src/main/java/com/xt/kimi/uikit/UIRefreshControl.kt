@@ -48,6 +48,7 @@ class UIRefreshAnimationView: UIView() {
             this.doAnimation()
         }
         animator.start()
+        this.animator = animator
     }
 
     fun doAnimation() {
