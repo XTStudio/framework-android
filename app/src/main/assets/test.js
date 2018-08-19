@@ -3,13 +3,25 @@ class FooViewController extends UIViewController {
     viewDidLoad() {
         super.viewDidLoad()
         this.title = "Test"
-        var imageView = new UIImageView
-        imageView.frame = {x: 44, y: 44, width: 200, height: 88}
-        imageView.contentMode = UIViewContentMode.scaleAspectFit
-//        imageView.layer.cornerRadius = 44
-        imageView.layer.masksToBounds = true
-        imageView.loadImageWithURLString("http://img.hb.aicdn.com/625d4850d10e332a08c5655b9c6e30d9143138cfee08b-g7Ar2k_sq320")
-        this.view.addSubview(imageView)
+        this.scrollView = new UIScrollView
+        var refreshControl = new UIRefreshControl
+        refreshControl.on("refresh", function(sender) {
+            DispatchQueue.main.asyncAfter(3.0, function(){
+                sender.endRefreshing()
+            })
+        })
+        var redView = new UIView
+        redView.frame = {x: 0, y: 0, width: 44, height: 44}
+        redView.backgroundColor = UIColor.red
+        this.scrollView.addSubview(redView)
+        this.scrollView.addSubview(refreshControl)
+//        this.scrollView.contentSize = {width:0, height: 2000}
+        this.view.addSubview(this.scrollView)
+    }
+
+    viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        this.scrollView.frame = this.view.bounds
     }
 
 }

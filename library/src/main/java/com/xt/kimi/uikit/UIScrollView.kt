@@ -155,10 +155,13 @@ open class UIScrollView: UIView() {
                     else if (this@UIScrollView.directionalLockEnabled && this@UIScrollView.currentLockedDirection == 1) {
                         translation = CGPoint(0.0, translation.y)
                     }
-                    this@UIScrollView.createBounceEffect(translation, this.locationInView(null))
+                    val refreshOffset = this@UIScrollView.createRefreshEffect(translation)
+                    if (refreshOffset == null) {
+                        this@UIScrollView.createBounceEffect(translation, this.locationInView(null))
+                    }
                     this@UIScrollView.edo_contentOffset = CGPoint(
-                            max(-this@UIScrollView.contentInset.left, min(this@UIScrollView.contentSize.width + this@UIScrollView.contentInset.right - this@UIScrollView.bounds.width, this@UIScrollView.edo_contentOffset.x - translation.x)),
-                            max(-this@UIScrollView.contentInset.top, min(this@UIScrollView.contentSize.height + this@UIScrollView.contentInset.bottom - this@UIScrollView.bounds.height, this@UIScrollView.edo_contentOffset.y - translation.y))
+                            max(-this@UIScrollView.contentInset.left, min(max(0.0, this@UIScrollView.contentSize.width + this@UIScrollView.contentInset.right - this@UIScrollView.bounds.width), this@UIScrollView.edo_contentOffset.x - translation.x)),
+                            max(-this@UIScrollView.contentInset.top - (if(refreshControl?.edo_enabled == true) 240.0 else 0.0), min(max(0.0, this@UIScrollView.contentSize.height + this@UIScrollView.contentInset.bottom - this@UIScrollView.bounds.height), this@UIScrollView.edo_contentOffset.y - (refreshOffset ?: translation.y)))
                     )
                     this.setTranslation(CGPoint(0.0, 0.0), null)
                     this@UIScrollView.didScroll()
@@ -180,7 +183,21 @@ open class UIScrollView: UIView() {
                         velocity = CGPoint(0.0, velocity.y)
                     }
                     this@UIScrollView.willEndDragging(velocity)
-                    if (this@UIScrollView.shouldDecelerating(velocity)) {
+                    if (this@UIScrollView.refreshControl != null && this@UIScrollView.refreshControl!!.animationView.edo_alpha >= 1.0) {
+                        this@UIScrollView.didEndDragging(false)
+                        this@UIScrollView.willBeginDecelerating()
+                        this@UIScrollView.didEndDecelerating()
+                        this@UIScrollView.refreshControl!!.beginRefreshing()
+                        this@UIScrollView.setContentOffset(CGPoint(0.0, -this@UIScrollView.contentInset.top - 44.0), true)
+                    }
+                    else if (this@UIScrollView.refreshControl != null && this@UIScrollView.refreshControl!!.animationView.edo_alpha > 0.0) {
+                        this@UIScrollView.didEndDragging(false)
+                        this@UIScrollView.willBeginDecelerating()
+                        this@UIScrollView.didEndDecelerating()
+                        this@UIScrollView.refreshControl!!.animationView.edo_alpha = 0.0
+                        this@UIScrollView.setContentOffset(CGPoint(0.0, -this@UIScrollView.contentInset.top), true)
+                    }
+                    else if (this@UIScrollView.shouldDecelerating(velocity)) {
                         this@UIScrollView.didEndDragging(true)
                         this@UIScrollView.willBeginDecelerating()
                         this@UIScrollView.startDecelerating(velocity)
@@ -533,6 +550,32 @@ open class UIScrollView: UIView() {
         }
     }
 
+    // RefreshControl
+
+    private var refreshControl: UIRefreshControl? = null
+        set(value) {
+            field = value
+            value?.let {
+                super.addSubview(it.animationView)
+                it.animationView.frame = CGRect(0.0, 0.0, this.bounds.width, 44.0)
+                it.scrollView = this
+            }
+        }
+
+    private fun createRefreshEffect(translation: CGPoint): Double? {
+        refreshControl?.takeIf { it.edo_enabled }?.takeIf { this.contentSize.width <= this.bounds.width }?.let {
+            if (this.edo_contentOffset.y - translation.y < -this.contentInset.top) {
+                val progress = max(0.0, min(1.0, (-this.contentInset.top - (this.edo_contentOffset.y - translation.y)) / 128.0))
+                this.refreshControl?.animationView?.edo_alpha = progress
+                return translation.y / 3.0
+            }
+            else {
+                this.refreshControl?.animationView?.edo_alpha = 0.0
+            }
+        }
+        return null
+    }
+
     // Proxy
 
     val edo_subviews: List<UIView>
@@ -547,6 +590,10 @@ open class UIScrollView: UIView() {
     }
 
     override fun addSubview(view: UIView) {
+        if (view is UIRefreshControl) {
+            this.refreshControl = view
+            return
+        }
         this.contentView.addSubview(view)
     }
 
@@ -564,6 +611,11 @@ open class UIScrollView: UIView() {
 
     override fun sendSubviewToBack(view: UIView) {
         this.contentView.sendSubviewToBack(view)
+    }
+
+    override fun layoutSubviews() {
+        super.layoutSubviews()
+        this.refreshControl?.animationView?.frame = CGRect(0.0, 0.0, this.bounds.width, 44.0)
     }
 
 }
