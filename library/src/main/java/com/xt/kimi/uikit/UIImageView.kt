@@ -54,7 +54,6 @@ class UIImageView: UIView() {
         }
         this.image = null
         this.simpleDraweeView?.setImageURI(URLString)
-        this.simpleDraweeView?.setBackgroundColor(Color.RED)
     }
 
     override fun layoutSubviews() {
