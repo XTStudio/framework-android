@@ -3,26 +3,20 @@ class FooViewController extends UIViewController {
     viewDidLoad() {
         super.viewDidLoad()
         this.title = "Test"
-        this.scrollView = new UIScrollView
-        var fetchMoreControl = new UIFetchMoreControl
-        fetchMoreControl.on("fetch", function(sender) {
-            DispatchQueue.main.asyncAfter(3.0, function(){
-                this.scrollView.contentSize = {width: 0, height: 3000}
-                sender.endFetching()
-            }.bind(this))
-        }.bind(this))
-        var redView = new UIView
-        redView.frame = {x: 0, y: 2000 - 44, width: 44, height: 44}
-        redView.backgroundColor = UIColor.red
-        this.scrollView.addSubview(redView)
-        this.scrollView.addSubview(fetchMoreControl)
-        this.scrollView.contentSize = {width:0, height: 2000}
-        this.view.addSubview(this.scrollView)
+        var textField = new UITextField
+        textField.backgroundColor = UIColor.yellow
+        textField.frame = {x:44, y: 500, width: 200, height: 44}
+        this.view.addSubview(textField)
+        this.on("keyboardWillShow", function(rect) {
+            textField.transform = {a: 1.0, b:0.0, c:0.0, d:1.0, tx:0.0, ty:-rect.height}
+        })
+        this.on("keyboardWillHide", function(){
+        textField.transform = {a: 1.0, b:0.0, c:0.0, d:1.0, tx:0.0, ty:0.0}
+        })
     }
 
     viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        this.scrollView.frame = this.view.bounds
     }
 
 }

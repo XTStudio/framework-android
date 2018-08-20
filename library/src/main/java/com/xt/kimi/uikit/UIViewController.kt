@@ -8,6 +8,7 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
 import com.xt.endo.EDOJavaHelper
 import com.xt.endo.UIEdgeInsets
@@ -287,6 +288,16 @@ open class UIViewController {
         (this as? UITabBarController)?.let {
             it.selectedViewController?.goBack()
         }
+    }
+
+    internal fun keyboardWillShow(keyboardHeight: Double) {
+        EDOJavaHelper.emit(this, "keyboardWillShow", CGRect(0.0, 0.0, this.view.bounds.width, keyboardHeight), 0.0)
+        this.childViewControllers.forEach { it.keyboardWillShow(keyboardHeight) }
+    }
+
+    internal fun keyboardWillHide() {
+        EDOJavaHelper.emit(this, "keyboardWillHide", 0.0)
+        this.childViewControllers.forEach { it.keyboardWillHide() }
     }
 
 }

@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context.MODE_PRIVATE
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import com.xt.endo.CGRect
 import com.xt.endo.EDOExporter
 import com.xt.endo.EDOPackage
@@ -14,6 +16,8 @@ import com.xt.kimi.coregraphics.installCAShapeLayer
 import com.xt.kimi.foundation.*
 import com.xt.kimi.kimi.installKMCore
 import com.xt.kimi.uikit.*
+import com.xt.kimi.uikit.helper.KeyboardHeightObserver
+import com.xt.kimi.uikit.helper.KeyboardHeightProvider
 
 /**
  * Created by cuiminghui on 2018/7/20.
@@ -22,9 +26,11 @@ import com.xt.kimi.uikit.*
 var currentActivity: Activity? = null
     private set
 
-class KIMIPackage : EDOPackage() {
+class KIMIPackage : EDOPackage(), KeyboardHeightObserver {
 
     val exporter = EDOExporter.sharedExporter
+
+    private var keyboardHeightProvider: KeyboardHeightProvider? = null
 
     override fun install() {
         super.install()
@@ -45,9 +51,17 @@ class KIMIPackage : EDOPackage() {
         installFileManager()
         // UIKit
         (applicationContext as? Application)?.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
-            override fun onActivityPaused(activity: Activity?) { }
+            override fun onActivityPaused(activity: Activity?) {
+                keyboardHeightProvider?.close()
+                keyboardHeightProvider = null
+            }
             override fun onActivityResumed(activity: Activity?) {
                 currentActivity = activity
+                keyboardHeightProvider = KeyboardHeightProvider(activity)
+                activity?.findViewById<View>(android.R.id.content)?.post {
+                    keyboardHeightProvider?.start()
+                }
+                keyboardHeightProvider?.setKeyboardHeightObserver(this@KIMIPackage)
             }
             override fun onActivityStarted(activity: Activity?) {
                 currentActivity = activity
@@ -55,7 +69,7 @@ class KIMIPackage : EDOPackage() {
             override fun onActivityDestroyed(activity: Activity?) { }
             override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) { }
             override fun onActivityStopped(activity: Activity?) { }
-            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) { }
+            override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
         })
         scale = applicationContext.resources.displayMetrics.density
         installUIView()
@@ -126,6 +140,19 @@ class KIMIPackage : EDOPackage() {
         installCAGradientLayer()
         installCADisplayLink()
         installCAShapeLayer()
+    }
+
+    override fun onKeyboardHeightChanged(height: Int, orientation: Int) {
+        val keyboardHeight = height.toDouble() / scale
+        val contentView = currentActivity?.findViewById<View>(android.R.id.content) as? ViewGroup ?: return
+        ((contentView as? UIWindow) ?: (contentView.getChildAt(0) as? UIWindow))?.let {
+            if (keyboardHeight > 0) {
+                it.keyboardWillShow(keyboardHeight)
+            }
+            else {
+                it.keyboardWillHide()
+            }
+        }
     }
 
 }

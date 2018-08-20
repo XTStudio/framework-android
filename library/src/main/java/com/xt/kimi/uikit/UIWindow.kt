@@ -226,6 +226,18 @@ class UIWindow : UIView() {
         }
     }
 
+    // Keyboard Handling
+
+    internal fun keyboardWillShow(keyboardHeight: Double) {
+        this.rootViewController?.keyboardWillShow(keyboardHeight)
+        this.presentedViewControllers.forEach { it.keyboardWillShow(keyboardHeight) }
+    }
+
+    internal fun keyboardWillHide() {
+        this.rootViewController?.keyboardWillHide()
+        this.presentedViewControllers.forEach { it.keyboardWillHide() }
+    }
+
 }
 
 fun KIMIPackage.installUIWindow() {
