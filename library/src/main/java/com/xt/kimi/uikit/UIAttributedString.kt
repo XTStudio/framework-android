@@ -112,6 +112,7 @@ class UIAttributedString(str: String, attributes: Map<String, Any>?) {
 
     fun measure(inSize: CGSize): CGRect {
         measureLabel.attributedText = this
+        measureLabel.layer.view = measureLabel
         val textBounds = measureLabel.layer.textBounds(inSize.width)
         return CGRect(0.0, 0.0, textBounds.width, min(inSize.height, textBounds.height))
     }
