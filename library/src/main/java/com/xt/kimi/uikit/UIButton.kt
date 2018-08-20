@@ -343,6 +343,7 @@ fun KIMIPackage.installUIButton() {
     exporter.exportMethodToJavaScript(UIButton::class.java, "setImage")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setAttributedTitle")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleFont")
+    exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleColor")
     exporter.exportProperty(UIButton::class.java, "contentEdgeInsets")
     exporter.exportProperty(UIButton::class.java, "titleEdgeInsets")
     exporter.exportProperty(UIButton::class.java, "imageEdgeInsets")
