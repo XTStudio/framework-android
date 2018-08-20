@@ -6,6 +6,7 @@ import android.util.Base64
 import com.xt.endo.CGSize
 import com.xt.endo.EDOExporter
 import com.xt.kimi.KIMIPackage
+import com.xt.kimi.foundation.Data
 import kotlin.math.floor
 
 
@@ -48,6 +49,7 @@ fun KIMIPackage.installUIImage() {
     exporter.exportInitializer(UIImage::class.java) {
         (it.firstOrNull() as? Map<String, Any>)?.let { options ->
             val renderingMode = options["renderingMode"] as? UIImageRenderingMode ?: UIImageRenderingMode.automatic
+
             (options["base64"] as? String)?.let { base64 ->
                 try {
                     val byteArray = Base64.decode(base64, 0)
@@ -89,6 +91,11 @@ fun KIMIPackage.installUIImage() {
                         }
                     } catch (e: Exception) { }
                 }
+            }
+            (options["data"] as? Data)?.let { data ->
+                try {
+                    return@exportInitializer UIImage(BitmapFactory.decodeByteArray(data.byteArray, 0, data.byteArray.count()))
+                } catch (e: Exception) { }
             }
         }
         return@exportInitializer UIImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))

@@ -1,14 +1,18 @@
 package com.xt.kimi.uikit
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import com.xt.endo.CGPoint
 import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
+import com.xt.kimi.KIMIPackage
+import com.xt.kimi.currentActivity
 import kotlin.math.abs
 
 /**
@@ -135,6 +139,14 @@ class UIWindow : UIView() {
             }
         }
 
+    fun endEditing() {
+        currentActivity?.currentFocus?.let {
+            it.clearFocus()
+            (this.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(it.windowToken, 0)
+        }
+    }
+
     internal var presentedViewControllers: List<UIViewController> = listOf()
 
     internal fun presentViewController(viewController: UIViewController, animated: Boolean, complete: (() -> Unit)? = null) {
@@ -214,4 +226,10 @@ class UIWindow : UIView() {
         }
     }
 
+}
+
+fun KIMIPackage.installUIWindow() {
+    exporter.exportClass(UIWindow::class.java, "UIWindow", "UIView")
+    exporter.exportProperty(UIWindow::class.java, "rootViewController")
+    exporter.exportMethodToJavaScript(UIWindow::class.java, "endEditing")
 }

@@ -853,6 +853,7 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "tag")
     exporter.exportProperty(UIView::class.java, "superview", true)
     exporter.exportProperty(UIView::class.java, "subviews", true)
+    exporter.exportProperty(UIView::class.java, "window", true)
     exporter.exportMethodToJavaScript(UIView::class.java, "removeFromSuperview")
     exporter.exportMethodToJavaScript(UIView::class.java, "insertSubviewAtIndex")
     exporter.exportMethodToJavaScript(UIView::class.java, "exchangeSubview")
