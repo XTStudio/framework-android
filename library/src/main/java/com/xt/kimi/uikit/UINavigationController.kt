@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import android.app.Activity
 import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
@@ -205,6 +206,10 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         else {
             this.navigationBar.hidden = hidden
         }
+    }
+
+    override fun setNeedsStatusBarAppearanceUpdate(activity: Activity?) {
+        this.childViewControllers.lastOrNull()?.setNeedsStatusBarAppearanceUpdate(activity)
     }
 
 }

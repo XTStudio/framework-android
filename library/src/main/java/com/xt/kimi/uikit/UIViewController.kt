@@ -13,6 +13,12 @@ import com.xt.endo.EDOCallback
 import com.xt.endo.EDOJavaHelper
 import com.xt.endo.UIEdgeInsets
 import com.xt.kimi.KIMIPackage
+import com.xt.kimi.currentActivity
+
+enum class UIStatusBarStyle {
+    default,
+    lightContent,
+}
 
 open class UIViewController {
 
@@ -76,6 +82,7 @@ open class UIViewController {
         rootView.setBackgroundColor(Color.WHITE)
         rootView.rootViewController = this
         activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        this.setNeedsStatusBarAppearanceUpdate(activity)
     }
 
     private fun getStatusBarHeight(activity: Activity): Double {
@@ -129,6 +136,7 @@ open class UIViewController {
     }
 
     open fun viewWillAppear(animated: Boolean) {
+        this.setNeedsStatusBarAppearanceUpdate()
         EDOJavaHelper.invokeBindedMethod(this, "viewWillAppear", animated)
     }
 
@@ -168,10 +176,14 @@ open class UIViewController {
         if (visibleViewController.presentedViewController != null || viewController.presentingViewController != null || viewController.parentViewController != null) {
             return
         }
+        visibleViewController.viewWillDisappear(animated != false)
+        viewController.viewWillAppear(animated != false)
         viewController.presentingViewController = visibleViewController
         visibleViewController.presentedViewController = viewController
         window.presentViewController(viewController, animated != false) {
             completion?.invoke()
+            visibleViewController.viewDidDisappear(animated != false)
+            viewController.viewDidAppear(animated != false)
         }
     }
 
@@ -290,6 +302,8 @@ open class UIViewController {
         }
     }
 
+    // Keyboard support.
+
     internal fun keyboardWillShow(keyboardHeight: Double) {
         EDOJavaHelper.emit(this, "keyboardWillShow", CGRect(0.0, 0.0, this.view.bounds.width, keyboardHeight), 0.0)
         this.childViewControllers.forEach { it.keyboardWillShow(keyboardHeight) }
@@ -298,6 +312,22 @@ open class UIViewController {
     internal fun keyboardWillHide() {
         EDOJavaHelper.emit(this, "keyboardWillHide", 0.0)
         this.childViewControllers.forEach { it.keyboardWillHide() }
+    }
+
+    // StatusBar support.
+
+    open fun setNeedsStatusBarAppearanceUpdate(activity: Activity? = null) {
+        (EDOJavaHelper.value(this, "statusBarStyle") as? UIStatusBarStyle)?.let {
+            val activity = activity ?: currentActivity ?: return@let
+            when (it) {
+                UIStatusBarStyle.default -> {
+                    activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                }
+                UIStatusBarStyle.lightContent -> {
+                    activity.window.decorView.systemUiVisibility = 0
+                }
+            }
+        }
     }
 
 }
@@ -327,4 +357,9 @@ fun KIMIPackage.installUIViewController() {
     exporter.exportProperty(UIViewController::class.java, "navigationItem", true)
     exporter.exportProperty(UIViewController::class.java, "tabBarController", true)
     exporter.exportProperty(UIViewController::class.java, "tabBarItem", true)
+    exporter.exportMethodToJavaScript(UIViewController::class.java, "setNeedsStatusBarAppearanceUpdate")
+    exporter.exportEnum("UIStatusBarStyle", mapOf(
+            Pair("default", UIStatusBarStyle.default),
+            Pair("lightContent", UIStatusBarStyle.lightContent)
+    ))
 }

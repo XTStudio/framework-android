@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import android.app.Activity
 import com.xt.endo.CGRect
 import com.xt.kimi.KIMIPackage
 import kotlin.math.max
@@ -13,6 +14,7 @@ open class UITabBarController: UIViewController() {
                 viewController.view.hidden = index != value
             }
             this.tabBar.setSelectedIndex(value)
+            this.setNeedsStatusBarAppearanceUpdate()
         }
 
     var selectedViewController: UIViewController?
@@ -66,6 +68,10 @@ open class UITabBarController: UIViewController() {
         this.childViewControllers.forEach {
             it.view.frame = contentFrame
         }
+    }
+
+    override fun setNeedsStatusBarAppearanceUpdate(activity: Activity?) {
+        this.selectedViewController?.setNeedsStatusBarAppearanceUpdate(activity)
     }
 
 }

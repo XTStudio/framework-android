@@ -174,11 +174,14 @@ class UIWindow : UIView() {
     internal fun dismissViewController(animated: Boolean, complete: (() -> Unit)? = null) {
         if (this.presentedViewControllers.count() > 0) {
             val fromViewController = this.presentedViewControllers[this.presentedViewControllers.count() - 1]
+            val toViewController = fromViewController.presentingViewController ?: return
             this.presentedViewControllers = kotlin.run {
                 val presentedViewControllers = this.presentedViewControllers.toMutableList()
                 presentedViewControllers.remove(fromViewController)
                 return@run presentedViewControllers.toList()
             }
+            fromViewController.viewWillDisappear(animated)
+            toViewController.viewWillAppear(animated)
             fromViewController.presentingViewController?.presentedViewController = null
             fromViewController.presentingViewController = null
             fromViewController.window = null
@@ -188,11 +191,15 @@ class UIWindow : UIView() {
                 }, EDOCallback.createWithBlock {
                     fromViewController.view.removeFromSuperview()
                     complete?.invoke()
+                    fromViewController.viewDidDisappear(animated)
+                    toViewController.viewDidAppear(animated)
                 })
             }
             else {
                 fromViewController.view.removeFromSuperview()
                 complete?.invoke()
+                fromViewController.viewDidDisappear(animated)
+                toViewController.viewDidAppear(animated)
             }
         }
     }
