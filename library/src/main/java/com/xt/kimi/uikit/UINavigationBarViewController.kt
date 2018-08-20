@@ -75,9 +75,9 @@ class UINavigationBarViewController: UIViewController() {
         }
 
     override fun viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
         this.navigationBar.frame = barFrame
         this.contentView.frame = contentFrame
+        super.viewWillLayoutSubviews()
     }
 
 }
