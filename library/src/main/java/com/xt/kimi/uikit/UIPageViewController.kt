@@ -20,7 +20,13 @@ class UIPageViewController(val isVertical: Boolean? = false): UIViewController()
 
     var currentPage: UIViewController? = null
         set(value) {
+            field?.let { it.removeFromParentViewController() }
             field = value
+            value?.let {
+                if (it.parentViewController != this) {
+                    this.addChildViewController(it)
+                }
+            }
             this.resetContents()
         }
 
