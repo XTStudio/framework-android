@@ -120,6 +120,7 @@ class KIMIPackage : EDOPackage() {
         installUIPageViewController()
         installUINavigationBarViewController()
         installUIRefreshControl()
+        installUIFetchMoreControl()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()

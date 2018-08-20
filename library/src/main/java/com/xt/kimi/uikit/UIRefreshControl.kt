@@ -115,7 +115,7 @@ class UIRefreshControl: UIView() {
 fun KIMIPackage.installUIRefreshControl() {
     exporter.exportClass(UIRefreshControl::class.java, "UIRefreshControl", "UIView")
     exporter.exportProperty(UIRefreshControl::class.java, "edo_enabled")
-    exporter.exportProperty(UIRefreshControl::class.java, "refreshing")
+    exporter.exportProperty(UIRefreshControl::class.java, "refreshing", true)
     exporter.exportMethodToJavaScript(UIRefreshControl::class.java, "beginRefreshing")
     exporter.exportMethodToJavaScript(UIRefreshControl::class.java, "endRefreshing")
 }

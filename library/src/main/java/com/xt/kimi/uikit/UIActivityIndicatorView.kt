@@ -47,15 +47,16 @@ class UIActivityIndicatorView: UIView() {
         this.userInteractionEnabled = false
         systemProgressBar.isIndeterminate = true
         systemProgressBar.visibility = View.GONE
-        addView(systemProgressBar, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        addView(systemProgressBar, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         this.color = this.tintColor ?: UIColor.black
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
         if (changed) {
-            systemProgressBar.x = ((width - systemProgressBar.width) / 2.0).toFloat()
-            systemProgressBar.y = ((height - systemProgressBar.height) / 2.0).toFloat()
+            val size = if (this.largeStyle) 76.0 else 44.0
+            systemProgressBar.x = ((width - size * scale) / 2.0).toFloat()
+            systemProgressBar.y = ((height - size * scale) / 2.0).toFloat()
         }
     }
 

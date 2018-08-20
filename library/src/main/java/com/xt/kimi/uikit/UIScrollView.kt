@@ -155,6 +155,7 @@ open class UIScrollView: UIView() {
                     else if (this@UIScrollView.directionalLockEnabled && this@UIScrollView.currentLockedDirection == 1) {
                         translation = CGPoint(0.0, translation.y)
                     }
+                    this@UIScrollView.createFetchMoreEffect(translation)
                     val refreshOffset = this@UIScrollView.createRefreshEffect(translation)
                     if (refreshOffset == null) {
                         this@UIScrollView.createBounceEffect(translation, this.locationInView(null))
@@ -576,6 +577,29 @@ open class UIScrollView: UIView() {
         return null
     }
 
+    // FetchMoreControl
+
+    private var fetchMoreControl: UIFetchMoreControl? = null
+        set(value) {
+            field = value
+            value?.let {
+                it.scrollView = this
+            }
+        }
+
+    private fun createFetchMoreEffect(translation: CGPoint): Boolean {
+        fetchMoreControl?.takeIf { it.edo_enabled }?.takeIf { this.contentSize.width <= this.bounds.width }?.let {
+            if (it.fetching) {
+                return true
+            }
+            else if (this.edo_contentOffset.y - translation.y > this.contentSize.height + this.contentInset.bottom - this.bounds.height * 2) {
+                it.beginFetching()
+                return true
+            }
+        }
+        return false
+    }
+
     // Proxy
 
     val edo_subviews: List<UIView>
@@ -592,6 +616,10 @@ open class UIScrollView: UIView() {
     override fun addSubview(view: UIView) {
         if (view is UIRefreshControl) {
             this.refreshControl = view
+            return
+        }
+        if (view is UIFetchMoreControl) {
+            this.fetchMoreControl = view
             return
         }
         this.contentView.addSubview(view)
