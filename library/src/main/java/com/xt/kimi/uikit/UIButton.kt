@@ -203,12 +203,7 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
 
     override fun tintColorDidChange() {
         super.tintColorDidChange()
-        if (this.buttonType == UIButtonType.system) {
-            this.tintColor?.let { tintColor ->
-                this.setTitleColor(tintColor, UIControlState.normal.rawValue)
-                this.setTitleColor(UIColor.gray.colorWithAlphaComponent(0.75), UIControlState.disabled.rawValue)
-            }
-        }
+        this.reloadContents()
     }
 
     protected open fun sendEvent(name: String) {
@@ -328,7 +323,12 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
     }
 
     private fun titleColorForState(state: Int): UIColor {
-        return this.statedTitleColors[state] ?: this.statedTitleColors[0] ?: UIColor.black
+        return this.statedTitleColors[state] ?: this.statedTitleColors[0] ?: kotlin.run {
+            if (state == UIControlState.disabled.rawValue) {
+                return@run UIColor.gray.colorWithAlphaComponent(0.75)
+            }
+            return@run this.tintColor
+        } ?: UIColor.black
     }
 
     private fun highlightedPointInside(point: CGPoint): Boolean {

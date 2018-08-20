@@ -276,6 +276,7 @@ open class CALayer {
     }
 
     private fun drawShadow(ctx: Canvas, boundsPath: Path = createBorderPath()) {
+        if (this is CATextLayer) { return }
         val shadowColor = shadowColor ?: return
         val shadowOffset = shadowOffset ?: return
         if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0) {
