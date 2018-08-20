@@ -8,8 +8,12 @@ import android.text.SpannableString
 import android.text.TextPaint
 import android.text.style.*
 import com.eclipsesource.v8.V8
+import com.xt.endo.CGRect
+import com.xt.endo.CGSize
 import com.xt.endo.UIRange
 import com.xt.kimi.KIMIPackage
+import com.xt.kimi.coregraphics.CATextLayer
+import kotlin.math.min
 
 enum class UIAttributedStringKey {
     foregroundColor,      // value: UIColor
@@ -106,6 +110,18 @@ class UIAttributedString(str: String, attributes: Map<String, Any>?) {
         }
     }
 
+    fun measure(inSize: CGSize): CGRect {
+        measureLabel.attributedText = this
+        val textBounds = measureLabel.layer.textBounds(inSize.width)
+        return CGRect(0.0, 0.0, textBounds.width, min(inSize.height, textBounds.height))
+    }
+
+    companion object {
+
+        private val measureLabel = UILabel()
+
+    }
+
 }
 
 fun KIMIPackage.installUIAttributedString() {
@@ -128,4 +144,5 @@ fun KIMIPackage.installUIAttributedString() {
             Pair("strikethroughColor", UIAttributedStringKey.strikethroughColor.name),
             Pair("paragraphStyle", UIAttributedStringKey.paragraphStyle.name)
     ))
+    exporter.exportMethodToJavaScript(UIAttributedString::class.java, "measure")
 }
