@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import android.os.Handler
 import com.xt.endo.CGPoint
 import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
@@ -24,6 +25,7 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
         return CGPoint(x, y)
     }
 
+    internal var lockedDirection: Int? = null
     private var firstTouch: UITouch? = null
     private var translationPoint: CGPoint? = null
     private var beganPoints: MutableMap<Int, CGPoint> = mutableMapOf()
@@ -35,7 +37,9 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
                 firstTouch = it
             }
             if (it.phase == UITouchPhase.began) {
-                if (UIView.recognizedGesture != null) { this.beganPoints.clear(); return }
+                if (UIView.recognizedGesture != null && UIView.recognizedGesture != this) {
+                    this.beganPoints.clear(); return
+                }
                 it.windowPoint?.let { windowPoint ->
                     this.beganPoints[it.identifier] = windowPoint
                 }
@@ -45,17 +49,36 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
             }
             else if (it.phase == UITouchPhase.moved) {
                 if (this.state == UIGestureRecognizerState.possible) {
-                    if (UIView.recognizedGesture != null) {
+                    if (UIView.recognizedGesture != null && UIView.recognizedGesture != this) {
                         this.state = UIGestureRecognizerState.failed
                         return
                     }
                     it.windowPoint?.let { windowPoint ->
                         this.beganPoints[it.identifier]?.let { beganPoint ->
-                            if (abs(beganPoint.x - windowPoint.x) >= 8.0 || abs(beganPoint.y - windowPoint.y) >= 8.0) {
-                                UIView.recognizedGesture = this
-                                this.state = UIGestureRecognizerState.began
-                                this.handleEvent("began")
-                                EDOJavaHelper.emit(this, "began", this)
+                            lockedDirection?.let { lockedDirection ->
+                                if (lockedDirection == 1) {
+                                    if (abs(beganPoint.y - windowPoint.y) >= 8.0) {
+                                        UIView.recognizedGesture = this
+                                        this.state = UIGestureRecognizerState.began
+                                        this.handleEvent("began")
+                                        EDOJavaHelper.emit(this, "began", this)
+                                    }
+                                }
+                                else if (lockedDirection == 2) {
+                                    if (abs(beganPoint.x - windowPoint.x) >= 8.0) {
+                                        UIView.recognizedGesture = this
+                                        this.state = UIGestureRecognizerState.began
+                                        this.handleEvent("began")
+                                        EDOJavaHelper.emit(this, "began", this)
+                                    }
+                                }
+                            } ?: kotlin.run {
+                                if (abs(beganPoint.x - windowPoint.x) >= 8.0 || abs(beganPoint.y - windowPoint.y) >= 8.0) {
+                                    UIView.recognizedGesture = this
+                                    this.state = UIGestureRecognizerState.began
+                                    this.handleEvent("began")
+                                    EDOJavaHelper.emit(this, "began", this)
+                                }
                             }
                         }
                     }
@@ -71,7 +94,9 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
                     this.state = UIGestureRecognizerState.ended
                     this.handleEvent("ended")
                     EDOJavaHelper.emit(this, "ended", this)
-                    UIView.recognizedGesture = null
+                    Handler().post {
+                        UIView.recognizedGesture = null
+                    }
                 }
                 if (it.identifier == 0) {
                     this.state = UIGestureRecognizerState.possible
@@ -82,7 +107,9 @@ open class UIPanGestureRecognizer: UIGestureRecognizer() {
                     this.state = UIGestureRecognizerState.cancelled
                     this.handleEvent("cancelled")
                     EDOJavaHelper.emit(this, "cancelled", this)
-                    UIView.recognizedGesture = null
+                    Handler().post {
+                        UIView.recognizedGesture = null
+                    }
                 }
                 this.state = UIGestureRecognizerState.possible
             }

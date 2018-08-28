@@ -110,7 +110,7 @@ class URLSessionTask(private val urlRequest: URLRequest, private val complete: E
     }
 
     private fun buildCall() {
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
                 .url(urlRequest.URL.absoluteString)
                 .method(urlRequest.HTTPMethod ?: "GET",
                         kotlin.run {
@@ -155,7 +155,10 @@ class URLSessionTask(private val urlRequest: URLRequest, private val complete: E
                         }
                     }
                 })
-                .build()
+        urlRequest.allHTTPHeaderFields?.forEach {
+            requestBuilder.addHeader(it.key, it.value as? String ?: "")
+        }
+        val request = requestBuilder.build()
         val client = OkHttpClient.Builder()
                 .connectTimeout((urlRequest.timeout * 1000).toLong(), TimeUnit.MILLISECONDS)
                 .cache(URLSession.sharedCache)

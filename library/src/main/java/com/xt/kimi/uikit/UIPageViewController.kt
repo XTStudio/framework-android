@@ -121,19 +121,19 @@ class UIPageViewController(val isVertical: Boolean? = false): UIViewController()
     }
 
     override fun viewDidLoad() {
-        super.viewDidLoad()
         this.scrollView.pagingEnabled = true
         this.scrollView.bounces = false
         this.scrollView.showsHorizontalScrollIndicator = false
         this.scrollView.showsVerticalScrollIndicator = false
         this.view.addSubview(this.scrollView)
+        super.viewDidLoad()
     }
 
     override fun viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
         this.scrollView.frame = this.view.bounds
         this.scrollView.contentSize = CGSize(this.view.bounds.width, this.view.bounds.height)
         this.resetContents()
+        super.viewWillLayoutSubviews()
     }
 
     private fun changeContents() {

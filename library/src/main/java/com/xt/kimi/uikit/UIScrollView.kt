@@ -22,8 +22,16 @@ open class UIScrollView: UIView() {
         }
 
     var contentSize: CGSize = CGSize(0.0, 0.0)
+        set(value) {
+            field = value
+            this.resetLockedDirection()
+        }
 
     var contentInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            this.resetLockedDirection()
+        }
 
     var directionalLockEnabled = false
 
@@ -125,6 +133,7 @@ open class UIScrollView: UIView() {
         set(value) {
             super.frame = value
             this.contentView.frame = this.bounds
+            this.resetLockedDirection()
         }
 
     init {
@@ -221,12 +230,27 @@ open class UIScrollView: UIView() {
         this.setupScrollIndicators()
     }
 
+    private fun resetLockedDirection() {
+        val contentWidth = this.contentSize.width + this.contentInset.left + this.contentInset.right
+        val contentHeight = this.contentSize.height + this.contentInset.top + this.contentInset.bottom
+        if (contentWidth <= this.bounds.width && contentHeight <= this.bounds.height) {
+            this.panGestureRecognizer.lockedDirection = 0
+        }
+        else if (contentWidth <= this.bounds.width) {
+            this.panGestureRecognizer.lockedDirection = 1
+        }
+        else if (contentHeight <= this.bounds.height) {
+            this.panGestureRecognizer.lockedDirection = 2
+        }
+    }
+
     private var deceleratingWasCancelled = false
 
     override fun touchesBegan(touches: Set<UITouch>) {
         super.touchesBegan(touches)
         this.deceleratingWasCancelled = false
         if (!this.scroller.isFinished) {
+            UIView.recognizedGesture = this.panGestureRecognizer
             this.scroller.abortAnimation()
             this.tracking = true
             if (this.decelerating) {
@@ -242,6 +266,11 @@ open class UIScrollView: UIView() {
         if (this.deceleratingWasCancelled && this.pagingEnabled) {
             this.startDecelerating(CGPoint(0.0, 0.0))
         }
+        if (this.deceleratingWasCancelled) {
+            this.post {
+                UIView.recognizedGesture = null
+            }
+        }
     }
 
     override fun touchesCancelled(touches: Set<UITouch>) {
@@ -249,6 +278,11 @@ open class UIScrollView: UIView() {
         this.tracking = false
         if (this.deceleratingWasCancelled && this.pagingEnabled) {
             this.startDecelerating(CGPoint(0.0, 0.0))
+        }
+        if (this.deceleratingWasCancelled) {
+            this.post {
+                UIView.recognizedGesture = null
+            }
         }
     }
 
@@ -566,7 +600,7 @@ open class UIScrollView: UIView() {
     private fun createRefreshEffect(translation: CGPoint): Double? {
         refreshControl?.takeIf { it.edo_enabled }?.takeIf { this.contentSize.width <= this.bounds.width }?.let {
             if (this.edo_contentOffset.y - translation.y < -this.contentInset.top) {
-                val progress = max(0.0, min(1.0, (-this.contentInset.top - (this.edo_contentOffset.y - translation.y)) / 128.0))
+                val progress = max(0.0, min(1.0, (-this.contentInset.top - (this.edo_contentOffset.y - translation.y)) / 88.0))
                 this.refreshControl?.animationView?.edo_alpha = progress
                 return translation.y / 3.0
             }

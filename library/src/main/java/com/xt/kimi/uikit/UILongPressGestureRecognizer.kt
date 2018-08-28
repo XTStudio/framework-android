@@ -71,7 +71,9 @@ open class UILongPressGestureRecognizer: UIGestureRecognizer() {
                         this.state = UIGestureRecognizerState.ended
                         this.handleEvent("ended")
                         EDOJavaHelper.emit(this, "ended", this)
-                        UIView.recognizedGesture = null
+                        Handler().post {
+                            UIView.recognizedGesture = null
+                        }
                     }
                     this.state = UIGestureRecognizerState.possible
                     this.beganPoints.clear()
@@ -84,7 +86,9 @@ open class UILongPressGestureRecognizer: UIGestureRecognizer() {
                     this.state = UIGestureRecognizerState.cancelled
                     this.handleEvent("cancelled")
                     EDOJavaHelper.emit(this, "cancelled", this)
-                    UIView.recognizedGesture = null
+                    Handler().post {
+                        UIView.recognizedGesture = null
+                    }
                 }
                 this.state = UIGestureRecognizerState.possible
                 this.beganPoints.clear()

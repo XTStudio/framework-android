@@ -22,17 +22,17 @@ class UIParagraphStyle {
     /**
      * The receiver’s minimum height.
      */
-    var minimumLineHeight: Double? = null
+    var minimumLineHeight: Double = 0.0
 
     /**
      * The receiver’s maximum line height.
      */
-    var maximumLineHeight: Double? = null
+    var maximumLineHeight: Double = 0.0
 
     /**
      * The line height multiple.
      */
-    var lineHeightMultiple: Double? = null
+    var lineHeightMultiple: Double = 0.0
 
 }
 

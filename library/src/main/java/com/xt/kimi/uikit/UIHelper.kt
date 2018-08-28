@@ -6,13 +6,23 @@ import kotlin.math.min
 
 
 fun CGRectIntersectsRect(r1: CGRect, r2: CGRect): Boolean {
-    if (r1.x + r1.width <= r2.x ||
-        r2.x + r2.width <= r1.x ||
-        r1.y + r1.height <= r2.y ||
-        r2.y + r2.height <= r1.y) {
+    if (r1.x + r1.width - 0.1 <= r2.x ||
+        r2.x + r2.width - 0.1 <= r1.x ||
+        r1.y + r1.height - 0.1 <= r2.y ||
+        r2.y + r2.height - 0.1 <= r1.y) {
         return false
     }
     return true
+}
+
+fun CGRectContainsRect(r1: CGRect, r2: CGRect): Boolean {
+    if (r1.x - 0.1 <= r2.x &&
+            r1.y - 0.1 <= r2.y &&
+            r1.x + r1.width + 0.1 >= r2.x + r2.width &&
+            r1.y + r1.height + 0.1 >= r2.y + r2.height) {
+        return true
+    }
+    return false
 }
 
 fun CGRectUnion(r1: CGRect, r2: CGRect): CGRect {
@@ -28,7 +38,7 @@ fun CGRectIsEmpty(rect: CGRect): Boolean {
 }
 
 fun CGRectEqualToRect(r1: CGRect, r2: CGRect): Boolean {
-    return r1.x == r2.x && r1.y == r2.y && r1.width == r2.width && r1.height == r2.height
+    return Math.abs(r1.x - r2.x) < 0.001 && Math.abs(r1.y - r2.y) < 0.001 && Math.abs(r1.width - r2.width) < 0.001 && Math.abs(r1.height - r2.height) < 0.001
 }
 
 internal class CGPointMutable(var x: Double, var y: Double) {}

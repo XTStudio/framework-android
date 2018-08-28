@@ -10,6 +10,8 @@ import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
+import android.view.Gravity
+import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -76,6 +78,7 @@ class UITextField: UINativeTouchView() {
         init {
             systemEditText.setSingleLine()
             systemEditText.setTextColor(Color.BLACK)
+            systemEditText.setHintTextColor(Color.argb(128, 0, 0, 0))
             systemEditText.background = null
             addView(systemEditText, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         }
@@ -84,7 +87,7 @@ class UITextField: UINativeTouchView() {
             super.onLayout(changed, left, top, right, bottom)
             if (changed) {
                 this.systemEditText.width = this.width
-                this.systemEditText.height = this.height
+                this.systemEditText.y = ((this.height - this.systemEditText.textSize * scale) / 2.0).toFloat()
             }
         }
 
@@ -103,7 +106,7 @@ class UITextField: UINativeTouchView() {
         set(value) {
             field = value
             nativeEditText.systemEditText.setTextColor(value?.toInt() ?: Color.BLACK)
-            nativeEditText.systemEditText.setHintTextColor((value?.colorWithAlphaComponent(0.35)?.toInt() ?: Color.GRAY))
+            nativeEditText.systemEditText.setHintTextColor((value?.colorWithAlphaComponent(0.50)?.toInt() ?: Color.GRAY))
         }
 
     var font: UIFont? = null
@@ -134,6 +137,7 @@ class UITextField: UINativeTouchView() {
                         return@run Typeface.NORMAL
                     })
                 }
+                nativeEditText.systemEditText.y = ((this.height - nativeEditText.systemEditText.textSize * scale) / 2.0).toFloat()
             }
         }
 
@@ -260,6 +264,7 @@ class UITextField: UINativeTouchView() {
     init {
         this.isFocusable = true
         this.isFocusableInTouchMode = true
+        this.edo_backgroundColor = UIColor.white
         addSubview(nativeEditText)
         this.clearButtonView.hidden = true
         this.clearButtonView.setImage(clearButtonImage, UIControlState.normal.rawValue)
@@ -477,7 +482,7 @@ class UITextField: UINativeTouchView() {
                 field.isAccessible = true
                 val editor = field.get(nativeEditText.systemEditText)
                 val drawable = ContextCompat.getDrawable(nativeEditText.systemEditText.context, drawableResId)
-                drawable.setColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
+                drawable?.setColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
                 val drawables = arrayOf(drawable, drawable)
                 field = editor.javaClass.getDeclaredField("mCursorDrawable")
                 field.isAccessible = true

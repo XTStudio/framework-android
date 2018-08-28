@@ -166,6 +166,7 @@ class UITextView: UINativeTouchView() {
         systemEditText.setTextColor(Color.BLACK)
         systemEditText.background = null
         systemEditText.gravity = Gravity.TOP
+        this.edo_backgroundColor = UIColor.white
         addView(systemEditText, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         setupEvents()
     }
@@ -300,7 +301,7 @@ class UITextView: UINativeTouchView() {
                 field.isAccessible = true
                 val editor = field.get(systemEditText)
                 val drawable = ContextCompat.getDrawable(systemEditText.context, drawableResId)
-                drawable.setColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
+                drawable?.setColorFilter(tintColor.toInt(), PorterDuff.Mode.SRC_IN)
                 val drawables = arrayOf(drawable, drawable)
                 field = editor.javaClass.getDeclaredField("mCursorDrawable")
                 field.isAccessible = true

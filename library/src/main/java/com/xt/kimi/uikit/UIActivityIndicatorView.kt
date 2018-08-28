@@ -1,6 +1,7 @@
 package com.xt.kimi.uikit
 
 import android.graphics.PorterDuff
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
@@ -21,9 +22,12 @@ class UIActivityIndicatorView: UIView() {
             systemProgressBar = ProgressBar(this.context, null, if (value) android.R.attr.progressBarStyleLarge else android.R.attr.progressBarStyle)
             systemProgressBar.isIndeterminate = true
             systemProgressBar.visibility = View.GONE
-            addView(systemProgressBar, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+            addView(systemProgressBar, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             this.color = this.tintColor ?: UIColor.black
             this.requestFocus()
+            val size = if (this.largeStyle) 76.0 else 44.0
+            systemProgressBar.x = ((width - size * scale) / 2.0).toFloat()
+            systemProgressBar.y = ((height - size * scale) / 2.0).toFloat()
         }
 
     var animating: Boolean = false

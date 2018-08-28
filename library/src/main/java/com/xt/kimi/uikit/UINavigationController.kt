@@ -5,29 +5,33 @@ import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
 import com.xt.kimi.KIMIPackage
 
-open class UINavigationController(rootViewController: UIViewController? = null): UIViewController() {
+open class UINavigationController(private val rootViewController: UIViewController? = null): UIViewController() {
 
     val navigationBar = UINavigationBar()
 
     private var beingAnimating = false
 
-    init {
-        rootViewController?.let {
+    override fun viewDidLoad() {
+        this.navigationBar.navigationController = this
+        this.view.edo_backgroundColor = UIColor.clear
+        this.view.addSubview(this.navigationBar)
+        this.rootViewController?.let {
             this.pushViewController(it, false)
         }
-    }
-
-    override fun viewDidLoad() {
         super.viewDidLoad()
-        this.navigationBar.navigationController = this
-        this.view.addSubview(this.navigationBar)
     }
 
     fun pushViewController(viewController: UIViewController, animated: Boolean? = true) {
         if (this.beingAnimating) { return }
+        if (this.childViewControllers.count() > 0) {
+            viewController.hidesBottomBarWhenPushed = true
+        }
+        if (viewController.hidesBottomBarWhenPushed) {
+            this.tabBarController?.view?.bringSubviewToFront(this.view)
+        }
         this.addChildViewController(viewController)
         this.view.addSubview(viewController.view)
-        viewController.view.frame = contentFrame
+        viewController.view.frame = contentFrame(viewController)
         val fromViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 2)
         val toViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 1)
         if (animated != false && fromViewController != null && toViewController != null) {
@@ -37,6 +41,10 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             this.doPushAnimation(fromViewController, toViewController) {
                 fromViewController.viewDidDisappear(true)
                 toViewController.viewDidAppear(true)
+                this.childViewControllers.forEach {
+                    if (it == toViewController) { return@forEach }
+                    it.view.hidden = true
+                }
                 this.beingAnimating = false
             }
             this.navigationBar.pushNavigationItem(toViewController.navigationItem, true)
@@ -49,6 +57,10 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             toViewController?.navigationItem?.let {
                 this.navigationBar.pushNavigationItem(it, false)
             }
+            this.childViewControllers.forEach {
+                if (it == toViewController) { return@forEach }
+                it.view.hidden = true
+            }
         }
     }
 
@@ -56,6 +68,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         if (this.beingAnimating) { return null }
         val fromViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 1) ?: return null
         val toViewController = this.childViewControllers.getOrNull(this.childViewControllers.count() - 2) ?: return null
+        toViewController.view.hidden = false
         fromViewController.viewWillDisappear(animated ?: true)
         toViewController.viewWillAppear(animated ?: true)
         if (animated != false) {
@@ -65,15 +78,25 @@ open class UINavigationController(rootViewController: UIViewController? = null):
                 fromViewController.view.removeFromSuperview()
                 fromViewController.viewDidDisappear(true)
                 toViewController.viewDidAppear(true)
+                if (!toViewController.hidesBottomBarWhenPushed) {
+                    this.tabBarController?.let {
+                        it.view.bringSubviewToFront(it.tabBar)
+                    }
+                }
                 this.beingAnimating = false
             }
         }
         else {
             fromViewController.removeFromParentViewController()
             fromViewController.view.removeFromSuperview()
-            toViewController.view.frame = contentFrame
+            toViewController.view.frame = contentFrame(toViewController)
             fromViewController.viewDidDisappear(true)
             toViewController.viewDidAppear(true)
+            if (!toViewController.hidesBottomBarWhenPushed) {
+                this.tabBarController?.let {
+                    it.view.bringSubviewToFront(it.tabBar)
+                }
+            }
         }
         this.navigationBar.popNavigationItem(animated != false)
         return fromViewController
@@ -88,6 +111,7 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             return emptyList()
         }
         val toViewController = viewController
+        toViewController.view.hidden = false
         fromViewControllers.forEach { it.viewWillDisappear(animated ?: true) }
         toViewController.viewWillAppear(animated ?: true)
         if (animated != false) {
@@ -97,15 +121,25 @@ open class UINavigationController(rootViewController: UIViewController? = null):
                 fromViewControllers.forEach { it.view.removeFromSuperview() }
                 fromViewControllers.forEach { it.viewDidDisappear(true) }
                 toViewController.viewDidAppear(true)
+                if (!toViewController.hidesBottomBarWhenPushed) {
+                    this.tabBarController?.let {
+                        it.view.bringSubviewToFront(it.tabBar)
+                    }
+                }
                 this.beingAnimating = false
             }
         }
         else {
             fromViewControllers.forEach { it.removeFromParentViewController() }
             fromViewControllers.forEach { it.view.removeFromSuperview() }
-            toViewController.view.frame = contentFrame
+            toViewController.view.frame = contentFrame(toViewController)
             fromViewControllers.forEach { it.viewDidDisappear(false) }
             toViewController.viewDidAppear(false)
+            if (!toViewController.hidesBottomBarWhenPushed) {
+                this.tabBarController?.let {
+                    it.view.bringSubviewToFront(it.tabBar)
+                }
+            }
         }
         this.navigationBar.popToNavigationItem(toViewController.navigationItem, animated != false)
         return fromViewControllers
@@ -125,17 +159,27 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         viewControllers.forEach {
             this.addChildViewController(it)
             this.view.addSubview(it.view)
-            it.view.frame = contentFrame
+            it.view.frame = contentFrame(it)
         }
         this.navigationBar.setItems(viewControllers.map { it.navigationItem }, animated != false)
+        if (viewControllers.lastOrNull()?.hidesBottomBarWhenPushed == true) {
+            this.tabBarController?.let {
+                it.view.bringSubviewToFront(this.view)
+            }
+        }
+        else {
+            this.tabBarController?.let {
+                it.view.bringSubviewToFront(it.tabBar)
+            }
+        }
     }
 
     override fun viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
         this.navigationBar.frame = barFrame
         this.childViewControllers.forEach {
-            it.view.frame = contentFrame
+            it.view.frame = contentFrame(it)
         }
+        super.viewWillLayoutSubviews()
     }
 
     private val barFrame: CGRect
@@ -146,17 +190,25 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             return CGRect(0.0, 0.0, this.view.bounds.width, (this.window?.statusBarHeight ?: 0.0) + this.navigationBar.barHeight)
         }
 
-    private val contentFrame: CGRect
-        get() {
+    private fun contentFrame(viewController: UIViewController): CGRect {
+        if (viewController.hidesBottomBarWhenPushed) {
             return CGRect(0.0, this.barFrame.height, this.view.bounds.width, this.view.bounds.height - this.barFrame.height)
         }
+        else {
+            return CGRect(0.0, this.barFrame.height, this.view.bounds.width, this.view.bounds.height - this.barFrame.height - (this.tabBarController?.tabBar?.barHeight ?: 0.0))
+        }
+    }
 
     private fun doPushAnimation(fromViewController: UIViewController, toViewController: UIViewController, complete: () -> Unit) {
-        fromViewController.view.frame = contentFrame
-        toViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+        fromViewController.view.frame = contentFrame(fromViewController)
+        contentFrame(toViewController).let { contentFrame ->
+            toViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+        }
         UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
-            fromViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
-            toViewController.view.frame = contentFrame
+            contentFrame(fromViewController).let { contentFrame ->
+                fromViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
+            }
+            toViewController.view.frame = contentFrame(toViewController)
         }, EDOCallback.createWithBlock {
             complete()
         })
@@ -167,25 +219,29 @@ open class UINavigationController(rootViewController: UIViewController? = null):
             fromViewController.view.frame = this.view.bounds
         }
         else {
-            fromViewController.view.frame = contentFrame
+            fromViewController.view.frame = contentFrame(fromViewController)
         }
-        toViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
+        contentFrame(toViewController).let { contentFrame ->
+            toViewController.view.frame = CGRect(-contentFrame.width * 0.25, contentFrame.y, contentFrame.width, contentFrame.height)
+        }
         UIAnimator.shared.bouncy(0.0, 16.0, EDOCallback.createWithBlock {
             if (fromViewController is UINavigationBarViewController) {
-                fromViewController.view.frame = CGRect(contentFrame.width, this.view.frame.y, this.view.frame.width, this.view.frame.height)
+                fromViewController.view.frame = CGRect(contentFrame(fromViewController).width, this.view.frame.y, this.view.frame.width, this.view.frame.height)
             }
             else {
-                fromViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+                contentFrame(fromViewController).let { contentFrame ->
+                    fromViewController.view.frame = CGRect(contentFrame.width, contentFrame.y, contentFrame.width, contentFrame.height)
+                }
             }
-            toViewController.view.frame = contentFrame
+            toViewController.view.frame = contentFrame(toViewController)
         }, EDOCallback.createWithBlock {
             complete()
         })
     }
 
     override fun didAddSubview(subview: UIView) {
-        super.didAddSubview(subview)
         this.view.bringSubviewToFront(this.navigationBar)
+        super.didAddSubview(subview)
     }
 
     fun setNavigationBarHidden(hidden: Boolean, animated: Boolean, fadeAnimation: Boolean = false) {
@@ -206,9 +262,11 @@ open class UINavigationController(rootViewController: UIViewController? = null):
         else {
             this.navigationBar.hidden = hidden
         }
+        (this.childViewControllers.lastOrNull() as? UINavigationBarViewController)?.navigationControllerState?.barHidden = hidden
     }
 
     override fun setNeedsStatusBarAppearanceUpdate(activity: Activity?) {
+        super.setNeedsStatusBarAppearanceUpdate(activity)
         this.childViewControllers.lastOrNull()?.setNeedsStatusBarAppearanceUpdate(activity)
     }
 

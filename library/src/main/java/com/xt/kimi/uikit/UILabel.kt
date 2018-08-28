@@ -81,6 +81,10 @@ class UILabel: UIView() {
             this.setNeedsDisplay()
         }
 
+    init {
+        this.userInteractionEnabled = false
+    }
+
     override fun intrinsicContentSize(): CGSize? {
         if (this.text.isNullOrEmpty()) {
             return CGSize(0.0, 0.0)

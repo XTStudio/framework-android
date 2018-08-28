@@ -30,6 +30,42 @@ class UIImage(val bitmap: Bitmap, val scale: Int = 1, val renderingMode: UIImage
             }
         }
 
+        fun fromName(name: String, renderingMode: UIImageRenderingMode = UIImageRenderingMode.automatic): UIImage? {
+            val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return null
+            var currentScale = floor(com.xt.kimi.uikit.scale).toInt()
+            var targetFile: String? = null
+            val files = applicationContext.assets.list("images").filter { it.startsWith(name) }
+            if (files.contains(UIImage.fileName(name, currentScale))) {
+                targetFile = "images/${UIImage.fileName(name, currentScale)}"
+            } else {
+                while (currentScale > 0) {
+                    if (files.contains(UIImage.fileName(name, currentScale))) {
+                        targetFile = "images/${UIImage.fileName(name, currentScale)}"
+                        break
+                    }
+                    currentScale--
+                }
+                if (targetFile == null) {
+                    currentScale = floor(com.xt.kimi.uikit.scale).toInt() + 1
+                    while (currentScale < 5) {
+                        if (files.contains(UIImage.fileName(name, currentScale))) {
+                            targetFile = "images/${UIImage.fileName(name, currentScale)}"
+                            break
+                        }
+                        currentScale++
+                    }
+                }
+            }
+            targetFile?.let { targetFile ->
+                try {
+                    EDOExporter.sharedExporter.applicationContext?.assets?.open(targetFile).use {
+                        return UIImage(BitmapFactory.decodeStream(it), currentScale, renderingMode)
+                    }
+                } catch (e: Exception) { }
+            }
+            return null
+        }
+
         fun fromBase64(base64EncodedString: String, scale: Int, renderingMode: UIImageRenderingMode = UIImageRenderingMode.automatic): UIImage? {
             try {
                 val byteArray = Base64.decode(base64EncodedString, 0)
@@ -59,37 +95,8 @@ fun KIMIPackage.installUIImage() {
                 } catch (e: Exception) {}
             }
             (options["name"] as? String)?.let { name ->
-                val applicationContext = EDOExporter.sharedExporter.applicationContext ?: return@let
-                var currentScale = floor(scale).toInt()
-                var targetFile: String? = null
-                val files = applicationContext.assets.list("images").filter { it.startsWith(name) }
-                if (files.contains(UIImage.fileName(name, currentScale))) {
-                    targetFile = "images/${UIImage.fileName(name, currentScale)}"
-                } else {
-                    while (currentScale > 0) {
-                        if (files.contains(UIImage.fileName(name, currentScale))) {
-                            targetFile = "images/${UIImage.fileName(name, currentScale)}"
-                            break
-                        }
-                        currentScale--
-                    }
-                    if (targetFile == null) {
-                        currentScale = floor(scale).toInt() + 1
-                        while (currentScale < 5) {
-                            if (files.contains(UIImage.fileName(name, currentScale))) {
-                                targetFile = "images/${UIImage.fileName(name, currentScale)}"
-                                break
-                            }
-                            currentScale++
-                        }
-                    }
-                }
-                targetFile?.let { targetFile ->
-                    try {
-                        EDOExporter.sharedExporter.applicationContext?.assets?.open(targetFile).use {
-                            return@exportInitializer UIImage(BitmapFactory.decodeStream(it), currentScale, renderingMode)
-                        }
-                    } catch (e: Exception) { }
+                UIImage.fromName(name, renderingMode)?.let {
+                    return@exportInitializer it
                 }
             }
             (options["data"] as? Data)?.let { data ->

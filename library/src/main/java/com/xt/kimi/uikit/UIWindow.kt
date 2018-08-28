@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.os.SystemClock
+import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import com.xt.endo.CGPoint
@@ -162,11 +163,19 @@ class UIWindow : UIView() {
             UIAnimator.shared.bouncy(0.0, 24.0, EDOCallback.createWithBlock {
                 viewController.view.frame = this.bounds
             }, EDOCallback.createWithBlock {
+                this.presentedViewControllers.forEach {
+                    if (it == viewController) { return@forEach }
+                    it.view.hidden = true
+                }
                 complete?.invoke()
             })
         }
         else {
             viewController.view.frame = this.bounds
+            this.presentedViewControllers.forEach {
+                if (it == viewController) { return@forEach }
+                it.view.hidden = true
+            }
             complete?.invoke()
         }
     }
@@ -175,6 +184,7 @@ class UIWindow : UIView() {
         if (this.presentedViewControllers.count() > 0) {
             val fromViewController = this.presentedViewControllers[this.presentedViewControllers.count() - 1]
             val toViewController = fromViewController.presentingViewController ?: return
+            toViewController.view.hidden = false
             this.presentedViewControllers = kotlin.run {
                 val presentedViewControllers = this.presentedViewControllers.toMutableList()
                 presentedViewControllers.remove(fromViewController)
@@ -224,6 +234,8 @@ class UIWindow : UIView() {
     private val softButtonBarPaint = Paint()
 
     override fun draw(canvas: Canvas?) {
+        canvas?.quickReject(RectF(0.0f, 0.0f, (this.bounds.width * scale).toFloat(), (this.bounds.height * scale).toFloat()), Canvas.EdgeType.BW)
+        UIRenderingOptimizer.shared.measure(this, true)
         super.draw(canvas)
         if (this.softButtonBarHeight > 0.0) {
             val canvas = canvas ?: return

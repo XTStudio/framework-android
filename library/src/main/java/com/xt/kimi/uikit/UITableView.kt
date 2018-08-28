@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext
@@ -12,7 +13,7 @@ import kotlin.math.max
 
 // @Reference https://github.com/BigZaphod/Chameleon/blob/master/UIKit/Classes/UITableView.m
 
-class UITableView: UIScrollView() {
+open class UITableView: UIScrollView() {
 
     internal var kimi_context: V8? = null
 
@@ -52,6 +53,10 @@ class UITableView: UIScrollView() {
 
     var allowsMultipleSelection: Boolean = false
 
+    fun register(clazz: Class<*>, reuseIdentifier: String) {
+        this._registeredCellsClass[reuseIdentifier] = clazz as Class<UITableViewCell>
+    }
+
     fun register(initializer: EDOCallback, reuseIdentifier: String) {
         this._registeredCells[reuseIdentifier] = initializer
     }
@@ -61,11 +66,12 @@ class UITableView: UIScrollView() {
             this._reusableCells.remove(it)
             return it
         }
-        val kimi_context = this.kimi_context?.takeIf { !it.isReleased } ?: return UITableViewCell()
-        val initializer = this._registeredCells[reuseIdentifier] ?: return UITableViewCell()
-        val cell = UITableViewCell()
+        val cell = this._registeredCellsClass[reuseIdentifier]?.newInstance() ?: UITableViewCell()
         cell.reuseIdentifier = reuseIdentifier
-        EDOExporter.sharedExporter.scriptObjectWithObject(cell, kimi_context, true, initializer)
+        this._registeredCells[reuseIdentifier]?.let { initializer ->
+            val kimi_context = this.kimi_context?.takeIf { !it.isReleased } ?: return@let
+            EDOExporter.sharedExporter.scriptObjectWithObject(cell, kimi_context, true, initializer)
+        }
         return cell
     }
 
@@ -121,39 +127,48 @@ class UITableView: UIScrollView() {
 
     // DataSource & Delegate
 
-    fun numberOfSections(): Int {
+    open fun numberOfSections(): Int {
         return EDOJavaHelper.value(this, "numberOfSections") as? Int ?: 1
     }
 
-    fun numberOfRows(inSection: Int): Int {
+    open fun numberOfRows(inSection: Int): Int {
         return EDOJavaHelper.value(this, "numberOfRows", inSection) as? Int ?: 0
     }
 
-    fun heightForRow(indexPath: UIIndexPath): Double {
-        return (EDOJavaHelper.value(this, "heightForRow", indexPath) as? Number)?.toDouble() ?: this.rowHeight
+    open fun heightForRow(indexPath: UIIndexPath): Double {
+        val e = (EDOJavaHelper.value(this, "heightForRow", indexPath) as? Number)?.toDouble() ?: this.rowHeight
+        return e
     }
 
-    fun cellForRow(indexPath: UIIndexPath): UITableViewCell {
+    open fun cellForRow(indexPath: UIIndexPath): UITableViewCell {
         (EDOJavaHelper.value(this, "cellForRow", indexPath) as? UITableViewCell)?.let {
             return it
         }
         return UITableViewCell()
     }
 
-    fun viewForHeader(inSection: Int): UIView? {
+    open fun viewForHeader(inSection: Int): UIView? {
         return EDOJavaHelper.value(this, "viewForHeader", inSection) as? UIView
     }
 
-    fun heightForHeader(inSection: Int): Double {
+    open fun heightForHeader(inSection: Int): Double {
         return return (EDOJavaHelper.value(this, "heightForHeader", inSection) as? Number)?.toDouble() ?: 0.0
     }
 
-    fun viewForFooter(inSection: Int): UIView? {
+    open fun viewForFooter(inSection: Int): UIView? {
         return EDOJavaHelper.value(this, "viewForFooter", inSection) as? UIView
     }
 
-    fun heightForFooter(inSection: Int): Double {
+    open fun heightForFooter(inSection: Int): Double {
         return return (EDOJavaHelper.value(this, "heightForFooter", inSection) as? Number)?.toDouble() ?: 0.0
+    }
+
+    open fun didSelectRow(indexPath: UIIndexPath) {
+
+    }
+
+    open fun didDeselectRow(indexPath: UIIndexPath) {
+
     }
 
     // Implementation
@@ -175,6 +190,7 @@ class UITableView: UIScrollView() {
         this._layoutTableView()
     }
 
+    private val _registeredCellsClass: MutableMap<String, Class<UITableViewCell>> = mutableMapOf()
     private val _registeredCells: MutableMap<String, EDOCallback> = mutableMapOf()
     private val _reusableCells: MutableSet<UITableViewCell> = mutableSetOf()
     private val _cachedCells: MutableMap<String, UITableViewCell> = mutableMapOf()
@@ -463,7 +479,7 @@ class UITableView: UIScrollView() {
             }
             UITouchPhase.moved -> {
                 this.firstTouchPoint?.let { firstTouchPoint ->
-                    if (abs((currentTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
+                    if (UIView.recognizedGesture != null || abs((currentTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
                         this._highlightedRow = null
                         this._cachedCells.values.forEach {
                             it.edo_highlighted = false
@@ -505,9 +521,11 @@ class UITableView: UIScrollView() {
                     cell.edo_selected = !cell.edo_selected
                     EDOJavaHelper.emit(cell, "selected", cell, cell.edo_selected, false)
                     if (cell.edo_selected) {
+                        cell.currentIndexPath?.let { this.didSelectRow(it) }
                         EDOJavaHelper.emit(this, "didSelectRow", cell.currentIndexPath, cell)
                     }
                     else {
+                        cell.currentIndexPath?.let { this.didDeselectRow(it) }
                         EDOJavaHelper.emit(this, "didDeselectRow", cell.currentIndexPath, cell)
                     }
                 } ?: kotlin.run {

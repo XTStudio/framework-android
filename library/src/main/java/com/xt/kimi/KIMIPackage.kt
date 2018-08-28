@@ -14,6 +14,7 @@ import com.xt.kimi.coregraphics.installCAGradientLayer
 import com.xt.kimi.coregraphics.installCALayer
 import com.xt.kimi.coregraphics.installCAShapeLayer
 import com.xt.kimi.foundation.*
+import com.xt.kimi.kimi.KMCore
 import com.xt.kimi.kimi.installKMCore
 import com.xt.kimi.uikit.*
 import com.xt.kimi.uikit.helper.KeyboardHeightObserver
@@ -37,6 +38,7 @@ class KIMIPackage : EDOPackage(), KeyboardHeightObserver {
         val applicationContext = exporter.applicationContext ?: return
         // KIMI
         installKMCore()
+        KMCore.hostVersion = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0).versionName
         // Foundation
         installDispatchQueue()
         installUUID()
@@ -135,6 +137,7 @@ class KIMIPackage : EDOPackage(), KeyboardHeightObserver {
         installUINavigationBarViewController()
         installUIRefreshControl()
         installUIFetchMoreControl()
+        installUIProgressView()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()

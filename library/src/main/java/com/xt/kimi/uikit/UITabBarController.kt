@@ -7,22 +7,37 @@ import kotlin.math.max
 
 open class UITabBarController: UIViewController() {
 
+    internal var itemControllers: List<UIViewController> = listOf()
+
     var selectedIndex: Int = 0
         set(value) {
+            val oldIndex = field
+            this.itemControllers.getOrNull(value)?.let {
+                if (it.parentViewController == null) {
+                    this.addChildViewController(it)
+                    this.view.addSubview(it.view)
+                    this.view.bringSubviewToFront(this.tabBar)
+                    this.viewWillLayoutSubviews()
+                }
+            }
+            this.itemControllers.getOrNull(oldIndex)?.viewWillDisappear(false)
+            this.itemControllers.getOrNull(value)?.viewWillAppear(false)
             field = value
-            this.childViewControllers.forEachIndexed { index, viewController ->
-                viewController.view.hidden = index != value
+            this.childViewControllers.forEach {
+                it.view.hidden = itemControllers.indexOf(it) != value
             }
             this.tabBar.setSelectedIndex(value)
             this.setNeedsStatusBarAppearanceUpdate()
+            this.itemControllers.getOrNull(oldIndex)?.viewDidDisappear(false)
+            this.itemControllers.getOrNull(value)?.viewDidAppear(false)
         }
 
     var selectedViewController: UIViewController?
         set(value) {
-            this.selectedIndex = max(0, this.childViewControllers.indexOf(value))
+            this.selectedIndex = max(0, this.itemControllers.indexOf(value))
         }
         get() {
-            return this.childViewControllers.getOrNull(this.selectedIndex)
+            return this.itemControllers.getOrNull(this.selectedIndex)
         }
 
     fun edo_setViewControllers(viewControllers: List<UIViewController>, animated: Boolean? = false) {
@@ -30,13 +45,17 @@ open class UITabBarController: UIViewController() {
             it.removeFromParentViewController()
             it.view.removeFromSuperview()
         }
-        viewControllers.forEach {
-            this.addChildViewController(it)
-            this.view.addSubview(it.view)
+        this.itemControllers = viewControllers
+        viewControllers.forEachIndexed { index, it ->
+            if (index == 0) {
+                this.addChildViewController(it)
+                this.view.addSubview(it.view)
+            }
         }
         this.view.bringSubviewToFront(this.tabBar)
         this.tabBar.resetItems()
         this.selectedIndex = 0
+        this.viewWillLayoutSubviews()
     }
 
     val tabBar: UITabBar = UITabBar()
@@ -56,21 +75,37 @@ open class UITabBarController: UIViewController() {
             return CGRect(0.0, 0.0, this.view.bounds.width, this.view.bounds.height - this.barFrame.height)
         }
 
+    private val navigationControllerFrame: CGRect
+        get() {
+            return CGRect(0.0, 0.0, this.view.bounds.width, this.view.bounds.height)
+        }
+
+    private val hidesBottomBarContentFrame: CGRect
+        get() {
+            return CGRect(0.0, 0.0, this.view.bounds.width, this.view.bounds.height)
+        }
+
     override fun viewDidLoad() {
-        super.viewDidLoad()
         this.tabBar.tabBarController = this
         this.view.addSubview(this.tabBar)
+        super.viewDidLoad()
     }
 
     override fun viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
         this.tabBar.frame = barFrame
         this.childViewControllers.forEach {
-            it.view.frame = contentFrame
+            if (it is UINavigationController) {
+                it.view.frame = navigationControllerFrame
+            }
+            else {
+                it.view.frame = contentFrame
+            }
         }
+        super.viewWillLayoutSubviews()
     }
 
     override fun setNeedsStatusBarAppearanceUpdate(activity: Activity?) {
+        super.setNeedsStatusBarAppearanceUpdate(activity)
         this.selectedViewController?.setNeedsStatusBarAppearanceUpdate(activity)
     }
 

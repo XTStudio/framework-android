@@ -42,6 +42,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         clipChildren = false
         clipToPadding = false
         setWillNotDraw(false)
+
     }
 
     open val layer = CALayer()
@@ -634,6 +635,37 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     private var ignoreTransform = false
 
+    var edo_opaque: Boolean = false
+        set(value) {
+            field = value
+        }
+
+    open internal val edo_isOpaque: Boolean
+        get() {
+            if (this.edo_opaque) {
+                return true
+            }
+            if (this.clipsToBounds && this.layer.cornerRadius > 0) {
+                return false
+            }
+            return this.edo_backgroundColor?.a == 1.0 && this.edo_alpha == 1.0 && !this.hidden
+        }
+
+    internal val edo_isVisible: Boolean
+        get() {
+            if (this.edo_alpha <= 0.0 || this.hidden) {
+                return false
+            }
+            var current: UIView? = this.superview
+            while (current != null) {
+                if (this.edo_alpha <= 0.0 || this.hidden) {
+                    return false
+                }
+                current = current.superview
+            }
+            return true
+        }
+
     override fun draw(canvas: Canvas?) {
         val canvas = canvas ?: return
         if (canvas !is CAOSCanvas && this.clipsToBounds && !this.transform.isIdentity() && this.isHardwareAccelerated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -675,7 +707,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         if (ignoreTransform) { ignoreTransform = true }
         canvas.let {
             this.layer.view = this
-            this.layer.drawInContext(it)
+            if (UIRenderingOptimizer.shared.noNeedToDrawContent[this] != true) {
+                this.layer.drawInContext(it)
+            }
         }
         if (!this.clipsToBounds) {
 //            val rect = canvas.clipBounds
@@ -685,7 +719,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         else {
             canvas.clipPath(this.layer.createBoundsPath())
         }
-        super.draw(canvas)
+        if (this.childCount > 0) {
+            super.draw(canvas)
+        }
         canvas.restore()
     }
 
@@ -802,6 +838,41 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         )
     }
 
+    fun convertRectToWindow(rect: CGRect?): CGRect? {
+        if (this.window == null) {
+            return null
+        }
+        var matrix = Matrix()
+        var current: UIView? = this
+        var routes: MutableList<UIView> = mutableListOf()
+        while (current != null) {
+            if (current is UIWindow) { break }
+            routes.add(0, current)
+            current = current.superview
+        }
+        routes.forEach {
+            (it.superview as? UIScrollWrapperView)?.let {
+                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
+            }
+            matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
+            if (!it.transform.isIdentity()) {
+                val unmatrix = it.transform.unmatrix()
+                val matrix2 = Matrix()
+                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
+                matrix2.postRotate(unmatrix.degree.toFloat())
+                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
+                matrix.postConcat(matrix2)
+            }
+        }
+        var fromArr = FloatArray(9)
+        matrix.getValues(fromArr)
+        val lt = CGPoint(((rect ?: this.bounds).x) * fromArr[0] + ((rect ?: this.bounds).x) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).y) * fromArr[1] + ((rect ?: this.bounds).y) * fromArr[4] + fromArr[5])
+        val rb = CGPoint(((rect ?: this.bounds).width) * fromArr[0] + ((rect ?: this.bounds).width) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).height) * fromArr[1] + ((rect ?: this.bounds).height) * fromArr[4] + fromArr[5])
+        return CGRect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y)
+    }
+
     open fun intrinsicContentSize(): CGSize? {
         return null
     }
@@ -875,6 +946,7 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "clipsToBounds")
     exporter.exportProperty(UIView::class.java, "edo_backgroundColor")
     exporter.exportProperty(UIView::class.java, "edo_alpha")
+    exporter.exportProperty(UIView::class.java, "edo_opaque")
     exporter.exportProperty(UIView::class.java, "hidden")
     exporter.exportProperty(UIView::class.java, "contentMode")
     exporter.exportProperty(UIView::class.java, "tintColor")

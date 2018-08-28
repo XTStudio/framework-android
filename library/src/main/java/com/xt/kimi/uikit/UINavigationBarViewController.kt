@@ -5,7 +5,7 @@ import com.xt.kimi.KIMIPackage
 
 class UINavigationBarViewController: UIViewController() {
 
-    private class UINavigationControllerState {
+    internal class UINavigationControllerState {
 
         var barHidden = false
 
@@ -33,7 +33,7 @@ class UINavigationBarViewController: UIViewController() {
             return this.contentView
         }
 
-    private var navigationControllerState: UINavigationControllerState? = null
+    internal var navigationControllerState: UINavigationControllerState? = null
 
     override fun loadView() {
         super.loadView()
@@ -42,7 +42,6 @@ class UINavigationBarViewController: UIViewController() {
     }
 
     override fun viewWillAppear(animated: Boolean) {
-        super.viewWillAppear(animated)
         if (this.navigationController != null && this.navigationControllerState == null) {
             this.navigationController?.let { navigationController ->
                 this.navigationControllerState = UINavigationControllerState()
@@ -50,15 +49,16 @@ class UINavigationBarViewController: UIViewController() {
                 navigationController.setNavigationBarHidden(true, animated, false)
             }
         }
+        super.viewWillAppear(animated)
     }
 
     override fun viewWillDisappear(animated: Boolean) {
-        super.viewWillDisappear(animated)
         this.navigationControllerState?.let { navigationControllerState ->
             this.navigationController?.let { navigationController ->
                 navigationController.setNavigationBarHidden(navigationControllerState.barHidden, animated, true)
             }
         }
+        super.viewWillDisappear(animated)
     }
 
     private val barFrame: CGRect

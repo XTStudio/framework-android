@@ -1,6 +1,8 @@
 package com.xt.kimi.uikit
 
+import android.graphics.Canvas
 import android.graphics.Color
+import android.view.View
 import android.view.ViewGroup
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.drawable.ScalingUtils
@@ -16,6 +18,15 @@ class UIImageView: UIView() {
             field = value
             this.layer.contents = value
             this.setNeedsDisplay()
+        }
+
+    init {
+        this.userInteractionEnabled = false
+    }
+
+    override val edo_isOpaque: Boolean
+        get() {
+            return this.image?.bitmap?.hasAlpha() == true && super.edo_isOpaque
         }
 
     private var simpleDraweeView: SimpleDraweeView? = null
@@ -46,13 +57,13 @@ class UIImageView: UIView() {
         return super.intrinsicContentSize()
     }
 
-    fun loadImageWithURLString(URLString: String, placeholder: UIImage?) {
+    fun loadImageWithURLString(URLString: String?, placeholder: UIImage?) {
         if (simpleDraweeView == null) {
             simpleDraweeView = SimpleDraweeView(this.context)
             this.contentMode = this.contentMode
             addView(simpleDraweeView, ViewGroup.LayoutParams((this.bounds.width * com.xt.kimi.uikit.scale).toInt(), (this.bounds.height * com.xt.kimi.uikit.scale).toInt()))
         }
-        this.image = null
+        this.image = placeholder
         this.simpleDraweeView?.setImageURI(URLString)
     }
 
@@ -62,6 +73,16 @@ class UIImageView: UIView() {
             this.removeView(it)
             this.addView(it, ViewGroup.LayoutParams((this.bounds.width * com.xt.kimi.uikit.scale).toInt(), (this.bounds.height * com.xt.kimi.uikit.scale).toInt()))
         }
+    }
+
+    override fun draw(canvas: Canvas?) {
+        if (UIRenderingOptimizer.shared.noNeedToDrawContent[this] == true) {
+            this.simpleDraweeView?.visibility = View.GONE
+        }
+        else {
+            this.simpleDraweeView?.visibility = View.VISIBLE
+        }
+        super.draw(canvas)
     }
 
 }

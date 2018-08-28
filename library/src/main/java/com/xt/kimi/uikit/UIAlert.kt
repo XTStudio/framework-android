@@ -7,12 +7,12 @@ import com.xt.kimi.currentActivity
 
 class UIAlert(val message: String, val buttonText: String? = "OK") {
 
-    fun show(callback: EDOCallback) {
+    fun show(callback: EDOCallback?) {
         val currentActivity = currentActivity ?: return
         AlertDialog.Builder(currentActivity)
                 .setMessage(message)
-                .setPositiveButton(buttonText) { _, _ ->
-                    callback.invoke()
+                .setPositiveButton(buttonText ?: "OK") { _, _ ->
+                    callback?.invoke()
                 }
                 .show()
     }

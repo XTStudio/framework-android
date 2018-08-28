@@ -138,18 +138,55 @@ open class UIViewController {
     open fun viewWillAppear(animated: Boolean) {
         this.setNeedsStatusBarAppearanceUpdate()
         EDOJavaHelper.invokeBindedMethod(this, "viewWillAppear", animated)
+        (this as? UITabBarController)?.let {
+            it.selectedViewController?.viewWillAppear(animated)
+        } ?: kotlin.run {
+            (this as? UINavigationController)?.let {
+                it.childViewControllers.lastOrNull()?.viewWillAppear(animated)
+            }
+        } ?: kotlin.run {
+            this.childViewControllers.forEach { it.viewWillAppear(animated) }
+        }
     }
 
     open fun viewDidAppear(animated: Boolean) {
         EDOJavaHelper.invokeBindedMethod(this, "viewDidAppear", animated)
+        (this as? UITabBarController)?.let {
+            it.selectedViewController?.viewDidAppear(animated)
+        } ?: kotlin.run {
+            (this as? UINavigationController)?.let {
+                it.childViewControllers.lastOrNull()?.viewDidAppear(animated)
+            }
+        } ?: kotlin.run {
+            this.childViewControllers.forEach { it.viewDidAppear(animated) }
+        }
     }
 
     open fun viewWillDisappear(animated: Boolean) {
         EDOJavaHelper.invokeBindedMethod(this, "viewWillDisappear", animated)
+        this.window?.endEditing()
+        (this as? UITabBarController)?.let {
+            it.selectedViewController?.viewWillDisappear(animated)
+        } ?: kotlin.run {
+            (this as? UINavigationController)?.let {
+                it.childViewControllers.lastOrNull()?.viewWillDisappear(animated)
+            }
+        } ?: kotlin.run {
+            this.childViewControllers.forEach { it.viewWillDisappear(animated) }
+        }
     }
 
     open fun viewDidDisappear(animated: Boolean) {
         EDOJavaHelper.invokeBindedMethod(this, "viewDidDisappear", animated)
+        (this as? UITabBarController)?.let {
+            it.selectedViewController?.viewDidDisappear(animated)
+        } ?: kotlin.run {
+            (this as? UINavigationController)?.let {
+                it.childViewControllers.lastOrNull()?.viewDidDisappear(animated)
+            }
+        } ?: kotlin.run {
+            this.childViewControllers.forEach { it.viewDidDisappear(animated) }
+        }
     }
 
     open fun viewWillLayoutSubviews() {
@@ -250,6 +287,8 @@ open class UIViewController {
 
     val navigationItem = UINavigationItem()
 
+    var hidesBottomBarWhenPushed: Boolean = false
+
     val tabBarController: UITabBarController?
         get() {
             var current: UIViewController? = this
@@ -276,8 +315,8 @@ open class UIViewController {
 
     // Device Back Button Support
 
-    fun canGoBack(): Boolean {
-        if (this.window?.presentedViewControllers?.count() ?: 0 > 0) {
+    fun canGoBack(childBacking: Boolean = false): Boolean {
+        if (!childBacking && this.window?.presentedViewControllers?.count() ?: 0 > 0) {
             return true
         }
         (this as? UINavigationController)?.let {
@@ -289,8 +328,11 @@ open class UIViewController {
         return false
     }
 
-    fun goBack() {
-        if (this.window?.presentedViewControllers?.count() ?: 0 > 0) {
+    fun goBack(childBacking: Boolean = false) {
+        if (!childBacking && this.window?.presentedViewControllers?.count() ?: 0 > 0) {
+            this.window?.presentedViewControllers?.lastOrNull()?.takeIf { it.canGoBack(true) }?.let {
+                return it.goBack(true)
+            }
             this.window?.dismissViewController(true)
             return
         }
@@ -336,6 +378,7 @@ fun KIMIPackage.installUIViewController() {
     exporter.exportClass(UIViewController::class.java, "UIViewController")
     exporter.exportProperty(UIViewController::class.java, "title")
     exporter.exportProperty(UIViewController::class.java, "view", true)
+    exporter.exportProperty(UIViewController::class.java, "safeAreaInsets", true)
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidLoad")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewWillAppear")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidAppear")

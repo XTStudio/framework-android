@@ -49,7 +49,7 @@ class UITabBar: UIView() {
             it.barItem = null
         }
         this.tabBarController?.let { tabBarController ->
-            this.barButtons = tabBarController.childViewControllers.map {
+            this.barButtons = tabBarController.itemControllers.map {
                 val tabBarButton = UITabBarButton()
                 tabBarButton.barItem = it.tabBarItem
                 it.tabBarItem.barButton = tabBarButton
@@ -141,13 +141,13 @@ internal class UITabBarButton: UIView() {
         val imageInsets = this.barItem?.imageInsets ?: UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         this.iconImageView.frame = CGRect(
                 imageInsets.left + (this.bounds.width - iconSize.width) / 2.0 - imageInsets.right,
-                imageInsets.top + (this.bounds.height - (iconSize.height + 4.0 + titleSize.height)) / 2.0,
+                imageInsets.top + (this.bounds.height - (iconSize.height + titleSize.height)) / 2.0,
                 iconSize.width,
                 iconSize.height
         )
         this.titleLabel.frame = CGRect(
                 (this.bounds.width - titleSize.width) / 2.0,
-                this.iconImageView.frame.y + this.iconImageView.frame.height + 4.0 + imageInsets.bottom,
+                this.iconImageView.frame.y + this.iconImageView.frame.height + imageInsets.bottom,
                 titleSize.width,
                 titleSize.height
         )

@@ -93,6 +93,18 @@ class CATextLayer: CALayer() {
         textLayout?.let { layout ->
             val ty = (this.frame.height * scale - layout.height) / 2.0
             ctx.translate(0.0f, ty.toFloat())
+            shadowColor?.let { shadowColor ->
+                shadowOffset?.let { shadowOffset ->
+                    if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0) {
+                        layout.paint.setShadowLayer(
+                                (shadowRadius * scale).toFloat(),
+                                (shadowOffset.width * scale).toFloat(),
+                                (shadowOffset.height * scale).toFloat(),
+                                shadowColor.toInt()
+                        )
+                    }
+                }
+            }
             this.setAlphaForPaint(layout.paint, this)
             layout.draw(ctx)
             ctx.translate(0.0f, -ty.toFloat())
@@ -104,7 +116,7 @@ class CATextLayer: CALayer() {
         val builder = TextLayoutBuilder()
                 .setText(view.text ?: "")
                 .setTextSize(((view.font?.pointSize ?: 17.0) * scale).toInt())
-                .setWidth((width ?: Double.MAX_VALUE * scale).toInt())
+                .setWidth(((width ?: Double.MAX_VALUE) * scale).toInt())
                 .setTextStyle(kotlin.run {
                     val fontStyle = view.font?.fontStyle ?: return@run Typeface.NORMAL
                     when (fontStyle) {

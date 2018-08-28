@@ -381,7 +381,7 @@ class UICollectionView(val collectionViewLayout: UICollectionViewLayout): UIScro
             }
             UITouchPhase.moved -> {
                 this.firstTouchPoint?.let { firstTouchPoint ->
-                    if (abs((currentTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
+                    if (UIView.recognizedGesture != null || abs((currentTouch.windowPoint?.y ?: 0.0) - firstTouchPoint.y) > 8) {
                         this._indexPathsForHighlightedItems.clear()
                         this._allVisibleViewsDict.values.forEach {
                             (it as? UICollectionViewCell)?.let {

@@ -2,7 +2,7 @@ package com.xt.kimi.uikit
 
 import com.xt.kimi.KIMIPackage
 
-class UITableViewCell: UIView() {
+open class UITableViewCell: UIView() {
 
     val selectionView: UIView = UIView()
 
@@ -32,17 +32,28 @@ class UITableViewCell: UIView() {
     init {
         this.selectionView.edo_alpha = 0.0
         this.selectionView.edo_backgroundColor = UIColor(0xd0 / 255.0, 0xd0 / 255.0, 0xd0 / 255.0, 1.0)
+        this.contentView.edo_backgroundColor = UIColor.white
         addSubview(this.selectionView)
         addSubview(this.contentView)
     }
 
+    private var restoringContentViewBackgroundColor: UIColor? = null
+
     private fun onStateChanged() {
         if (this.hasSelectionStyle) {
             if (this.edo_selected || this.edo_highlighted) {
+                if (restoringContentViewBackgroundColor == null) {
+                    restoringContentViewBackgroundColor = this.contentView.edo_backgroundColor
+                }
                 this.selectionView.edo_alpha = 1.0
+                this.contentView.edo_backgroundColor = UIColor.clear
             }
             else {
                 this.selectionView.edo_alpha = 0.0
+                if (restoringContentViewBackgroundColor != null) {
+                    this.contentView.edo_backgroundColor = restoringContentViewBackgroundColor
+                    restoringContentViewBackgroundColor = null
+                }
             }
         }
     }
@@ -59,6 +70,9 @@ fun KIMIPackage.installUITableViewCell() {
     exporter.exportClass(UITableViewCell::class.java, "UITableViewCell", "UIView")
     exporter.exportProperty(UITableViewCell::class.java, "contentView", true)
     exporter.exportProperty(UITableViewCell::class.java, "reuseIdentifier", true)
+    exporter.exportProperty(UITableViewCell::class.java, "hasSelectionStyle")
+    exporter.exportProperty(UITableViewCell::class.java, "edo_highlighted", true)
+    exporter.exportProperty(UITableViewCell::class.java, "edo_selected", true)
     exporter.exportInitializer(UITableViewCell::class.java) {
         return@exportInitializer UITableViewCell()
     }

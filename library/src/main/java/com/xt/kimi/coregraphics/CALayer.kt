@@ -256,7 +256,7 @@ open class CALayer {
 
     private fun createBorderPath(): Path {
         sharedOuterPath.reset()
-        val outRect = RectF((this.borderWidth / 2.0 * scale).toFloat(), (this.borderWidth / 2.0 * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat())
+        val outRect = RectF((this.borderWidth / 2.0 * scale).toFloat(), (this.borderWidth / 2.0 * scale).toFloat(), ((this.frame.width - this.borderWidth / 2.0) * scale).toFloat(), ((this.frame.height - this.borderWidth / 2.0) * scale).toFloat())
         val radiusRatio = this.cornerRadius / max(this.frame.width, this.frame.height)
         val newCornerRadius = max(outRect.width(), outRect.height()) * radiusRatio
         sharedOuterPath.addRoundRect(outRect, newCornerRadius.toFloat(), newCornerRadius.toFloat(), Path.Direction.CCW)

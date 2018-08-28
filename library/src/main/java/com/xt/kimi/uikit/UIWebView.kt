@@ -11,7 +11,7 @@ import com.xt.kimi.KIMIPackage
 import com.xt.kimi.foundation.URL
 import com.xt.kimi.foundation.URLRequest
 
-class UIWebView: UINativeTouchView() {
+open class UIWebView: UINativeTouchView() {
 
     var title: String? = null
         private set
@@ -65,7 +65,7 @@ class UIWebView: UINativeTouchView() {
 
     // Implementation
 
-    private val systemWebView = WebView(this.context)
+    internal val systemWebView = WebView(this.context)
 
     init {
         this.resetWebViewConfiguration()

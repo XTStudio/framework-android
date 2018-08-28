@@ -8,11 +8,14 @@ class KMCore {
 
         @JvmField val version = "0.1.0"
 
+        @JvmField var hostVersion: String = ""
+
     }
 
 }
 
 fun KIMIPackage.installKMCore() {
     exporter.exportClass(KMCore::class.java, "KMCore")
-    exporter.exportStaticProperty(KMCore::class.java, "version")
+    exporter.exportStaticProperty(KMCore::class.java, "version", true)
+    exporter.exportStaticProperty(KMCore::class.java, "hostVersion", true)
 }
