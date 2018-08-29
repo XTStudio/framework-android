@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.app.Activity
 import com.xt.endo.CGRect
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import kotlin.math.max
 
@@ -9,8 +10,16 @@ open class UITabBarController: UIViewController() {
 
     internal var itemControllers: List<UIViewController> = listOf()
 
-    var selectedIndex: Int = 0
+    var selectedIndex: Int = -1
         set(value) {
+            if (field == value) {
+                EDOJavaHelper.emit(this, "onSelectedViewController", this, true)
+                return
+            }
+            if (value < 0) {
+                field = value
+                return
+            }
             val oldIndex = field
             this.itemControllers.getOrNull(value)?.let {
                 if (it.parentViewController == null) {
@@ -30,6 +39,7 @@ open class UITabBarController: UIViewController() {
             this.setNeedsStatusBarAppearanceUpdate()
             this.itemControllers.getOrNull(oldIndex)?.viewDidDisappear(false)
             this.itemControllers.getOrNull(value)?.viewDidAppear(false)
+            EDOJavaHelper.emit(this, "onSelectedViewController", this, false)
         }
 
     var selectedViewController: UIViewController?

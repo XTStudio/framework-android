@@ -113,7 +113,11 @@ class UIRenderingOptimizer {
         if (needsDrawn && view.edo_isOpaque) {
             this.drawnRects.clear()
             nextDrawnRects.forEach { rect ->
-                if (rect.width * rect.height < 200.0) { return@forEach }
+                if (rect.width * rect.height < 200.0 ||
+                        (rect.width < 10 && rect.height < windowRect.height) ||
+                        (rect.height < 10 && rect.width < windowRect.width )) {
+                    return@forEach
+                }
                 this.drawnRects.add(rect)
             }
         }
@@ -138,23 +142,23 @@ class UIRenderingOptimizer {
             if (target.x - origin.x > 0 && target.y - origin.y > 0) {
                 this.devidedRects.add(CGRect(origin.x, origin.y, target.x - origin.x, target.y - origin.y))
             }
-            if (target.x + target.width - max(target.x, origin.x) > 0 && target.y - origin.y > 0) {
-                this.devidedRects.add(CGRect(max(target.x, origin.x), origin.y, target.x + target.width - max(target.x, origin.x), target.y - origin.y))
+            if (origin.x + origin.width - max(target.x, origin.x) > 0 && target.y - origin.y > 0) {
+                this.devidedRects.add(CGRect(max(target.x, origin.x), origin.y, origin.x + origin.width - max(target.x, origin.x), target.y - origin.y))
             }
             if (origin.x + origin.width - (target.x + target.width) > 0 && target.y - origin.y > 0) {
                 this.devidedRects.add(CGRect(target.x + target.width, origin.y, origin.x + origin.width - (target.x + target.width), target.y - origin.y))
             }
-            if (target.x - origin.x > 0 && target.y + target.height - max(target.y, origin.y) > 0) {
-                this.devidedRects.add(CGRect(origin.x, max(target.y, origin.y), target.x - origin.x, target.y + target.height - max(target.y, origin.y)))
+            if (target.x - origin.x > 0 && origin.y + origin.height - max(target.y, origin.y) > 0) {
+                this.devidedRects.add(CGRect(origin.x, max(target.y, origin.y), target.x - origin.x, origin.y + origin.height - max(target.y, origin.y)))
             }
-            if (origin.x + origin.width - (target.x + target.width) > 0 && target.y + target.height - max(target.y, origin.y) > 0) {
-                this.devidedRects.add(CGRect(target.x + target.width, max(target.y, origin.y), origin.x + origin.width - (target.x + target.width), target.y + target.height - max(target.y, origin.y)))
+            if (origin.x + origin.width - (target.x + target.width) > 0 && origin.y + origin.height - max(target.y, origin.y) > 0) {
+                this.devidedRects.add(CGRect(target.x + target.width, max(target.y, origin.y), origin.x + origin.width - (target.x + target.width), origin.y + origin.height - max(target.y, origin.y)))
             }
             if (target.x - origin.x > 0 && origin.y + origin.height - (target.y + target.height) > 0) {
                 this.devidedRects.add(CGRect(origin.x, target.y + target.height, target.x - origin.x, origin.y + origin.height - (target.y + target.height)))
             }
-            if (target.x + target.width - max(target.x, origin.x) > 0 && origin.y + origin.height - (target.y + target.height) > 0) {
-                this.devidedRects.add(CGRect(max(target.x, origin.x), target.y + target.height, target.x + target.width - max(target.x, origin.x), origin.y + origin.height - (target.y + target.height)))
+            if (origin.x + origin.width - max(target.x, origin.x) > 0 && origin.y + origin.height - (target.y + target.height) > 0) {
+                this.devidedRects.add(CGRect(max(target.x, origin.x), target.y + target.height, origin.x + origin.width - max(target.x, origin.x), origin.y + origin.height - (target.y + target.height)))
             }
             if (origin.x + origin.width - (target.x + target.width) > 0 && origin.y + origin.height - (target.y + target.height) > 0) {
                 this.devidedRects.add(CGRect(target.x + target.width, target.y + target.height, origin.x + origin.width - (target.x + target.width), origin.y + origin.height - (target.y + target.height)))
