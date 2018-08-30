@@ -120,6 +120,7 @@ internal class UITabBarButton: UIView() {
     init {
         this.addSubview(this.iconImageView)
         this.titleLabel.font = UIFont(11.0)
+        this.titleLabel.textAlignment = UITextAlignment.center
         this.addSubview(this.titleLabel)
     }
 
@@ -146,9 +147,9 @@ internal class UITabBarButton: UIView() {
                 iconSize.height
         )
         this.titleLabel.frame = CGRect(
-                (this.bounds.width - titleSize.width) / 2.0,
+                0.0,
                 this.iconImageView.frame.y + this.iconImageView.frame.height + imageInsets.bottom,
-                titleSize.width,
+                this.bounds.width,
                 titleSize.height
         )
     }
