@@ -3,4 +3,5 @@
     <application>
         <meta-data android:name="com.xt.kimi.KIMIPackage" android:value="EDOPackage" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

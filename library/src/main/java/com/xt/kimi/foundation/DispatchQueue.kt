@@ -45,14 +45,6 @@ class DispatchQueue(val identifier: String) {
             if (this.operationContext == null) {
                 val context = JSContext()
                 EDOExporter.sharedExporter.exportWithContext(context)
-                try {
-                    val logClazz = Class.forName("com.xt.uulog.UULog\$Companion")
-                    val method = logClazz.getDeclaredMethod("attachTo", JSContext::class.java)
-                    val companionObject = Class.forName("com.xt.uulog.UULog").getDeclaredField("Companion").get(Class.forName("com.xt.uulog.UULog"))
-                    method.invoke(companionObject, context)
-                } catch (e: Exception) {
-                    print(true)
-                }
                 this.operationContext = context
             }
             this.operationContext?.let { context ->

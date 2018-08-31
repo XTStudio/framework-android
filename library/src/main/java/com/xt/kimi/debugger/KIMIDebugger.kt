@@ -1,7 +1,6 @@
 package com.xt.kimi.debugger
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.os.Handler
 import android.view.ViewGroup
@@ -11,7 +10,11 @@ import com.xt.endo.EDOExporter
 import com.xt.jscore.JSContext
 import com.xt.kimi.currentActivity
 import com.xt.kimi.uikit.scale
+import com.xt.uulog.UULog
+import com.xt.uulog.UULogHandler
 import okhttp3.*
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.IOException
 
 class KIMIDebugger(val applicationContext: Context, remoteAddress: String? = null) {
@@ -22,17 +25,127 @@ class KIMIDebugger(val applicationContext: Context, remoteAddress: String? = nul
     private var lastTag: String? = null
     private var contextInitializer: (() -> JSContext)? = null
 
+    init {
+        this.addConsoleHandler()
+    }
+
+    fun addConsoleHandler() {
+        UULog.sharedHandler = object :UULogHandler {
+            override fun onDebug(arguments: List<String>) {
+                try {
+                    val bodyObject = JSONObject()
+                    bodyObject.put("type", "debug")
+                    val bodyArguments = JSONArray()
+                    arguments.forEach { bodyArguments.put(it) }
+                    bodyObject.put("values", bodyArguments)
+                    this@KIMIDebugger.httpClient.newCall(
+                            Request.Builder()
+                                    .url("http://$remoteAddress/console")
+                                    .post(RequestBody.create(MediaType.parse("text/plain"), bodyObject.toString()))
+                                    .build()
+                    ).enqueue(object : Callback {
+                        override fun onFailure(call: Call?, e: IOException?) { }
+                        override fun onResponse(call: Call?, response: Response?) { }
+                    })
+                } catch (e: Exception) { }
+            }
+            override fun onError(arguments: List<String>) {
+                try {
+                    val bodyObject = JSONObject()
+                    bodyObject.put("type", "error")
+                    val bodyArguments = JSONArray()
+                    arguments.forEach { bodyArguments.put(it) }
+                    bodyObject.put("values", bodyArguments)
+                    this@KIMIDebugger.httpClient.newCall(
+                            Request.Builder()
+                                    .url("http://$remoteAddress/console")
+                                    .post(RequestBody.create(MediaType.parse("text/plain"), bodyObject.toString()))
+                                    .build()
+                    ).enqueue(object : Callback {
+                        override fun onFailure(call: Call?, e: IOException?) { }
+                        override fun onResponse(call: Call?, response: Response?) { }
+                    })
+                } catch (e: Exception) { }
+            }
+            override fun onInfo(arguments: List<String>) {
+                try {
+                    val bodyObject = JSONObject()
+                    bodyObject.put("type", "info")
+                    val bodyArguments = JSONArray()
+                    arguments.forEach { bodyArguments.put(it) }
+                    bodyObject.put("values", bodyArguments)
+                    this@KIMIDebugger.httpClient.newCall(
+                            Request.Builder()
+                                    .url("http://$remoteAddress/console")
+                                    .post(RequestBody.create(MediaType.parse("text/plain"), bodyObject.toString()))
+                                    .build()
+                    ).enqueue(object : Callback {
+                        override fun onFailure(call: Call?, e: IOException?) { }
+                        override fun onResponse(call: Call?, response: Response?) { }
+                    })
+                } catch (e: Exception) { }
+            }
+            override fun onVerbose(arguments: List<String>) {
+                try {
+                    val bodyObject = JSONObject()
+                    bodyObject.put("type", "log")
+                    val bodyArguments = JSONArray()
+                    arguments.forEach { bodyArguments.put(it) }
+                    bodyObject.put("values", bodyArguments)
+                    this@KIMIDebugger.httpClient.newCall(
+                            Request.Builder()
+                                    .url("http://$remoteAddress/console")
+                                    .post(RequestBody.create(MediaType.parse("text/plain"), bodyObject.toString()))
+                                    .build()
+                    ).enqueue(object : Callback {
+                        override fun onFailure(call: Call?, e: IOException?) { }
+                        override fun onResponse(call: Call?, response: Response?) { }
+                    })
+                } catch (e: Exception) { }
+            }
+            override fun onWarn(arguments: List<String>) {
+                try {
+                    val bodyObject = JSONObject()
+                    bodyObject.put("type", "warn")
+                    val bodyArguments = JSONArray()
+                    arguments.forEach { bodyArguments.put(it) }
+                    bodyObject.put("values", bodyArguments)
+                    this@KIMIDebugger.httpClient.newCall(
+                            Request.Builder()
+                                    .url("http://$remoteAddress/console")
+                                    .post(RequestBody.create(MediaType.parse("text/plain"), bodyObject.toString()))
+                                    .build()
+                    ).enqueue(object : Callback {
+                        override fun onFailure(call: Call?, e: IOException?) { }
+                        override fun onResponse(call: Call?, response: Response?) { }
+                    })
+                } catch (e: Exception) { }
+            }
+        }
+    }
+
     fun setContextInitializer(value: () -> JSContext) {
         this.contextInitializer = value
     }
 
     fun connect(callback: (context: JSContext) -> Unit, fallback: () -> Unit) {
+        try {
+            val clazz = Class.forName(this.applicationContext.packageName + ".BuildConfig")
+            val field = clazz.getField("DEBUG")
+            if (field.get(clazz) as? Boolean != true) {
+                fallback()
+                return
+            }
+        } catch (e: Exception) { }
         val dialog = this.displayConnectingDialog(callback, fallback)
         this.httpClient.newCall(Request.Builder()
                 .url("http://$remoteAddress/source")
                 .get()
                 .build()).enqueue(object : Callback {
             override fun onFailure(call: Call?, e: IOException?) {
+                if (this@KIMIDebugger.lastTag == null) {
+                    return
+                }
                 Handler(applicationContext.mainLooper).post {
                     dialog.hide()
                     fallback()

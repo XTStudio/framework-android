@@ -8,9 +8,7 @@ import com.xt.endo.EDOObjectTransfer
 import com.xt.jscore.JSContext
 import com.xt.jscore.JSValue
 import com.xt.kimi.debugger.KIMIDebugger
-import com.xt.kimi.uikit.UINavigationController
 import com.xt.kimi.uikit.UIViewController
-import com.xt.uulog.UULog
 
 class MainActivity : Activity() {
 
@@ -21,17 +19,11 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val debugger = KIMIDebugger(this)
-        debugger.setContextInitializer {
-            val context = JSContext()
-            context.evaluateScript("var main = undefined")
-            return@setContextInitializer context
-        }
         debugger.connect({
             this.context = it
             this.attachWindow()
         }, {
             val context = JSContext()
-            UULog.attachTo(context)
             EDOExporter.sharedExporter.exportWithContext(context)
             context.exceptionHandler = { _, exception ->
                 Log.e("JSContext", exception.toString())
