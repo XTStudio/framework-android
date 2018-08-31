@@ -152,6 +152,7 @@ class KIMIDebugger(val applicationContext: Context, remoteAddress: String? = nul
                 }
             }
             override fun onResponse(call: Call?, response: Response?) {
+                if (this@KIMIDebugger.closed) { return }
                 val script = response?.body()?.string() ?: return
                 Handler(applicationContext.mainLooper).post {
                     val context = this@KIMIDebugger.contextInitializer?.invoke() ?: JSContext()
@@ -175,6 +176,7 @@ class KIMIDebugger(val applicationContext: Context, remoteAddress: String? = nul
                     this@KIMIDebugger.fetchUpdate(callback)
                 }
                 override fun onResponse(call: Call?, response: Response?) {
+                    if (this@KIMIDebugger.closed) { return }
                     val tag = response?.body()?.string() ?: return this@KIMIDebugger.fetchUpdate(callback)
                     if (this@KIMIDebugger.lastTag == null) {
                         this@KIMIDebugger.lastTag = tag
