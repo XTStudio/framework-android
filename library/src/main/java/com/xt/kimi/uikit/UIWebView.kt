@@ -11,6 +11,23 @@ import com.xt.kimi.KIMIPackage
 import com.xt.kimi.foundation.URL
 import com.xt.kimi.foundation.URLRequest
 
+private class UIWebViewJavaScriptInterface(val webView: UIWebView) {
+
+    @JavascriptInterface
+    fun bridgeScript(): String {
+        return "var KIMICallbacks=[];KIMI.postMessage=function(body,callback){var callbackIdx=typeof callback===\"function\"?KIMICallbacks.length:-1;if(callbackIdx!==undefined){KIMICallbacks.push(callback)}KIMI._postMessage(body, callbackIdx)};KIMI.onMessage=function(callbackIdx,args){try{KIMICallbacks[callbackIdx].apply(undefined,args)}catch(error){}};"
+    }
+
+    @JavascriptInterface
+    fun _postMessage(body: String, callbackIdx: Int) {
+        this.webView.post {
+            val value = EDOJavaHelper.value(this.webView, "message", body)
+            this.webView.evaluateJavaScript("KIMI.onMessage($callbackIdx, [`$value`])", EDOCallback.createWithBlock {  })
+        }
+    }
+
+}
+
 open class UIWebView: UINativeTouchView() {
 
     var title: String? = null
@@ -136,6 +153,17 @@ open class UIWebView: UINativeTouchView() {
         this.systemWebView.settings.databaseEnabled = true
         this.systemWebView.settings.domStorageEnabled = true
         this.systemWebView.settings.useWideViewPort = true
+        this.systemWebView.addJavascriptInterface(UIWebViewJavaScriptInterface(this), "KIMI")
+        WebView.setWebContentsDebuggingEnabled(kotlin.run {
+            try {
+                val clazz = Class.forName(this.context.packageName + ".BuildConfig")
+                val field = clazz.getField("DEBUG")
+                if (field.get(clazz) as? Boolean == true) {
+                    return@run true
+                }
+            } catch (e: Exception) { }
+            return@run false
+        })
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
