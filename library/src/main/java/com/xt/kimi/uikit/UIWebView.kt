@@ -154,16 +154,18 @@ open class UIWebView: UINativeTouchView() {
         this.systemWebView.settings.domStorageEnabled = true
         this.systemWebView.settings.useWideViewPort = true
         this.systemWebView.addJavascriptInterface(UIWebViewJavaScriptInterface(this), "KIMI")
-        WebView.setWebContentsDebuggingEnabled(kotlin.run {
-            try {
-                val clazz = Class.forName(this.context.packageName + ".BuildConfig")
-                val field = clazz.getField("DEBUG")
-                if (field.get(clazz) as? Boolean == true) {
-                    return@run true
-                }
-            } catch (e: Exception) { }
-            return@run false
-        })
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(kotlin.run {
+                try {
+                    val clazz = Class.forName(this.context.packageName + ".BuildConfig")
+                    val field = clazz.getField("DEBUG")
+                    if (field.get(clazz) as? Boolean == true) {
+                        return@run true
+                    }
+                } catch (e: Exception) { }
+                return@run false
+            })
+        }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
