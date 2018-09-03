@@ -1,6 +1,8 @@
 package com.xt.kimi.uikit
 
 import android.animation.ValueAnimator
+import android.os.Handler
+import android.os.Looper
 import android.view.animation.LinearInterpolator
 import com.xt.endo.CGPoint
 import com.xt.endo.CGRect
@@ -93,10 +95,21 @@ class UIRefreshControl: UIView() {
         this.animationView.tintColor = this.tintColor
     }
 
-    fun beginRefreshing() {
+    fun beginRefreshing_callFromScrollView() {
         this.refreshing = true
         this.animationView.startAnimation()
         EDOJavaHelper.emit(this, "refresh", this)
+    }
+
+    fun beginRefreshing() {
+        val scrollView = this.scrollView ?: return
+        this.refreshing = true
+        scrollView.setContentOffset(CGPoint(0.0, -scrollView.contentInset.top - 44.0), true)
+        this.animationView.startAnimation()
+        Handler(Looper.getMainLooper()).postDelayed({
+            this.animationView.edo_alpha = 1.0
+            EDOJavaHelper.emit(this, "refresh", this)
+        }, 750)
     }
 
     fun endRefreshing() {

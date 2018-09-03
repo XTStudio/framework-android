@@ -197,7 +197,7 @@ open class UIScrollView: UIView() {
                         this@UIScrollView.didEndDragging(false)
                         this@UIScrollView.willBeginDecelerating()
                         this@UIScrollView.didEndDecelerating()
-                        this@UIScrollView.refreshControl!!.beginRefreshing()
+                        this@UIScrollView.refreshControl!!.beginRefreshing_callFromScrollView()
                         this@UIScrollView.setContentOffset(CGPoint(0.0, -this@UIScrollView.contentInset.top - 44.0), true)
                     }
                     else if (this@UIScrollView.refreshControl != null && this@UIScrollView.refreshControl!!.animationView.edo_alpha > 0.0) {
@@ -363,7 +363,7 @@ open class UIScrollView: UIView() {
                     ceil(max(minX, min(maxX, (round(scroller.finalX / this.bounds.width) * this.bounds.width))) - this.edo_contentOffset.x).toInt(),
                     ceil(max(minY, min(maxY, (round(scroller.finalY / this.bounds.height) * this.bounds.height))) - this.edo_contentOffset.y).toInt(),
                     500
-                    )
+            )
         }
         this.loopScrollAnimation()
     }
