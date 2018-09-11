@@ -165,21 +165,21 @@ class UIActionSheet {
 
     val actions: MutableList<UIAlertAction> = mutableListOf()
 
-    fun addRegularAction(title: String, actionBlock: EDOCallback) {
+    fun addRegularAction(title: String, actionBlock: EDOCallback?) {
         this.actions.add(UIAlertAction(title, UIAlertAction.Style.normal) {
-            actionBlock.invoke()
+            actionBlock?.invoke()
         })
     }
 
-    fun addDangerAction(title: String, actionBlock: EDOCallback) {
+    fun addDangerAction(title: String, actionBlock: EDOCallback?) {
         this.actions.add(UIAlertAction(title, UIAlertAction.Style.danger) {
-            actionBlock.invoke()
+            actionBlock?.invoke()
         })
     }
 
-    fun addCancelAction(title: String, actionBlock: EDOCallback) {
+    fun addCancelAction(title: String, actionBlock: EDOCallback?) {
         this.actions.add(UIAlertAction(title, UIAlertAction.Style.cancel) {
-            actionBlock.invoke()
+            actionBlock?.invoke()
         })
     }
 
