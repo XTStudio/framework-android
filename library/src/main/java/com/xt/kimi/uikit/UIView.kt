@@ -30,12 +30,21 @@ enum class UIViewContentMode {
 
 open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
-    fun attachToActivity(activity: Activity) {
+    fun attachToActivity(activity: Activity, isKeyWindow: Boolean = true) {
         this.removeFromSuperview()
-        val rootView = UIWindow()
-        rootView.setBackgroundColor(Color.WHITE)
+        val rootView = if (this is UIWindow) this else UIWindow()
         rootView.addSubview(this)
-        activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        if (isKeyWindow) {
+            rootView.setBackgroundColor(Color.WHITE)
+            activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+        else {
+            activity.addContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+    }
+
+    fun detachFromActivity() {
+        this.window?.removeFromSuperview()
     }
 
     init {
@@ -240,6 +249,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             superview.setNeedsDisplay()
             this.superview = null
             this.didMoveToSuperview()
+        } ?: kotlin.run {
+            (parent as? ViewGroup)?.removeView(this)
         }
     }
 

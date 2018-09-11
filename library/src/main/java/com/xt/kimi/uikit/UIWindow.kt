@@ -19,7 +19,7 @@ import kotlin.math.abs
 /**
  * Created by cuiminghui on 2018/7/23.
  */
-class UIWindow : UIView() {
+open class UIWindow : UIView() {
 
     val touches: MutableMap<Int, UITouch> = mutableMapOf()
     val upCount: MutableMap<CGPoint, Int> = mutableMapOf()

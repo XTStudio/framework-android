@@ -60,7 +60,7 @@ open class UIViewController {
             this.view.setNeedsLayout(true)
         }
 
-    fun attachToActivity(activity: Activity, statusBarTransparent: Boolean) {
+    fun attachToActivity(activity: Activity, statusBarTransparent: Boolean, isKeyWindow: Boolean = true) {
         activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         val rootView = UIWindow()
         if (statusBarTransparent) {
@@ -79,10 +79,19 @@ open class UIViewController {
                 rootView.statusBarHeight = this.getStatusBarHeight(activity)
             }
         }
-        rootView.setBackgroundColor(Color.WHITE)
         rootView.rootViewController = this
-        activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-        this.setNeedsStatusBarAppearanceUpdate(activity)
+        if (isKeyWindow) {
+            rootView.setBackgroundColor(Color.WHITE)
+            activity.setContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            this.setNeedsStatusBarAppearanceUpdate(activity)
+        }
+        else {
+            activity.addContentView(rootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+    }
+
+    fun detachFromActivity() {
+        this.view.window?.removeFromSuperview()
     }
 
     private fun getStatusBarHeight(activity: Activity): Double {
