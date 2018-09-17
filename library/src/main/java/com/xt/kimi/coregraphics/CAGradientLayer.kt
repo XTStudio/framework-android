@@ -36,6 +36,17 @@ class CAGradientLayer: CALayer() {
 
     override fun drawContent(ctx: Canvas) {
         super.drawContent(ctx)
+        var locations: MutableList<Double> = mutableListOf()
+        if (locations.count() != colors.count()) {
+            var i = 0.0
+            (0 until colors.count()).forEach {
+                locations.add(i)
+                i += 1.0 / (colors.count() - 1)
+            }
+        }
+        else {
+            locations = this.locations.toMutableList()
+        }
         CALayer.sharedContentPaint.reset()
         CALayer.sharedContentPaint.shader = LinearGradient(
                 (this.frame.width * this.startPoint.x * scale).toFloat(),
@@ -43,7 +54,7 @@ class CAGradientLayer: CALayer() {
                 (this.frame.width * this.endPoint.x * scale).toFloat(),
                 (this.frame.height * this.endPoint.y * scale).toFloat(),
                 this.colors.map { return@map it.toInt() }.toIntArray(),
-                this.locations.map { return@map it.toFloat() }.toFloatArray(),
+                locations.map { return@map it.toFloat() }.toFloatArray(),
                 Shader.TileMode.CLAMP
         )
         this.setAlphaForPaint(CALayer.sharedContentPaint, this)
