@@ -333,7 +333,7 @@ open class CALayer {
                 }
                 UIViewContentMode.scaleAspectFit -> {
                     val viewRatio = this.frame.width / this.frame.height
-                    val contentRatio = it.bitmap.width / it.bitmap.height
+                    val contentRatio = it.bitmap.width.toDouble() / it.bitmap.height.toDouble()
                     if (viewRatio > contentRatio) {
                         val width = (it.bitmap.width * (this.frame.height / it.bitmap.height)).toFloat()
                         ctx.drawBitmap(
@@ -365,7 +365,7 @@ open class CALayer {
                 }
                 UIViewContentMode.scaleAspectFill -> {
                     val viewRatio = this.frame.width / this.frame.height
-                    val contentRatio = it.bitmap.width / it.bitmap.height
+                    val contentRatio = it.bitmap.width.toDouble() / it.bitmap.height.toDouble()
                     if (viewRatio < contentRatio) {
                         val width = (it.bitmap.width * (this.frame.height / it.bitmap.height)).toFloat()
                         ctx.drawBitmap(
