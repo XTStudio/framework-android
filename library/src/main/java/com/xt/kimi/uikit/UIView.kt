@@ -222,12 +222,14 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     var superview: UIView? = null
         private set
 
-    internal val window: UIWindow?
+    val window: UIWindow?
         get() {
             (this as? UIWindow)?.let { return this }
             var current: UIView? = superview
             while (current != null) {
-                (current as? UIWindow)?.let { return it }
+                (current as? UIWindow)?.let {
+                    return it
+                }
                 current = current.superview
             }
             return null
@@ -903,7 +905,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         internal fun createBitmap(width: Int, height: Int): Bitmap {
             sharedBitmaps.forEach { item ->
                 item.get()?.takeIf { !it.isRecycled && lockedBitmaps[it] == false }?.let { sharedBitmap ->
-                    if (sharedBitmap.width >= width && sharedBitmap.height >= height) {
+                    if (sharedBitmap.width == width && sharedBitmap.height == height) {
                         return sharedBitmap
                     }
                 }

@@ -139,6 +139,7 @@ class KIMIPackage : EDOPackage(), KeyboardHeightObserver {
         installUIFetchMoreControl()
         installUIProgressView()
         installUIActionSheet()
+        installUIWindow()
         // CoreGraphics
         installCALayer()
         installCAGradientLayer()

@@ -50,7 +50,6 @@ open class UITapGestureRecognizer : UIGestureRecognizer() {
                     UIView.recognizedGesture = this
                     this.state = UIGestureRecognizerState.ended
                     this.handleEvent("touch")
-                    val e = it.view?.convertRectToWindow(null)
                     EDOJavaHelper.emit(this, "touch", this)
                     handler.post {
                         UIView.recognizedGesture = null

@@ -5,13 +5,13 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.text.TextUtils
 import com.facebook.fbui.textlayoutbuilder.TextLayoutBuilder
 import com.xt.endo.CGRect
-import com.xt.kimi.uikit.UILabel
-import com.xt.kimi.uikit.UILineBreakMode
-import com.xt.kimi.uikit.UITextAlignment
-import com.xt.kimi.uikit.scale
+import com.xt.kimi.uikit.*
+import kotlin.math.ceil
 
 class CATextLayer: CALayer() {
 
@@ -96,11 +96,12 @@ class CATextLayer: CALayer() {
             shadowColor?.let { shadowColor ->
                 shadowOffset?.let { shadowOffset ->
                     if (shadowColor.a > 0 && shadowOpacity > 0 && shadowRadius > 0) {
+                        val shadowColorWithOpacity = if (shadowOpacity < 1) UIColor(shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a * shadowOpacity) else shadowColor
                         layout.paint.setShadowLayer(
                                 (shadowRadius * scale).toFloat(),
                                 (shadowOffset.width * scale).toFloat(),
                                 (shadowOffset.height * scale).toFloat(),
-                                shadowColor.toInt()
+                                shadowColorWithOpacity.toInt()
                         )
                     }
                 }
@@ -113,6 +114,23 @@ class CATextLayer: CALayer() {
 
     fun textBounds(width: Double?): CGRect {
         val view = this.view as? UILabel ?: return CGRect(0.0, 0.0, 0.0, 0.0)
+        view.attributedText?.spannableString?.let { spannableString ->
+            val textWidth = Layout.getDesiredWidth(spannableString, TextPaint())
+            if (textWidth < (width ?: Double.MAX_VALUE) * scale) {
+                val builder = TextLayoutBuilder()
+                        .setText(spannableString)
+                        .setWidth(((width ?: Double.MAX_VALUE) * scale).toInt())
+                return CGRect(0.0, 0.0, ceil(textWidth / scale + 1.0), (builder.build()?.height?.toDouble() ?: 0.0) / scale)
+            }
+            else {
+                val builder = TextLayoutBuilder()
+                        .setText(spannableString)
+                        .setWidth(((width ?: Double.MAX_VALUE) * scale).toInt())
+                builder.build()?.let {
+                    return CGRect(0.0, 0.0, ((0 until it.lineCount).map { idx -> it.getLineRight(idx) }.maxBy { it }?.toDouble() ?: 0.0) / scale, it.height.toDouble() / scale)
+                }
+            }
+        }
         val builder = TextLayoutBuilder()
                 .setText(view.text ?: "")
                 .setTextSize(((view.font?.pointSize ?: 17.0) * scale).toInt())

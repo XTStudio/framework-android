@@ -210,8 +210,10 @@ class UITextView: UINativeTouchView() {
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
         if (changed) {
-            this.systemEditText.width = this.width
-            this.systemEditText.height = this.height
+            this.systemEditText.x = 4 * scale
+            this.systemEditText.y = 4 * scale
+            this.systemEditText.width = (this.width - 8 * scale).toInt()
+            this.systemEditText.height = (this.height - 8 * scale).toInt()
         }
     }
 

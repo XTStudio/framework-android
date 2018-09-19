@@ -70,6 +70,7 @@ open class UIScrollView: UIView() {
         }
         else {
             this.edo_contentOffset = contentOffset
+            this@UIScrollView.didScroll()
         }
     }
 
@@ -375,6 +376,7 @@ open class UIScrollView: UIView() {
                     this.scroller.currX.toDouble(),
                     this.scroller.currY.toDouble()
             )
+            this@UIScrollView.didScroll()
             Choreographer.getInstance().postFrameCallback { this.loopScrollAnimation() }
         }
         else if (this.decelerating) {
