@@ -34,6 +34,7 @@ class UITextView: UINativeTouchView() {
     var textColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "textColor")
             systemEditText.setTextColor(value?.toInt() ?: Color.BLACK)
             systemEditText.setHintTextColor((value?.colorWithAlphaComponent(0.35)?.toInt() ?: Color.GRAY))
         }
@@ -41,6 +42,7 @@ class UITextView: UINativeTouchView() {
     var font: UIFont? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "font")
             value?.let { font ->
                 systemEditText.textSize = (font.pointSize).toFloat()
                 font.fontName?.let { fontName ->
@@ -72,6 +74,7 @@ class UITextView: UINativeTouchView() {
     var textAlignment = UITextAlignment.left
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "textAlignment")
             systemEditText.textAlignment = kotlin.run {
                 return@run when (value) {
                     UITextAlignment.left -> TEXT_ALIGNMENT_TEXT_START
@@ -84,12 +87,14 @@ class UITextView: UINativeTouchView() {
     var editable: Boolean = true
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "editable")
             systemEditText.isEnabled = false
         }
 
     var selectable: Boolean = true
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "selectable")
             systemEditText.setTextIsSelectable(value)
         }
 
@@ -119,36 +124,42 @@ class UITextView: UINativeTouchView() {
     var autocapitalizationType: UITextAutocapitalizationType = UITextAutocapitalizationType.sentences
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "autocapitalizationType")
             this.resetInputType()
         }
 
     var autocorrectionType: UITextAutocorrectionType = UITextAutocorrectionType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "autocorrectionType")
             this.resetInputType()
         }
 
     var spellCheckingType: UITextSpellCheckingType = UITextSpellCheckingType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "spellCheckingType")
             this.resetInputType()
         }
 
     var keyboardType: UIKeyboardType = UIKeyboardType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "keyboardType")
             this.resetInputType()
         }
 
     var returnKeyType: UIReturnKeyType = UIReturnKeyType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "returnKeyType")
             this.resetInputType()
         }
 
     var secureTextEntry: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "secureTextEntry")
             if (value) {
                 this.systemEditText.transformationMethod = PasswordTransformationMethod()
             }
@@ -211,7 +222,6 @@ class UITextView: UINativeTouchView() {
         super.onLayout(changed, left, top, right, bottom)
         if (changed) {
             this.systemEditText.x = 4 * scale
-            this.systemEditText.y = 4 * scale
             this.systemEditText.width = (this.width - 8 * scale).toInt()
             this.systemEditText.height = (this.height - 8 * scale).toInt()
         }
@@ -339,19 +349,19 @@ class UITextView: UINativeTouchView() {
 fun KIMIPackage.installUITextView() {
     exporter.exportClass(UITextView::class.java, "UITextView", "UIView")
     exporter.exportProperty(UITextView::class.java, "text")
-    exporter.exportProperty(UITextView::class.java, "textColor")
-    exporter.exportProperty(UITextView::class.java, "font")
-    exporter.exportProperty(UITextView::class.java, "textAlignment")
-    exporter.exportProperty(UITextView::class.java, "editable")
-    exporter.exportProperty(UITextView::class.java, "selectable")
+    exporter.exportProperty(UITextView::class.java, "textColor", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "font", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "textAlignment", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "editable", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "selectable", false, true, true)
     exporter.exportProperty(UITextView::class.java, "editing", true)
     exporter.exportMethodToJavaScript(UITextView::class.java, "scrollRangeToVisible")
     exporter.exportMethodToJavaScript(UITextView::class.java, "focus")
     exporter.exportMethodToJavaScript(UITextView::class.java, "blur")
-    exporter.exportProperty(UITextView::class.java, "autocapitalizationType")
-    exporter.exportProperty(UITextView::class.java, "autocorrectionType")
-    exporter.exportProperty(UITextView::class.java, "spellCheckingType")
-    exporter.exportProperty(UITextView::class.java, "keyboardType")
-    exporter.exportProperty(UITextView::class.java, "returnKeyType")
-    exporter.exportProperty(UITextView::class.java, "secureTextEntry")
+    exporter.exportProperty(UITextView::class.java, "autocapitalizationType", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "autocorrectionType", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "spellCheckingType", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "keyboardType", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "returnKeyType", false, true, true)
+    exporter.exportProperty(UITextView::class.java, "secureTextEntry", false, true, true)
 }

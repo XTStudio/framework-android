@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 open class UICollectionReusableView: UIView() {
@@ -10,7 +11,10 @@ open class UICollectionReusableView: UIView() {
         internal set
 
     var reuseIdentifier: String? = null
-        internal set
+        internal set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "reuseIdentifier")
+        }
 
     open fun prepareForReuse() {
         this.layoutAttributes = null
@@ -32,5 +36,5 @@ open class UICollectionReusableView: UIView() {
 fun KIMIPackage.installUICollectionReusableView() {
     exporter.exportClass(UICollectionReusableView::class.java, "UICollectionReusableView", "UIView")
     exporter.exportProperty(UICollectionReusableView::class.java, "collectionView", true)
-    exporter.exportProperty(UICollectionReusableView::class.java, "reuseIdentifier", true)
+    exporter.exportProperty(UICollectionReusableView::class.java, "reuseIdentifier", true, true, true)
 }

@@ -107,8 +107,8 @@ fun KIMIPackage.installUIImage() {
         }
         return@exportInitializer UIImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
     }
-    exporter.exportProperty(UIImage::class.java, "size")
-    exporter.exportProperty(UIImage::class.java, "scale")
+    exporter.exportProperty(UIImage::class.java, "size", true, true)
+    exporter.exportProperty(UIImage::class.java, "scale", true, true)
     exporter.exportEnum("UIImageRenderingMode", mapOf(
             Pair("automatic", UIImageRenderingMode.automatic),
             Pair("alwaysOriginal", UIImageRenderingMode.alwaysOriginal),

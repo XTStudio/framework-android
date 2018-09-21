@@ -87,8 +87,8 @@ fun KIMIPackage.installDispatchQueue() {
         }
         return@exportInitializer DispatchQueue(identifier)
     }
-    exporter.exportStaticProperty(DispatchQueue::class.java, "main", true)
-    exporter.exportStaticProperty(DispatchQueue::class.java, "global", true)
+    exporter.exportStaticProperty(DispatchQueue::class.java, "main", true, true)
+    exporter.exportStaticProperty(DispatchQueue::class.java, "global", true, true)
     exporter.exportScript(DispatchQueue::class.java, "Initializer.prototype.isolate = function(){ var args = []; for(var i=1;i<arguments.length;i++){ args.push(arguments[i]); } this._isolate(arguments[0].toString(), args); }", true)
     DispatchQueue.createGlobalQueue()
 }

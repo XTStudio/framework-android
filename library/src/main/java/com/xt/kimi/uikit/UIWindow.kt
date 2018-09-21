@@ -12,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import com.xt.endo.CGPoint
 import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.currentActivity
 import kotlin.math.abs
@@ -87,6 +88,9 @@ open class UIWindow : UIView() {
                 }
                 touches.clear()
                 sharedVelocityTracker.clear()
+                post {
+                    UIView.recognizedGesture = null
+                }
             }
         }
         else if (event.actionMasked == MotionEvent.ACTION_CANCEL) {
@@ -101,6 +105,9 @@ open class UIWindow : UIView() {
             upTimestamp.clear()
             touches.clear()
             sharedVelocityTracker.clear()
+            post {
+                UIView.recognizedGesture = null
+            }
         }
         return true
     }
@@ -134,6 +141,7 @@ open class UIWindow : UIView() {
                 it.view.removeFromSuperview()
             }
             field = value
+            EDOJavaHelper.valueChanged(this, "rootViewController")
             field?.let {
                 it.window = this
                 this.addSubview(it.view)
@@ -261,6 +269,6 @@ open class UIWindow : UIView() {
 
 fun KIMIPackage.installUIWindow() {
     exporter.exportClass(UIWindow::class.java, "UIWindow", "UIView")
-    exporter.exportProperty(UIWindow::class.java, "rootViewController")
+    exporter.exportProperty(UIWindow::class.java, "rootViewController", false, true, true)
     exporter.exportMethodToJavaScript(UIWindow::class.java, "endEditing")
 }

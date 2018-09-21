@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import com.xt.endo.CGRect
 import com.xt.endo.EDOCallback
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 class UIProgressView: UIView() {
@@ -9,6 +10,7 @@ class UIProgressView: UIView() {
     var progress: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "progress")
             this.layoutIfNeeded()
         }
 
@@ -27,12 +29,14 @@ class UIProgressView: UIView() {
     var progressTintColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "progressTintColor")
             this.progressView.edo_backgroundColor = value
         }
 
     var trackTintColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "trackTintColor")
             this.trackView.edo_backgroundColor = value
         }
 
@@ -58,8 +62,8 @@ class UIProgressView: UIView() {
 
 fun KIMIPackage.installUIProgressView() {
     exporter.exportClass(UIProgressView::class.java, "UIProgressView", "UIView")
-    exporter.exportProperty(UIProgressView::class.java, "progress")
-    exporter.exportProperty(UIProgressView::class.java, "progressTintColor")
-    exporter.exportProperty(UIProgressView::class.java, "trackTintColor")
+    exporter.exportProperty(UIProgressView::class.java, "progress", false, true, true)
+    exporter.exportProperty(UIProgressView::class.java, "progressTintColor", false, true, true)
+    exporter.exportProperty(UIProgressView::class.java, "trackTintColor", false, true, true)
     exporter.exportMethodToJavaScript(UIProgressView::class.java, "setProgress")
 }

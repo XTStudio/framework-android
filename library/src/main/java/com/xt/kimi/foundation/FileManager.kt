@@ -245,12 +245,12 @@ class FileManager {
 
 fun KIMIPackage.installFileManager() {
     exporter.exportClass(FileManager::class.java, "FileManager")
-    exporter.exportStaticProperty(FileManager::class.java, "defaultManager", true)
-    exporter.exportStaticProperty(FileManager::class.java, "documentDirectory", true)
-    exporter.exportStaticProperty(FileManager::class.java, "libraryDirectory", true)
-    exporter.exportStaticProperty(FileManager::class.java, "cacheDirectory", true)
-    exporter.exportStaticProperty(FileManager::class.java, "temporaryDirectory", true)
-    exporter.exportStaticProperty(FileManager::class.java, "jsBundleDirectory", true)
+    exporter.exportStaticProperty(FileManager::class.java, "defaultManager", true, true)
+    exporter.exportStaticProperty(FileManager::class.java, "documentDirectory", true, true)
+    exporter.exportStaticProperty(FileManager::class.java, "libraryDirectory", true, true)
+    exporter.exportStaticProperty(FileManager::class.java, "cacheDirectory", true, true)
+    exporter.exportStaticProperty(FileManager::class.java, "temporaryDirectory", true, true)
+    exporter.exportStaticProperty(FileManager::class.java, "jsBundleDirectory", true, true)
     exporter.exportMethodToJavaScript(FileManager::class.java, "subpaths")
     exporter.exportMethodToJavaScript(FileManager::class.java, "createDirectory")
     exporter.exportMethodToJavaScript(FileManager::class.java, "createFile")

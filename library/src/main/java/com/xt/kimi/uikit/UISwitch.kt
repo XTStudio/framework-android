@@ -17,12 +17,21 @@ class UISwitch: UIView() {
     }
 
     var onTintColor: UIColor? = this.tintColor
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "onTintColor")
+        }
 
     var thumbTintColor: UIColor? = UIColor.white
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "thumbTintColor")
+        }
 
     var isOn: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "isOn")
             this.layoutSubviews()
         }
 
@@ -146,8 +155,8 @@ class UISwitch: UIView() {
 
 fun KIMIPackage.installUISwitch() {
     exporter.exportClass(UISwitch::class.java, "UISwitch", "UIView")
-    exporter.exportProperty(UISwitch::class.java, "onTintColor")
-    exporter.exportProperty(UISwitch::class.java, "thumbTintColor")
-    exporter.exportProperty(UISwitch::class.java, "edo_isOn")
+    exporter.exportProperty(UISwitch::class.java, "onTintColor", false, true, true)
+    exporter.exportProperty(UISwitch::class.java, "thumbTintColor", false, true, true)
+    exporter.exportProperty(UISwitch::class.java, "edo_isOn", false, true, true)
     exporter.exportMethodToJavaScript(UISwitch::class.java, "edo_setOn")
 }

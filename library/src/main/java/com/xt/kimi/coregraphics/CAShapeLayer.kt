@@ -1,6 +1,7 @@
 package com.xt.kimi.coregraphics
 
 import android.graphics.*
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.uikit.UIBezierPath
 import com.xt.kimi.uikit.UIColor
@@ -28,72 +29,84 @@ class CAShapeLayer: CALayer() {
     var path: UIBezierPath? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "path")
             this.view?.setNeedsDisplay()
         }
 
     var fillColor: UIColor? = UIColor.black
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "fillColor")
             this.view?.setNeedsDisplay()
         }
 
     var fillRule: CAShapeFillRule = CAShapeFillRule.evenOdd
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "fillRule")
             this.view?.setNeedsDisplay()
         }
 
     var lineCap: CAShapeLineCap = CAShapeLineCap.butt
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "lineCap")
             this.view?.setNeedsDisplay()
         }
 
     var lineDashPattern: List<Double> = listOf()
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "lineDashPattern")
             this.view?.setNeedsDisplay()
         }
 
     var lineDashPhase: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "lineDashPhase")
             this.view?.setNeedsDisplay()
         }
 
     var lineJoin: CAShapeLineJoin = CAShapeLineJoin.miter
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "lineJoin")
             this.view?.setNeedsDisplay()
         }
 
     var lineWidth: Double = 1.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "lineWidth")
             this.view?.setNeedsDisplay()
         }
 
     var miterLimit: Double = 10.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "miterLimit")
             this.view?.setNeedsDisplay()
         }
 
     var strokeColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "strokeColor")
             this.view?.setNeedsDisplay()
         }
 
     var strokeStart: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "strokeStart")
             this.view?.setNeedsDisplay()
         }
 
     var strokeEnd: Double = 1.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "strokeEnd")
             this.view?.setNeedsDisplay()
         }
 
@@ -240,16 +253,16 @@ private class CAPathUtils {
 
 fun KIMIPackage.installCAShapeLayer() {
     exporter.exportClass(CAShapeLayer::class.java, "CAShapeLayer", "CALayer")
-    exporter.exportProperty(CAShapeLayer::class.java, "path")
-    exporter.exportProperty(CAShapeLayer::class.java, "fillColor")
-    exporter.exportProperty(CAShapeLayer::class.java, "fillRule")
-    exporter.exportProperty(CAShapeLayer::class.java, "lineCap")
-    exporter.exportProperty(CAShapeLayer::class.java, "lineDashPattern")
-    exporter.exportProperty(CAShapeLayer::class.java, "lineDashPhase")
-    exporter.exportProperty(CAShapeLayer::class.java, "lineJoin")
-    exporter.exportProperty(CAShapeLayer::class.java, "lineWidth")
-    exporter.exportProperty(CAShapeLayer::class.java, "miterLimit")
-    exporter.exportProperty(CAShapeLayer::class.java, "strokeColor")
-    exporter.exportProperty(CAShapeLayer::class.java, "strokeStart")
-    exporter.exportProperty(CAShapeLayer::class.java, "strokeEnd")
+    exporter.exportProperty(CAShapeLayer::class.java, "path", false, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "fillColor", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "fillRule", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "lineCap", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "lineDashPattern", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "lineDashPhase", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "lineJoin", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "lineWidth", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "miterLimit", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "strokeColor", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "strokeStart", false, true, true)
+    exporter.exportProperty(CAShapeLayer::class.java, "strokeEnd", false, true, true)
 }

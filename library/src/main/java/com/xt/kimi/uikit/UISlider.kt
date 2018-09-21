@@ -16,26 +16,41 @@ class UISlider: UIView() {
     }
 
     var value: Double = 0.5
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "value")
+        }
 
     var minimumValue: Double = 0.0
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "minimumValue")
+        }
 
     var maximumValue: Double = 1.0
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "maximumValue")
+        }
 
     var minimumTrackTintColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "minimumTrackTintColor")
             this.minimumTrackView.edo_backgroundColor = value
         }
 
     var maximumTrackTintColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "maximumTrackTintColor")
             this.maximumTrackView.edo_backgroundColor = value
         }
 
     var thumbTintColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "thumbTintColor")
             this.thumbView.edo_backgroundColor = value
             this.thumbOutLightView.edo_backgroundColor = value?.colorWithAlphaComponent(0.2)
         }
@@ -139,11 +154,11 @@ class UISlider: UIView() {
 
 fun KIMIPackage.installUISlider() {
     exporter.exportClass(UISlider::class.java, "UISlider", "UIView")
-    exporter.exportProperty(UISlider::class.java, "value")
-    exporter.exportProperty(UISlider::class.java, "minimumValue")
-    exporter.exportProperty(UISlider::class.java, "maximumValue")
-    exporter.exportProperty(UISlider::class.java, "minimumTrackTintColor")
-    exporter.exportProperty(UISlider::class.java, "maximumTrackTintColor")
-    exporter.exportProperty(UISlider::class.java, "thumbTintColor")
+    exporter.exportProperty(UISlider::class.java, "value", false, true, true)
+    exporter.exportProperty(UISlider::class.java, "minimumValue", false, true, true)
+    exporter.exportProperty(UISlider::class.java, "maximumValue", false, true, true)
+    exporter.exportProperty(UISlider::class.java, "minimumTrackTintColor", false, true, true)
+    exporter.exportProperty(UISlider::class.java, "maximumTrackTintColor", false, true, true)
+    exporter.exportProperty(UISlider::class.java, "thumbTintColor", false, true, true)
     exporter.exportMethodToJavaScript(UISlider::class.java, "edo_setValue")
 }

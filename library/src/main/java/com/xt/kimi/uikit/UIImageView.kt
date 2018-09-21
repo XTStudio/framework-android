@@ -8,6 +8,7 @@ import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.drawable.ScalingUtils
 import com.facebook.drawee.view.SimpleDraweeView
 import com.xt.endo.CGSize
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 class UIImageView: UIView() {
@@ -16,6 +17,7 @@ class UIImageView: UIView() {
         set(value) {
             this.simpleDraweeView?.setImageURI(null as? String)
             field = value
+            EDOJavaHelper.valueChanged(this, "image")
             this.layer.contents = value
             this.setNeedsDisplay()
         }
@@ -64,7 +66,11 @@ class UIImageView: UIView() {
             addView(simpleDraweeView, ViewGroup.LayoutParams((this.bounds.width * com.xt.kimi.uikit.scale).toInt(), (this.bounds.height * com.xt.kimi.uikit.scale).toInt()))
         }
         this.image = placeholder
-        this.simpleDraweeView?.setImageURI(URLString)
+        this.simpleDraweeView?.visibility = View.GONE
+        this.post {
+            this.simpleDraweeView?.visibility = View.VISIBLE
+            this.simpleDraweeView?.setImageURI(URLString)
+        }
     }
 
     override fun layoutSubviews() {
@@ -90,6 +96,6 @@ class UIImageView: UIView() {
 fun KIMIPackage.installUIImageView() {
     Fresco.initialize(exporter.applicationContext)
     exporter.exportClass(UIImageView::class.java, "UIImageView", "UIView")
-    exporter.exportProperty(UIImageView::class.java, "image")
+    exporter.exportProperty(UIImageView::class.java, "image", false, true, true)
     exporter.exportMethodToJavaScript(UIImageView::class.java, "loadImageWithURLString")
 }

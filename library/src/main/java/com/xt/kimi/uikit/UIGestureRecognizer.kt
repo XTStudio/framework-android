@@ -1,6 +1,7 @@
 package com.xt.kimi.uikit
 
 import com.xt.endo.CGPoint
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 enum class UIGestureRecognizerState {
@@ -15,9 +16,16 @@ enum class UIGestureRecognizerState {
 open class UIGestureRecognizer {
 
     var state: UIGestureRecognizerState = UIGestureRecognizerState.possible
-        internal set
+        internal set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "state")
+        }
 
     var enabled: Boolean = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "state")
+        }
 
     var view: UIView? = null
         internal set
@@ -54,9 +62,9 @@ open class UIGestureRecognizer {
 
 fun KIMIPackage.installUIGestureRecognizer() {
     exporter.exportClass(UIGestureRecognizer::class.java, "UIGestureRecognizer")
-    exporter.exportProperty(UIGestureRecognizer::class.java, "state", true)
-    exporter.exportProperty(UIGestureRecognizer::class.java, "enabled")
-    exporter.exportProperty(UIGestureRecognizer::class.java, "view", true)
+    exporter.exportProperty(UIGestureRecognizer::class.java, "state", true, true)
+    exporter.exportProperty(UIGestureRecognizer::class.java, "enabled", false, true, true)
+    exporter.exportProperty(UIGestureRecognizer::class.java, "view", true, true)
     exporter.exportMethodToJavaScript(UIGestureRecognizer::class.java, "requireGestureRecognizerToFail")
     exporter.exportMethodToJavaScript(UIGestureRecognizer::class.java, "locationInView")
     exporter.exportMethodToJavaScript(UIGestureRecognizer::class.java, "numberOfTouches")

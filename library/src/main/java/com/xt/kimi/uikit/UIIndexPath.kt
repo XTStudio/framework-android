@@ -31,6 +31,6 @@ fun KIMIPackage.installUIIndexPath() {
                 if (1 < it.count()) it[1] as? Int ?: 0 else 0
         )
     }
-    exporter.exportProperty(UIIndexPath::class.java, "row", true)
-    exporter.exportProperty(UIIndexPath::class.java, "section", true)
+    exporter.exportProperty(UIIndexPath::class.java, "row", true, true)
+    exporter.exportProperty(UIIndexPath::class.java, "section", true, true)
 }

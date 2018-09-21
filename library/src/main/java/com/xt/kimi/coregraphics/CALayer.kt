@@ -3,6 +3,7 @@ package com.xt.kimi.coregraphics
 import android.graphics.*
 import com.xt.endo.CGRect
 import com.xt.endo.CGSize
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 import com.xt.kimi.uikit.*
 import kotlin.math.abs
@@ -26,9 +27,16 @@ open class CALayer {
         }
 
     var frame: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this,  "frame")
+        }
 
     var superlayer: CALayer? = null
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this,  "superlayer")
+        }
 
     fun removeFromSuperlayer() {
         superlayer?.let { superlayer ->
@@ -42,7 +50,10 @@ open class CALayer {
     }
 
     var sublayers: List<CALayer> = listOf()
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this,  "sublayers")
+        }
 
     fun addSublayer(layer: CALayer) {
         if (this == layer) { return }
@@ -124,68 +135,84 @@ open class CALayer {
     var hidden: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "hidden")
             this.view?.setNeedsDisplay()
         }
 
     var edo_mask: CALayer? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "mask")
             this.view?.setNeedsDisplay()
         }
 
     var masksToBounds: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "masksToBounds")
             this.view?.setNeedsDisplay()
         }
 
     var backgroundColor: UIColor? = null
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "backgroundColor")
+            this.view?.setNeedsDisplay()
+        }
 
     var cornerRadius: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "cornerRadius")
             this.view?.setNeedsDisplay()
         }
 
     var borderWidth: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "borderWidth")
             this.view?.setNeedsDisplay()
         }
 
     var borderColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "borderColor")
             this.view?.setNeedsDisplay()
         }
 
     var opacity: Double = 1.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "opacity")
             this.view?.setNeedsDisplay()
         }
 
     var shadowColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "shadowColor")
             this.view?.setNeedsDisplay()
         }
 
     var shadowOpacity: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "shadowOpacity")
             this.view?.setNeedsDisplay()
         }
 
     var shadowOffset: CGSize? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "shadowOffset")
             this.view?.setNeedsDisplay()
         }
 
     var shadowRadius: Double = 0.0
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "shadowRadius")
             this.view?.setNeedsDisplay()
         }
 
@@ -423,25 +450,25 @@ open class CALayer {
 
 fun KIMIPackage.installCALayer() {
     exporter.exportClass(CALayer::class.java, "CALayer")
-    exporter.exportProperty(CALayer::class.java, "frame")
-    exporter.exportProperty(CALayer::class.java, "superlayer", true)
+    exporter.exportProperty(CALayer::class.java, "frame", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "superlayer", true, true)
     exporter.exportMethodToJavaScript(CALayer::class.java, "removeFromSuperlayer")
-    exporter.exportProperty(CALayer::class.java, "sublayers", true)
+    exporter.exportProperty(CALayer::class.java, "sublayers", true, true)
     exporter.exportMethodToJavaScript(CALayer::class.java, "addSublayer")
     exporter.exportMethodToJavaScript(CALayer::class.java, "insertSublayerAtIndex")
     exporter.exportMethodToJavaScript(CALayer::class.java, "insertSublayerBelow")
     exporter.exportMethodToJavaScript(CALayer::class.java, "insertSublayerAbove")
     exporter.exportMethodToJavaScript(CALayer::class.java, "replaceSublayer")
-    exporter.exportProperty(CALayer::class.java, "hidden")
-    exporter.exportProperty(CALayer::class.java, "opacity")
-    exporter.exportProperty(CALayer::class.java, "edo_mask")
-    exporter.exportProperty(CALayer::class.java, "masksToBounds")
-    exporter.exportProperty(CALayer::class.java, "backgroundColor")
-    exporter.exportProperty(CALayer::class.java, "cornerRadius")
-    exporter.exportProperty(CALayer::class.java, "borderWidth")
-    exporter.exportProperty(CALayer::class.java, "borderColor")
-    exporter.exportProperty(CALayer::class.java, "shadowColor")
-    exporter.exportProperty(CALayer::class.java, "shadowOpacity")
-    exporter.exportProperty(CALayer::class.java, "shadowOffset")
-    exporter.exportProperty(CALayer::class.java, "shadowRadius")
+    exporter.exportProperty(CALayer::class.java, "hidden", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "opacity", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "edo_mask", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "masksToBounds", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "backgroundColor", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "cornerRadius", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "borderWidth", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "borderColor", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "shadowColor", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "shadowOpacity", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "shadowOffset", false, true, true)
+    exporter.exportProperty(CALayer::class.java, "shadowRadius", false, true, true)
 }

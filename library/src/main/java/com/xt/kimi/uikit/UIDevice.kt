@@ -27,10 +27,10 @@ class UIDevice {
 
 fun KIMIPackage.installUIDevice() {
     exporter.exportClass(UIDevice::class.java, "UIDevice")
-    exporter.exportProperty(UIDevice::class.java, "name", true)
-    exporter.exportProperty(UIDevice::class.java, "model", true)
-    exporter.exportProperty(UIDevice::class.java, "systemName", true)
-    exporter.exportProperty(UIDevice::class.java, "systemVersion", true)
-    exporter.exportProperty(UIDevice::class.java, "identifierForVendor")
-    exporter.exportStaticProperty(UIDevice::class.java, "current", true)
+    exporter.exportProperty(UIDevice::class.java, "name", true, true)
+    exporter.exportProperty(UIDevice::class.java, "model", true, true)
+    exporter.exportProperty(UIDevice::class.java, "systemName", true, true)
+    exporter.exportProperty(UIDevice::class.java, "systemVersion", true, true)
+    exporter.exportProperty(UIDevice::class.java, "identifierForVendor", true, true)
+    exporter.exportStaticProperty(UIDevice::class.java, "current", true, true)
 }

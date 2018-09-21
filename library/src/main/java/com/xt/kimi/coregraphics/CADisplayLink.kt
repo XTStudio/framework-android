@@ -36,7 +36,7 @@ fun KIMIPackage.installCADisplayLink() {
     exporter.exportMethodToJavaScript(CADisplayLink::class.java, "active")
     exporter.exportMethodToJavaScript(CADisplayLink::class.java, "invalidate")
     exporter.exportProperty(CADisplayLink::class.java, "timestamp", true)
-    exporter.exportInitializer(CADisplayLink::class.java, {
+    exporter.exportInitializer(CADisplayLink::class.java) {
         return@exportInitializer CADisplayLink(it.firstOrNull() as? EDOCallback)
-    })
+    }
 }

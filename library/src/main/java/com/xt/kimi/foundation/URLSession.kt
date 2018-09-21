@@ -193,7 +193,7 @@ enum class URLSessionTaskState {
 
 fun KIMIPackage.installURLSession() {
     exporter.exportClass(URLSession::class.java, "URLSession")
-    exporter.exportStaticProperty(URLSession::class.java, "shared", true)
+    exporter.exportStaticProperty(URLSession::class.java, "shared", true, true)
     exporter.exportMethodToJavaScript(URLSession::class.java, "dataTask")
     exporter.exportClass(URLSessionTask::class.java, "URLSessionTask")
     exporter.exportProperty(URLSessionTask::class.java, "state", true)

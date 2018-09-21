@@ -25,6 +25,7 @@ open class UIViewController {
     var title: String? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "title")
             this.navigationItem.viewController = this
             this.navigationItem.setNeedsUpdate()
         }
@@ -57,6 +58,7 @@ open class UIViewController {
                 return
             }
             field = value
+            EDOJavaHelper.valueChanged(this, "safeAreaInsets")
             this.view.setNeedsLayout(true)
         }
 
@@ -208,13 +210,24 @@ open class UIViewController {
     }
 
     var parentViewController: UIViewController? = null
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "parentViewController")
+            EDOJavaHelper.valueChanged(this, "navigationController")
+            EDOJavaHelper.valueChanged(this, "tabBarController")
+        }
 
     var presentedViewController: UIViewController? = null
-        internal set
+        internal set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "presentedViewController")
+        }
 
     var presentingViewController: UIViewController? = null
-        internal set
+        internal set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "presentingViewController")
+        }
 
     open fun presentViewController(viewController: UIViewController, animated: Boolean? = true, completion: EDOCallback? = null) {
         val window = this.window ?: return
@@ -241,7 +254,10 @@ open class UIViewController {
     }
 
     var childViewControllers: List<UIViewController> = listOf()
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "childViewControllers")
+        }
 
     open fun addChildViewController(viewController: UIViewController) {
         if (viewController == this) { return }
@@ -297,6 +313,10 @@ open class UIViewController {
     val navigationItem = UINavigationItem()
 
     var hidesBottomBarWhenPushed: Boolean = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "hidesBottomBarWhenPushed")
+        }
 
     val tabBarController: UITabBarController?
         get() {
@@ -385,9 +405,9 @@ open class UIViewController {
 
 fun KIMIPackage.installUIViewController() {
     exporter.exportClass(UIViewController::class.java, "UIViewController")
-    exporter.exportProperty(UIViewController::class.java, "title")
-    exporter.exportProperty(UIViewController::class.java, "view", true)
-    exporter.exportProperty(UIViewController::class.java, "safeAreaInsets", true)
+    exporter.exportProperty(UIViewController::class.java, "title", false, true, true)
+    exporter.exportProperty(UIViewController::class.java, "view", true, true)
+    exporter.exportProperty(UIViewController::class.java, "safeAreaInsets", true, true)
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidLoad")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewWillAppear")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidAppear")
@@ -395,20 +415,20 @@ fun KIMIPackage.installUIViewController() {
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidDisappear")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewWillLayoutSubviews")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "viewDidLayoutSubviews")
-    exporter.exportProperty(UIViewController::class.java, "parentViewController", true)
-    exporter.exportProperty(UIViewController::class.java, "presentedViewController", true)
-    exporter.exportProperty(UIViewController::class.java, "presentingViewController", true)
+    exporter.exportProperty(UIViewController::class.java, "parentViewController", true, true)
+    exporter.exportProperty(UIViewController::class.java, "presentedViewController", true, true)
+    exporter.exportProperty(UIViewController::class.java, "presentingViewController", true, true)
     exporter.exportMethodToJavaScript(UIViewController::class.java, "presentViewController")
     exporter.exportMethodToJavaScript(UIViewController::class.java, "dismissViewController")
-    exporter.exportProperty(UIViewController::class.java, "childViewControllers", true)
+    exporter.exportProperty(UIViewController::class.java, "childViewControllers", true, true)
     exporter.exportMethodToJavaScript(UIViewController::class.java, "addChildViewController")
     exporter.exportMethodToJavaScript(UIViewController::class.java, "removeFromParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "willMoveToParentViewController")
     exporter.bindMethodToJavaScript(UIViewController::class.java, "didMoveToParentViewController")
-    exporter.exportProperty(UIViewController::class.java, "navigationController", true)
-    exporter.exportProperty(UIViewController::class.java, "navigationItem", true)
-    exporter.exportProperty(UIViewController::class.java, "tabBarController", true)
-    exporter.exportProperty(UIViewController::class.java, "tabBarItem", true)
+    exporter.exportProperty(UIViewController::class.java, "navigationController", true, true)
+    exporter.exportProperty(UIViewController::class.java, "navigationItem", true, true)
+    exporter.exportProperty(UIViewController::class.java, "tabBarController", true, true)
+    exporter.exportProperty(UIViewController::class.java, "tabBarItem", true, true)
     exporter.exportMethodToJavaScript(UIViewController::class.java, "setNeedsStatusBarAppearanceUpdate")
     exporter.exportEnum("UIStatusBarStyle", mapOf(
             Pair("default", UIStatusBarStyle.default),

@@ -32,6 +32,8 @@ open class UITabBarController: UIViewController() {
             this.itemControllers.getOrNull(oldIndex)?.viewWillDisappear(false)
             this.itemControllers.getOrNull(value)?.viewWillAppear(false)
             field = value
+            EDOJavaHelper.valueChanged(this, "selectedIndex")
+            EDOJavaHelper.valueChanged(this, "selectedViewController")
             this.childViewControllers.forEach {
                 it.view.hidden = itemControllers.indexOf(it) != value
             }
@@ -95,6 +97,10 @@ open class UITabBarController: UIViewController() {
             return CGRect(0.0, 0.0, this.view.bounds.width, this.view.bounds.height)
         }
 
+    init {
+        this.tabBar.isImportantNodeForRendering = true
+    }
+
     override fun viewDidLoad() {
         this.tabBar.tabBarController = this
         this.view.addSubview(this.tabBar)
@@ -123,8 +129,8 @@ open class UITabBarController: UIViewController() {
 
 fun KIMIPackage.installUITabBarController() {
     exporter.exportClass(UITabBarController::class.java, "UITabBarController", "UIViewController")
-    exporter.exportProperty(UITabBarController::class.java, "selectedIndex")
-    exporter.exportProperty(UITabBarController::class.java, "selectedViewController")
+    exporter.exportProperty(UITabBarController::class.java, "selectedIndex", false, true, true)
+    exporter.exportProperty(UITabBarController::class.java, "selectedViewController", false, true, true)
     exporter.exportMethodToJavaScript(UITabBarController::class.java, "edo_setViewControllers")
-    exporter.exportProperty(UITabBarController::class.java, "tabBar", true)
+    exporter.exportProperty(UITabBarController::class.java, "tabBar", true, true)
 }

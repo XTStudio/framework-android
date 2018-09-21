@@ -9,6 +9,7 @@ class UICollectionViewCell: UICollectionReusableView() {
         set(value) {
             if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "selected")
             EDOJavaHelper.emit(this, "selected", this, value)
         }
 
@@ -16,6 +17,7 @@ class UICollectionViewCell: UICollectionReusableView() {
         set(value) {
             if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "highlighted")
             EDOJavaHelper.emit(this, "highlighted", this, value)
         }
 
@@ -30,6 +32,7 @@ class UICollectionViewCell: UICollectionReusableView() {
     }
 
     init {
+        this.contentView.isImportantNodeForRendering = true
         addSubview(this.contentView)
     }
 
@@ -42,7 +45,7 @@ class UICollectionViewCell: UICollectionReusableView() {
 
 fun KIMIPackage.installUICollectionViewCell() {
     exporter.exportClass(UICollectionViewCell::class.java, "UICollectionViewCell", "UICollectionReusableView")
-    exporter.exportProperty(UICollectionViewCell::class.java, "contentView", true)
-    exporter.exportProperty(UICollectionViewCell::class.java, "edo_selected", true)
-    exporter.exportProperty(UICollectionViewCell::class.java, "edo_highlighted", true)
+    exporter.exportProperty(UICollectionViewCell::class.java, "contentView", true, true)
+    exporter.exportProperty(UICollectionViewCell::class.java, "edo_selected", true, true)
+    exporter.exportProperty(UICollectionViewCell::class.java, "edo_highlighted", true, true)
 }

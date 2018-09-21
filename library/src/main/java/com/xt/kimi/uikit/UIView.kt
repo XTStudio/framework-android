@@ -64,6 +64,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open var frame: CGRect = CGRect(0.0, 0.0, 0.0, 0.0)
         set(value) {
+            if (CGRectEqualToRect(field, value)) { return }
             if (!UIAnimator.duringAnimationValueSet) {
                 this.edo_frame_animations?.forEach { it.cancel() }
                 this.edo_frame_animations = null
@@ -121,6 +122,9 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             }
             val boundsChanged = field.width != value.width || field.height != value.height
             field = value
+            EDOJavaHelper.valueChanged(this, "frame")
+            EDOJavaHelper.valueChanged(this, "bounds")
+            EDOJavaHelper.valueChanged(this, "center")
             this.layer.frame = frame
             if (boundsChanged) {
                 this.bounds = CGRect(0.0, 0.0, frame.width, frame.height)
@@ -212,15 +216,25 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 }
             }
             field = value
+            EDOJavaHelper.valueChanged(this, "transform")
             this.setNeedsDisplay()
         }
 
     // Hierarchy
 
     var tag: Int = 0
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "tag")
+        }
 
     var superview: UIView? = null
-        private set
+        private set(value) {
+            field = value
+            this.setWillNotDraw(false)
+            EDOJavaHelper.valueChanged(this, "superview")
+            EDOJavaHelper.valueChanged(this, "window")
+        }
 
     val window: UIWindow?
         get() {
@@ -236,7 +250,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
 
     open var subviews: List<UIView> = listOf()
-        internal set
+        internal set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "subviews")
+        }
 
     open fun removeFromSuperview() {
         superview?.let { superview ->
@@ -525,6 +542,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 }
             }
             field = value
+            EDOJavaHelper.valueChanged(this, "backgroundColor")
             this.layer.backgroundColor = value
             this.setNeedsDisplay()
         }
@@ -555,11 +573,13 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 }
             }
             this.alpha = value.toFloat()
+            EDOJavaHelper.valueChanged(this, "alpha")
         }
 
     open var hidden: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "hidden")
             this.visibility = if (value) View.GONE else View.VISIBLE
             this.setNeedsDisplay()
         }
@@ -580,6 +600,7 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
 
     open fun tintColorDidChange() {
+        EDOJavaHelper.valueChanged(this, "tintColor")
         EDOJavaHelper.invokeBindedMethod(this, "tintColorDidChange")
         subviews.forEach {
             if (it.tintColor == null) {
@@ -647,6 +668,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     }
 
     private var ignoreTransform = false
+
+    internal open var isImportantNodeForRendering: Boolean = false
 
     var edo_opaque: Boolean = false
         set(value) {
@@ -855,31 +878,30 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         if (this.window == null) {
             return null
         }
-        var matrix = Matrix()
+        var matrix = UIView._convertRectToWindow_sharedMatrix1
+        matrix.reset()
         var current: UIView? = this
-        var routes: MutableList<UIView> = mutableListOf()
         while (current != null) {
             if (current is UIWindow) { break }
-            routes.add(0, current)
-            current = current.superview
-        }
-        routes.forEach {
+            val it = current
             (it.superview as? UIScrollWrapperView)?.let {
-                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
+                matrix.preTranslate(-it.scrollX / scale, -it.scrollY / scale)
             }
-            matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
+            matrix.preTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
             if (!it.transform.isIdentity()) {
                 val unmatrix = it.transform.unmatrix()
-                val matrix2 = Matrix()
-                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
-                matrix2.postRotate(unmatrix.degree.toFloat())
-                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
-                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
-                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
-                matrix.postConcat(matrix2)
+                val matrix2 = UIView._convertRectToWindow_sharedMatrix2
+                matrix2.reset()
+                matrix2.preTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
+                matrix2.preRotate(unmatrix.degree.toFloat())
+                matrix2.preScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix2.preTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix2.preTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
+                matrix.preConcat(matrix2)
             }
+            current = current.superview
         }
-        var fromArr = FloatArray(9)
+        val fromArr = UIView._convertRectToWindow_sharedFloatArray
         matrix.getValues(fromArr)
         val lt = CGPoint(((rect ?: this.bounds).x) * fromArr[0] + ((rect ?: this.bounds).x) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).y) * fromArr[1] + ((rect ?: this.bounds).y) * fromArr[4] + fromArr[5])
         val rb = CGPoint(((rect ?: this.bounds).width) * fromArr[0] + ((rect ?: this.bounds).width) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).height) * fromArr[1] + ((rect ?: this.bounds).height) * fromArr[4] + fromArr[5])
@@ -923,21 +945,25 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             lockedBitmaps[bitmap] = false
         }
 
+        private val _convertRectToWindow_sharedMatrix1 = Matrix()
+        private val _convertRectToWindow_sharedMatrix2 = Matrix()
+        private val _convertRectToWindow_sharedFloatArray = FloatArray(9)
+
     }
 
 }
 
 fun KIMIPackage.installUIView() {
     exporter.exportClass(UIView::class.java, "UIView")
-    exporter.exportProperty(UIView::class.java, "layer")
-    exporter.exportProperty(UIView::class.java, "frame")
-    exporter.exportProperty(UIView::class.java, "bounds")
-    exporter.exportProperty(UIView::class.java, "center")
-    exporter.exportProperty(UIView::class.java, "transform")
-    exporter.exportProperty(UIView::class.java, "tag")
-    exporter.exportProperty(UIView::class.java, "superview", true)
-    exporter.exportProperty(UIView::class.java, "subviews", true)
-    exporter.exportProperty(UIView::class.java, "window", true)
+    exporter.exportProperty(UIView::class.java, "layer", true, true)
+    exporter.exportProperty(UIView::class.java, "frame", false, true, true)
+    exporter.exportProperty(UIView::class.java, "bounds", false, true)
+    exporter.exportProperty(UIView::class.java, "center", false, true)
+    exporter.exportProperty(UIView::class.java, "transform", false, true, true)
+    exporter.exportProperty(UIView::class.java, "tag", false, true, true)
+    exporter.exportProperty(UIView::class.java, "superview", true, true)
+    exporter.exportProperty(UIView::class.java, "subviews", true, true)
+    exporter.exportProperty(UIView::class.java, "window", true, true)
     exporter.exportMethodToJavaScript(UIView::class.java, "removeFromSuperview")
     exporter.exportMethodToJavaScript(UIView::class.java, "insertSubviewAtIndex")
     exporter.exportMethodToJavaScript(UIView::class.java, "exchangeSubview")
@@ -957,12 +983,12 @@ fun KIMIPackage.installUIView() {
     exporter.bindMethodToJavaScript(UIView::class.java, "layoutSubviews")
     exporter.exportMethodToJavaScript(UIView::class.java, "setNeedsDisplay")
     exporter.exportProperty(UIView::class.java, "clipsToBounds")
-    exporter.exportProperty(UIView::class.java, "edo_backgroundColor")
-    exporter.exportProperty(UIView::class.java, "edo_alpha")
+    exporter.exportProperty(UIView::class.java, "edo_backgroundColor", false, true, true)
+    exporter.exportProperty(UIView::class.java, "edo_alpha", false, true, true)
     exporter.exportProperty(UIView::class.java, "edo_opaque")
-    exporter.exportProperty(UIView::class.java, "hidden")
+    exporter.exportProperty(UIView::class.java, "hidden", false, true, true)
     exporter.exportProperty(UIView::class.java, "contentMode")
-    exporter.exportProperty(UIView::class.java, "tintColor")
+    exporter.exportProperty(UIView::class.java, "tintColor", false, true, true)
     exporter.bindMethodToJavaScript(UIView::class.java, "tintColorDidChange")
     exporter.exportEnum("UIViewContentMode", mapOf(
             Pair("scaleToFill", UIViewContentMode.scaleToFill),

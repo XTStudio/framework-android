@@ -16,6 +16,7 @@ open class UIScrollView: UIView() {
     open var edo_contentOffset: CGPoint = CGPoint(0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "contentOffset")
             this.contentView.scrollX = (value.x * scale).toInt()
             this.contentView.scrollY = (value.y * scale).toInt()
             this.resetScrollIndicators()
@@ -24,34 +25,65 @@ open class UIScrollView: UIView() {
     var contentSize: CGSize = CGSize(0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "contentSize")
             this.resetLockedDirection()
         }
 
     var contentInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "contentInset")
             this.resetLockedDirection()
         }
 
     var directionalLockEnabled = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "directionalLockEnabled")
+        }
 
     var bounces = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "bounces")
+        }
 
     var alwaysBounceVertical = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "alwaysBounceVertical")
+        }
 
     var alwaysBounceHorizontal = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "alwaysBounceHorizontal")
+        }
 
     var pagingEnabled = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "pagingEnabled")
+        }
 
     var scrollEnabled = true
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "scrollEnabled")
             this.panGestureRecognizer.enabled = value
         }
 
     var showsHorizontalScrollIndicator = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "showsHorizontalScrollIndicator")
+        }
 
     var showsVerticalScrollIndicator = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "showsVerticalScrollIndicator")
+        }
 
     fun setContentOffset(contentOffset: CGPoint, animated: Boolean) {
         this.scroller.abortAnimation()
@@ -347,10 +379,10 @@ open class UIScrollView: UIView() {
                 this.edo_contentOffset.y.toInt(),
                 -velocity.x.toInt(),
                 -velocity.y.toInt(),
-                -this.contentInset.left.toInt(),
-                (this.contentSize.width + this.contentInset.right - this.bounds.width).toInt(),
-                -this.contentInset.top.toInt(),
-                (this.contentSize.height + this.contentInset.bottom - this.bounds.height).toInt()
+                -this.contentInset.left.toInt() - 1000,
+                (this.contentSize.width + this.contentInset.right - this.bounds.width).toInt() + 100,
+                -this.contentInset.top.toInt() - 1000,
+                (this.contentSize.height + this.contentInset.bottom - this.bounds.height).toInt() + 1000
         )
         if (this.pagingEnabled) {
             scroller.abortAnimation()
@@ -373,8 +405,8 @@ open class UIScrollView: UIView() {
         val finished = !this.scroller.computeScrollOffset()
         if (!finished) {
             this.edo_contentOffset = CGPoint(
-                    this.scroller.currX.toDouble(),
-                    this.scroller.currY.toDouble()
+                    Math.max(-this.contentInset.left, Math.min(Math.max(-this.contentInset.left, this.contentSize.width + this.contentInset.right - this.bounds.width), this.scroller.currX.toDouble())),
+                    Math.max(-this.contentInset.top, Math.min(Math.max(-this.contentInset.top, this.contentSize.height + this.contentInset.bottom - this.bounds.height), this.scroller.currY.toDouble()))
             )
             this@UIScrollView.didScroll()
             Choreographer.getInstance().postFrameCallback { this.loopScrollAnimation() }
@@ -686,17 +718,17 @@ open class UIScrollView: UIView() {
 
 fun KIMIPackage.installUIScrollView() {
     exporter.exportClass(UIScrollView::class.java, "UIScrollView", "UIView")
-    exporter.exportProperty(UIScrollView::class.java, "edo_contentOffset")
-    exporter.exportProperty(UIScrollView::class.java, "contentSize")
-    exporter.exportProperty(UIScrollView::class.java, "contentInset")
-    exporter.exportProperty(UIScrollView::class.java, "directionalLockEnabled")
-    exporter.exportProperty(UIScrollView::class.java, "bounces")
-    exporter.exportProperty(UIScrollView::class.java, "alwaysBounceVertical")
-    exporter.exportProperty(UIScrollView::class.java, "alwaysBounceHorizontal")
-    exporter.exportProperty(UIScrollView::class.java, "pagingEnabled")
-    exporter.exportProperty(UIScrollView::class.java, "scrollEnabled")
-    exporter.exportProperty(UIScrollView::class.java, "showsHorizontalScrollIndicator")
-    exporter.exportProperty(UIScrollView::class.java, "showsVerticalScrollIndicator")
+    exporter.exportProperty(UIScrollView::class.java, "edo_contentOffset", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "contentSize", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "contentInset", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "directionalLockEnabled", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "bounces", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "alwaysBounceVertical", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "alwaysBounceHorizontal", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "pagingEnabled", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "scrollEnabled", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "showsHorizontalScrollIndicator", false, true, true)
+    exporter.exportProperty(UIScrollView::class.java, "showsVerticalScrollIndicator", false, true, true)
     exporter.exportMethodToJavaScript(UIScrollView::class.java, "setContentOffset")
     exporter.exportMethodToJavaScript(UIScrollView::class.java, "scrollRectToVisible")
     exporter.exportProperty(UIScrollView::class.java, "edo_subviews", true)

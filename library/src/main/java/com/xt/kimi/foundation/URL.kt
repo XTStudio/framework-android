@@ -13,7 +13,7 @@ class URL(val uri: Uri) {
 
 fun KIMIPackage.installURL() {
     exporter.exportClass(URL::class.java, "URL")
-    exporter.exportProperty(URL::class.java, "absoluteString", true)
+    exporter.exportProperty(URL::class.java, "absoluteString", true, true)
     exporter.exportScript(URL::class.java, "Initializer.URLWithString = function(URLString, baseURL){ return new URL({URLString: URLString, baseURL: baseURL}) }")
     exporter.exportScript(URL::class.java, "Initializer.fileURLWithPath = function(filePath){ return new URL({filePath: filePath}) }")
     exporter.exportInitializer(URL::class.java) {

@@ -26,25 +26,27 @@ class UIRenderingOptimizer {
             this.rootWindow = view
             this.noNeedToDrawAnything = false
         }
-        view.subviews.reversed().forEach {
-            if (!it.edo_isVisible) {
-                it.setWillNotDraw(true)
-                return@forEach
-            }
-            this.measure(it, false, kotlin.run {
-                if (view.clipsToBounds) {
-                    val nextClipsBounds = view.convertRectToWindow(null) ?: return@run clips ?: null
-                    return@run clips?.let { clips ->
-                        return@run CGRect(
-                                max(clips.x, nextClipsBounds.x),
-                                max(clips.y, nextClipsBounds.y),
-                                min(clips.x + clips.width, nextClipsBounds.x + nextClipsBounds.width) - max(clips.x, nextClipsBounds.x),
-                                min(clips.y + clips.height, nextClipsBounds.y + nextClipsBounds.height) - max(clips.y, nextClipsBounds.y)
-                        )
-                    } ?: nextClipsBounds
+        if (!view.isImportantNodeForRendering) {
+            view.subviews.reversed().forEach {
+                if (!it.edo_isVisible) {
+                    it.setWillNotDraw(true)
+                    return@forEach
                 }
-                return@run clips ?: null
-            })
+                this.measure(it, false, kotlin.run {
+                    if (view.clipsToBounds) {
+                        val nextClipsBounds = view.convertRectToWindow(null) ?: return@run clips ?: null
+                        return@run clips?.let { clips ->
+                            return@run CGRect(
+                                    max(clips.x, nextClipsBounds.x),
+                                    max(clips.y, nextClipsBounds.y),
+                                    min(clips.x + clips.width, nextClipsBounds.x + nextClipsBounds.width) - max(clips.x, nextClipsBounds.x),
+                                    min(clips.y + clips.height, nextClipsBounds.y + nextClipsBounds.height) - max(clips.y, nextClipsBounds.y)
+                            )
+                        } ?: nextClipsBounds
+                    }
+                    return@run clips ?: null
+                })
+            }
         }
         val needsDrawn = this.checkNeedsDrawn(view, clips)
         if (!needsDrawn) {
@@ -65,6 +67,9 @@ class UIRenderingOptimizer {
             return false
         }
         val rootWindow = rootWindow ?: return false
+        if (view.frame.width < 8 || view.frame.height < 8) {
+            return true
+        }
         var windowRect = view.convertRectToWindow(null) ?: return false
         if (!CGRectIntersectsRect(windowRect, rootWindow.bounds)) {
             return false

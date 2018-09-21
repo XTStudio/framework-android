@@ -86,9 +86,16 @@ class UIRefreshControl: UIView() {
     }
 
     var edo_enabled: Boolean = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "enabled")
+        }
 
     var refreshing: Boolean = false
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "refreshing")
+        }
 
     override fun tintColorDidChange() {
         super.tintColorDidChange()
@@ -127,8 +134,8 @@ class UIRefreshControl: UIView() {
 
 fun KIMIPackage.installUIRefreshControl() {
     exporter.exportClass(UIRefreshControl::class.java, "UIRefreshControl", "UIView")
-    exporter.exportProperty(UIRefreshControl::class.java, "edo_enabled")
-    exporter.exportProperty(UIRefreshControl::class.java, "refreshing", true)
+    exporter.exportProperty(UIRefreshControl::class.java, "edo_enabled", false, true, true)
+    exporter.exportProperty(UIRefreshControl::class.java, "refreshing", true, true)
     exporter.exportMethodToJavaScript(UIRefreshControl::class.java, "beginRefreshing")
     exporter.exportMethodToJavaScript(UIRefreshControl::class.java, "endRefreshing")
 }

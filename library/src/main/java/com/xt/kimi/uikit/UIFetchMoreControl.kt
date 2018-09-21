@@ -13,9 +13,16 @@ class UIFetchMoreControl: UIView() {
     }
 
     var edo_enabled: Boolean = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "enabled")
+        }
 
     var fetching: Boolean = false
-        private set
+        private set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "fetching")
+        }
 
     override fun tintColorDidChange() {
         super.tintColorDidChange()
@@ -39,8 +46,8 @@ class UIFetchMoreControl: UIView() {
 
 fun KIMIPackage.installUIFetchMoreControl() {
     exporter.exportClass(UIFetchMoreControl::class.java, "UIFetchMoreControl", "UIView")
-    exporter.exportProperty(UIFetchMoreControl::class.java, "edo_enabled")
-    exporter.exportProperty(UIFetchMoreControl::class.java, "fetching", true)
+    exporter.exportProperty(UIFetchMoreControl::class.java, "edo_enabled", false, true, true)
+    exporter.exportProperty(UIFetchMoreControl::class.java, "fetching", true, true, true)
     exporter.exportMethodToJavaScript(UIFetchMoreControl::class.java, "beginFetching")
     exporter.exportMethodToJavaScript(UIFetchMoreControl::class.java, "endFetching")
 }

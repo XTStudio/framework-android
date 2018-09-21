@@ -16,6 +16,6 @@ class KMCore {
 
 fun KIMIPackage.installKMCore() {
     exporter.exportClass(KMCore::class.java, "KMCore")
-    exporter.exportStaticProperty(KMCore::class.java, "version", true)
-    exporter.exportStaticProperty(KMCore::class.java, "hostVersion", true)
+    exporter.exportStaticProperty(KMCore::class.java, "version", true, true)
+    exporter.exportStaticProperty(KMCore::class.java, "hostVersion", true, true)
 }

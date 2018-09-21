@@ -277,7 +277,7 @@ fun KIMIPackage.installUINavigationController() {
     exporter.exportInitializer(UINavigationController::class.java) {
         return@exportInitializer UINavigationController(it.firstOrNull() as? UIViewController)
     }
-    exporter.exportProperty(UINavigationController::class.java, "navigationBar", true)
+    exporter.exportProperty(UINavigationController::class.java, "navigationBar", true, true)
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "setNavigationBarHidden")
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "pushViewController")
     exporter.exportMethodToJavaScript(UINavigationController::class.java, "popViewController")

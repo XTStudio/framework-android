@@ -47,7 +47,7 @@ class UserDefaults(val suite: String?) {
 
 fun KIMIPackage.installUserDefaults() {
     exporter.exportClass(UserDefaults::class.java, "UserDefaults")
-    exporter.exportStaticProperty(UserDefaults::class.java, "standard", true)
+    exporter.exportStaticProperty(UserDefaults::class.java, "standard", true, true)
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "valueForKey")
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "setValue")
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "reset")

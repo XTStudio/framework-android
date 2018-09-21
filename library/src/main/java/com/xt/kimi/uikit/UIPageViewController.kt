@@ -8,10 +8,15 @@ import kotlin.math.ceil
 class UIPageViewController(val isVertical: Boolean? = false): UIViewController() {
 
     var loops: Boolean = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "loops")
+        }
 
     var pageItems: List<UIViewController>? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "pageItems")
             field?.takeIf { it.count() > 0 }?.let {
                 this.currentPage = it.firstOrNull()
                 this.resetContents()
@@ -22,6 +27,7 @@ class UIPageViewController(val isVertical: Boolean? = false): UIViewController()
         set(value) {
             field?.let { it.removeFromParentViewController() }
             field = value
+            EDOJavaHelper.valueChanged(this, "currentPage")
             value?.let {
                 if (it.parentViewController != this) {
                     this.addChildViewController(it)
@@ -226,9 +232,9 @@ fun KIMIPackage.installUIPageViewController() {
     exporter.exportInitializer(UIPageViewController::class.java) {
         return@exportInitializer UIPageViewController(it.firstOrNull() as? Boolean ?: false)
     }
-    exporter.exportProperty(UIPageViewController::class.java, "loops")
-    exporter.exportProperty(UIPageViewController::class.java, "pageItems")
-    exporter.exportProperty(UIPageViewController::class.java, "currentPage")
+    exporter.exportProperty(UIPageViewController::class.java, "loops", false, true, true)
+    exporter.exportProperty(UIPageViewController::class.java, "pageItems", false, true, true)
+    exporter.exportProperty(UIPageViewController::class.java, "currentPage", false, true, true)
     exporter.exportMethodToJavaScript(UIPageViewController::class.java, "scrollToNextPage")
     exporter.exportMethodToJavaScript(UIPageViewController::class.java, "scrollToPreviousPage")
 }

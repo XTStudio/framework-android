@@ -105,6 +105,7 @@ class UITextField: UINativeTouchView() {
     var textColor: UIColor? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "textColor")
             nativeEditText.systemEditText.setTextColor(value?.toInt() ?: Color.BLACK)
             nativeEditText.systemEditText.setHintTextColor((value?.colorWithAlphaComponent(0.50)?.toInt() ?: Color.GRAY))
         }
@@ -112,6 +113,7 @@ class UITextField: UINativeTouchView() {
     var font: UIFont? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "font")
             value?.let { font ->
                 nativeEditText.systemEditText.textSize = (font.pointSize).toFloat()
                 font.fontName?.let { fontName ->
@@ -144,6 +146,7 @@ class UITextField: UINativeTouchView() {
     var textAlignment = UITextAlignment.left
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "textAlignment")
             nativeEditText.systemEditText.textAlignment = kotlin.run {
                 return@run when (value) {
                     UITextAlignment.left -> TEXT_ALIGNMENT_TEXT_START
@@ -156,26 +159,37 @@ class UITextField: UINativeTouchView() {
     var placeholder: String? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "placeholder")
             nativeEditText.systemEditText.hint = value
         }
 
     var clearsOnBeginEditing: Boolean = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "clearsOnBeginEditing")
+        }
 
     val editing: Boolean
         get() { return nativeEditText.systemEditText.isFocused }
 
     var clearButtonMode: UITextFieldViewMode = UITextFieldViewMode.never
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "clearButtonMode")
+        }
 
     var leftView: UIView? = null
         set(value) {
             field?.removeFromSuperview()
             field = value
+            EDOJavaHelper.valueChanged(this, "leftView")
             reloadExtraContents()
         }
 
     var leftViewMode: UITextFieldViewMode = UITextFieldViewMode.never
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "leftViewMode")
             reloadExtraContents()
         }
 
@@ -183,12 +197,14 @@ class UITextField: UINativeTouchView() {
         set(value) {
             field?.removeFromSuperview()
             field = value
+            EDOJavaHelper.valueChanged(this, "rightView")
             reloadExtraContents()
         }
 
     var rightViewMode: UITextFieldViewMode = UITextFieldViewMode.never
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "rightViewMode")
             reloadExtraContents()
         }
 
@@ -207,36 +223,42 @@ class UITextField: UINativeTouchView() {
     var autocapitalizationType: UITextAutocapitalizationType = UITextAutocapitalizationType.sentences
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "autocapitalizationType")
             this.resetInputType()
         }
 
     var autocorrectionType: UITextAutocorrectionType = UITextAutocorrectionType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "autocorrectionType")
             this.resetInputType()
         }
 
     var spellCheckingType: UITextSpellCheckingType = UITextSpellCheckingType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "spellCheckingType")
             this.resetInputType()
         }
 
     var keyboardType: UIKeyboardType = UIKeyboardType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "keyboardType")
             this.resetInputType()
         }
 
     var returnKeyType: UIReturnKeyType = UIReturnKeyType.default
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "returnKeyType")
             this.resetInputType()
         }
 
     var secureTextEntry: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "secureTextEntry")
             if (value) {
                 this.nativeEditText.systemEditText.transformationMethod = PasswordTransformationMethod()
             }
@@ -531,26 +553,26 @@ class UITextField: UINativeTouchView() {
 
 fun KIMIPackage.installUITextField() {
     exporter.exportClass(UITextField::class.java, "UITextField", "UIView")
-    exporter.exportProperty(UITextField::class.java, "text")
-    exporter.exportProperty(UITextField::class.java, "textColor")
-    exporter.exportProperty(UITextField::class.java, "font")
-    exporter.exportProperty(UITextField::class.java, "textAlignment")
-    exporter.exportProperty(UITextField::class.java, "placeholder")
-    exporter.exportProperty(UITextField::class.java, "clearsOnBeginEditing")
+    exporter.exportProperty(UITextField::class.java, "text", false)
+    exporter.exportProperty(UITextField::class.java, "textColor", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "font", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "textAlignment", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "placeholder", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "clearsOnBeginEditing", false, true, true)
     exporter.exportProperty(UITextField::class.java, "editing", true)
-    exporter.exportProperty(UITextField::class.java, "clearButtonMode")
-    exporter.exportProperty(UITextField::class.java, "leftView")
-    exporter.exportProperty(UITextField::class.java, "leftViewMode")
-    exporter.exportProperty(UITextField::class.java, "rightView")
-    exporter.exportProperty(UITextField::class.java, "rightViewMode")
+    exporter.exportProperty(UITextField::class.java, "clearButtonMode", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "leftView", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "leftViewMode", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "rightView", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "rightViewMode", false, true, true)
     exporter.exportMethodToJavaScript(UITextField::class.java, "focus")
     exporter.exportMethodToJavaScript(UITextField::class.java, "blur")
-    exporter.exportProperty(UITextField::class.java, "autocapitalizationType")
-    exporter.exportProperty(UITextField::class.java, "autocorrectionType")
-    exporter.exportProperty(UITextField::class.java, "spellCheckingType")
-    exporter.exportProperty(UITextField::class.java, "keyboardType")
-    exporter.exportProperty(UITextField::class.java, "returnKeyType")
-    exporter.exportProperty(UITextField::class.java, "secureTextEntry")
+    exporter.exportProperty(UITextField::class.java, "autocapitalizationType", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "autocorrectionType", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "spellCheckingType", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "keyboardType", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "returnKeyType", false, true, true)
+    exporter.exportProperty(UITextField::class.java, "secureTextEntry", false, true, true)
     exporter.exportEnum("UITextFieldViewMode", mapOf(
             Pair("never", UITextFieldViewMode.never),
             Pair("whileEditing", UITextFieldViewMode.whileEditing),

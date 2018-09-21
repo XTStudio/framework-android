@@ -38,10 +38,10 @@ class URLResponse(response: Response) {
 
 fun KIMIPackage.installURLResponse() {
     exporter.exportClass(URLResponse::class.java, "URLResponse")
-    exporter.exportProperty(URLResponse::class.java, "URL", true)
-    exporter.exportProperty(URLResponse::class.java, "expectedContentLength", true)
-    exporter.exportProperty(URLResponse::class.java, "MIMEType", true)
-    exporter.exportProperty(URLResponse::class.java, "textEncodingName", true)
-    exporter.exportProperty(URLResponse::class.java, "statusCode", true)
-    exporter.exportProperty(URLResponse::class.java, "allHeaderFields", true)
+    exporter.exportProperty(URLResponse::class.java, "URL", true, true)
+    exporter.exportProperty(URLResponse::class.java, "expectedContentLength", true, true)
+    exporter.exportProperty(URLResponse::class.java, "MIMEType", true, true)
+    exporter.exportProperty(URLResponse::class.java, "textEncodingName", true, true)
+    exporter.exportProperty(URLResponse::class.java, "statusCode", true, true)
+    exporter.exportProperty(URLResponse::class.java, "allHeaderFields", true, true)
 }

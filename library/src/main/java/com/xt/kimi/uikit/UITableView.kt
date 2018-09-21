@@ -23,6 +23,7 @@ open class UITableView: UIScrollView() {
         set(value) {
             field?.removeFromSuperview()
             field = value
+            EDOJavaHelper.valueChanged(this, "tableHeaderView")
             this._setContentSize()
             value?.let { this.addSubview(it) }
             this._layoutTableView()
@@ -32,6 +33,7 @@ open class UITableView: UIScrollView() {
         set(value) {
             field?.removeFromSuperview()
             field = value
+            EDOJavaHelper.valueChanged(this, "tableFooterView")
             this._setContentSize()
             value?.let { this.addSubview(it) }
             this._layoutTableView()
@@ -40,18 +42,28 @@ open class UITableView: UIScrollView() {
     var separatorColor: UIColor? = UIColor(0xbc / 255.0, 0xba / 255.0, 0xc1 / 255.0, 1.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "separatorColor")
             this.setNeedsDisplay()
         }
 
     var separatorInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "separatorInset")
             this.setNeedsDisplay()
         }
 
     var allowsSelection: Boolean = true
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "allowsSelection")
+        }
 
     var allowsMultipleSelection: Boolean = false
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "allowsMultipleSelection")
+        }
 
     fun register(clazz: Class<*>, reuseIdentifier: String) {
         this._registeredCellsClass[reuseIdentifier] = clazz as Class<UITableViewCell>
@@ -136,8 +148,7 @@ open class UITableView: UIScrollView() {
     }
 
     open fun heightForRow(indexPath: UIIndexPath): Double {
-        val e = (EDOJavaHelper.value(this, "heightForRow", indexPath) as? Number)?.toDouble() ?: this.rowHeight
-        return e
+        return (EDOJavaHelper.value(this, "heightForRow", indexPath) as? Number)?.toDouble() ?: this.rowHeight
     }
 
     open fun cellForRow(indexPath: UIIndexPath): UITableViewCell {
@@ -594,12 +605,12 @@ fun KIMIPackage.installUITableView() {
         tableView.kimi_context = JSContext.currentContext?.runtime
         return@exportInitializer tableView
     }
-    exporter.exportProperty(UITableView::class.java, "tableHeaderView")
-    exporter.exportProperty(UITableView::class.java, "tableFooterView")
-    exporter.exportProperty(UITableView::class.java, "separatorColor")
-    exporter.exportProperty(UITableView::class.java, "separatorInset")
-    exporter.exportProperty(UITableView::class.java, "allowsSelection")
-    exporter.exportProperty(UITableView::class.java, "allowsMultipleSelection")
+    exporter.exportProperty(UITableView::class.java, "tableHeaderView", false, true, true)
+    exporter.exportProperty(UITableView::class.java, "tableFooterView", false, true, true)
+    exporter.exportProperty(UITableView::class.java, "separatorColor", false, true, true)
+    exporter.exportProperty(UITableView::class.java, "separatorInset", false, true, true)
+    exporter.exportProperty(UITableView::class.java, "allowsSelection", false, true, true)
+    exporter.exportProperty(UITableView::class.java, "allowsMultipleSelection", false, true, true)
     exporter.exportMethodToJavaScript(UITableView::class.java, "register")
     exporter.exportMethodToJavaScript(UITableView::class.java, "dequeueReusableCell")
     exporter.exportMethodToJavaScript(UITableView::class.java, "reloadData")

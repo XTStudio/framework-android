@@ -1,6 +1,7 @@
 package com.xt.kimi.uikit
 
 import com.xt.endo.CGRect
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 class UINavigationBarViewController: UIViewController() {
@@ -12,10 +13,15 @@ class UINavigationBarViewController: UIViewController() {
     }
 
     var navigationBarContentHeight: Double = 44.0
+        set(value) {
+            field = value
+            EDOJavaHelper.valueChanged(this, "navigationBarContentHeight")
+        }
 
     var navigationBarInFront: Boolean = true
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "navigationBarInFront")
             if (value) {
                 this.view.bringSubviewToFront(this.navigationBar)
             }
@@ -38,6 +44,7 @@ class UINavigationBarViewController: UIViewController() {
     override fun loadView() {
         super.loadView()
         this.view.addSubview(this.contentView)
+        this.navigationBar.isImportantNodeForRendering = true
         this.view.addSubview(this.navigationBar)
     }
 
@@ -84,8 +91,8 @@ class UINavigationBarViewController: UIViewController() {
 
 fun KIMIPackage.installUINavigationBarViewController() {
     exporter.exportClass(UINavigationBarViewController::class.java, "UINavigationBarViewController", "UIViewController")
-    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBarContentHeight")
-    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBarInFront")
-    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBar", true)
-    exporter.exportProperty(UINavigationBarViewController::class.java, "edo_view", true)
+    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBarContentHeight", false, true, true)
+    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBarInFront", false, true, true)
+    exporter.exportProperty(UINavigationBarViewController::class.java, "navigationBar", true, true)
+    exporter.exportProperty(UINavigationBarViewController::class.java, "edo_view", true, true)
 }

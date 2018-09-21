@@ -37,17 +37,27 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
 
     override var frame: CGRect
         get() = super.frame
-        set(value) { super.frame = value; this.reloadContents(); }
+        set(value) {
+            val boundsChanged = super.frame.width != value.width || super.frame.height != value.height
+            super.frame = value
+            if (boundsChanged) {
+                this.reloadContents()
+            }
+        }
 
     var edo_enabled = true
         set(value) {
+            if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "enabled")
             this.reloadContents()
         }
 
     var edo_selected = false
         set(value) {
+            if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "selected")
             this.reloadContents()
         }
 
@@ -55,12 +65,15 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
         private set(value) {
             if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "highlighted")
             this.reloadContents()
         }
 
     var tracking = false
         private set(value) {
+            if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "tracking")
             this.reloadContents()
         }
 
@@ -68,18 +81,23 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
         private set(value) {
             if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "touchInside")
             this.reloadContents()
         }
 
     var contentVerticalAlignment = UIControlContentVerticalAlignment.center
         set(value) {
+            if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "contentVerticalAlignment")
             this.reloadContents()
         }
 
     var contentHorizontalAlignment = UIControlContentHorizontalAlignment.center
         set(value) {
+            if (field == value) { return }
             field = value
+            EDOJavaHelper.valueChanged(this, "contentHorizontalAlignment")
             this.reloadContents()
         }
 
@@ -111,18 +129,21 @@ open class UIButton(val buttonType: UIButtonType): UIView() {
     var contentEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "contentEdgeInsets")
             this.reloadContents()
         }
 
     var titleEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "titleEdgeInsets")
             this.reloadContents()
         }
 
     var imageEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "imageEdgeInsets")
             this.reloadContents()
         }
 
@@ -344,16 +365,16 @@ fun KIMIPackage.installUIButton() {
     exporter.exportMethodToJavaScript(UIButton::class.java, "setAttributedTitle")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleFont")
     exporter.exportMethodToJavaScript(UIButton::class.java, "setTitleColor")
-    exporter.exportProperty(UIButton::class.java, "contentEdgeInsets")
-    exporter.exportProperty(UIButton::class.java, "titleEdgeInsets")
-    exporter.exportProperty(UIButton::class.java, "imageEdgeInsets")
-    exporter.exportProperty(UIButton::class.java, "edo_enabled")
-    exporter.exportProperty(UIButton::class.java, "edo_selected")
-    exporter.exportProperty(UIButton::class.java, "highlighted", true)
-    exporter.exportProperty(UIButton::class.java, "tracking", true)
-    exporter.exportProperty(UIButton::class.java, "touchInside", true)
-    exporter.exportProperty(UIButton::class.java, "contentVerticalAlignment")
-    exporter.exportProperty(UIButton::class.java, "contentHorizontalAlignment")
+    exporter.exportProperty(UIButton::class.java, "contentEdgeInsets", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "titleEdgeInsets", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "imageEdgeInsets", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "edo_enabled", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "edo_selected", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "highlighted", true, true, true)
+    exporter.exportProperty(UIButton::class.java, "tracking", true, true, true)
+    exporter.exportProperty(UIButton::class.java, "touchInside", true, true, true)
+    exporter.exportProperty(UIButton::class.java, "contentVerticalAlignment", false, true, true)
+    exporter.exportProperty(UIButton::class.java, "contentHorizontalAlignment", false, true, true)
     exporter.exportInitializer(UIButton::class.java) {
         return@exportInitializer UIButton(if (it.firstOrNull() as? Boolean == true) UIButtonType.custom else UIButtonType.system)
     }

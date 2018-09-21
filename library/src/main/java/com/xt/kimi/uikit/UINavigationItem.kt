@@ -1,5 +1,6 @@
 package com.xt.kimi.uikit
 
+import com.xt.endo.EDOJavaHelper
 import com.xt.kimi.KIMIPackage
 
 class UINavigationItem {
@@ -10,6 +11,7 @@ class UINavigationItem {
     var title: String? = null
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "title")
             this.setNeedsUpdate()
         }
         get() {
@@ -35,6 +37,7 @@ class UINavigationItem {
     var hidesBackButton: Boolean = false
         set(value) {
             field = value
+            EDOJavaHelper.valueChanged(this, "hidesBackButton")
             this.setNeedsUpdate()
         }
 
@@ -54,6 +57,8 @@ class UINavigationItem {
         set(value) {
             field.forEach { it.customView?.removeFromSuperview() }
             field = value
+            EDOJavaHelper.valueChanged(this, "leftBarButtonItem")
+            EDOJavaHelper.valueChanged(this, "leftBarButtonItems")
             this.setNeedsUpdate()
         }
 
@@ -73,6 +78,8 @@ class UINavigationItem {
         set(value) {
             field.forEach { it.customView?.removeFromSuperview() }
             field = value
+            EDOJavaHelper.valueChanged(this, "rightBarButtonItem")
+            EDOJavaHelper.valueChanged(this, "rightBarButtonItems")
             this.setNeedsUpdate()
         }
 
@@ -111,10 +118,10 @@ class UINavigationItem {
 
 fun KIMIPackage.installUINavigationItem() {
     exporter.exportClass(UINavigationItem::class.java, "UINavigationItem")
-    exporter.exportProperty(UINavigationItem::class.java, "title")
-    exporter.exportProperty(UINavigationItem::class.java, "hidesBackButton")
-    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItem")
-    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItems")
-    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItem")
-    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItems")
+    exporter.exportProperty(UINavigationItem::class.java, "title", false, true, true)
+    exporter.exportProperty(UINavigationItem::class.java, "hidesBackButton", false, true, true)
+    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItem", false, true, true)
+    exporter.exportProperty(UINavigationItem::class.java, "leftBarButtonItems", false, true, true)
+    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItem", false, true, true)
+    exporter.exportProperty(UINavigationItem::class.java, "rightBarButtonItems", false, true, true)
 }

@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.github.XTStudio:Endo-Android:0.1.4'
+    implementation 'com.github.XTStudio:Endo-Android:0.1.5'
     implementation 'com.facebook.rebound:rebound:0.3.8'
     implementation 'com.facebook.fbui.textlayoutbuilder:textlayoutbuilder:1.4.0'
     implementation 'com.facebook.fresco:fresco:1.10.0+'

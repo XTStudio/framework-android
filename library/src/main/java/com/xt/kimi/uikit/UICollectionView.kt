@@ -526,7 +526,7 @@ class UICollectionViewItemKey(val type: ItemType = ItemType.cell,
 
 fun KIMIPackage.installUICollectionView() {
     exporter.exportClass(UICollectionView::class.java, "UICollectionView", "UIScrollView")
-    exporter.exportProperty(UICollectionView::class.java, "collectionViewLayout", true)
+    exporter.exportProperty(UICollectionView::class.java, "collectionViewLayout", true, true)
     exporter.exportProperty(UICollectionView::class.java, "allowsSelection")
     exporter.exportProperty(UICollectionView::class.java, "allowsMultipleSelection")
     exporter.exportMethodToJavaScript(UICollectionView::class.java, "register")
