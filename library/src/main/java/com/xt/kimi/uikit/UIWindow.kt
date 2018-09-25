@@ -255,12 +255,16 @@ open class UIWindow : UIView() {
 
     // Keyboard Handling
 
+    internal var currentKeyboardHeight: Double = 0.0
+
     internal fun keyboardWillShow(keyboardHeight: Double) {
+        this.currentKeyboardHeight = keyboardHeight
         this.rootViewController?.keyboardWillShow(keyboardHeight)
         this.presentedViewControllers.forEach { it.keyboardWillShow(keyboardHeight) }
     }
 
     internal fun keyboardWillHide() {
+        this.currentKeyboardHeight = 0.0
         this.rootViewController?.keyboardWillHide()
         this.presentedViewControllers.forEach { it.keyboardWillHide() }
     }

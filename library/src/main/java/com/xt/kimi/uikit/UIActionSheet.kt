@@ -18,7 +18,7 @@ class UIAlertAction(val title: String, val style: Style, val callback: () -> Uni
 
 }
 
-private class UIActionSheetController: UIViewController() {
+internal class UIActionSheetController: UIViewController() {
 
     val backgroundView = UIView()
     val contentView = UIView()
@@ -128,6 +128,7 @@ private class UIActionSheetController: UIViewController() {
     }
 
     fun dismiss(animated: Boolean, callback: () -> Unit) {
+        UIActionSheet.currentActionSheet = null
         if (animated) {
             backgroundView.edo_alpha = 1.0
             contentView.frame = CGRect(0.0, this.view.bounds.height - contentView.frame.height, this.view.bounds.width, contentView.frame.height)
@@ -184,13 +185,21 @@ class UIActionSheet {
     }
 
     fun show() {
+        currentActionSheet?.let { it.dismiss(false) {} }
         currentActivity?.let {
             val view = UIActionSheetController()
+            UIActionSheet.currentActionSheet = view
             view.attachToActivity(it, true, false)
             view.message = this.message?.takeIf { !it.isEmpty() }
             view.actions = this.actions
             view.show(true)
         }
+    }
+
+    companion object {
+
+        internal var currentActionSheet: UIActionSheetController? = null
+
     }
 
 }

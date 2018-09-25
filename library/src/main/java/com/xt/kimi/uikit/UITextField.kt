@@ -306,6 +306,11 @@ class UITextField: UINativeTouchView() {
                     nativeEditText.systemEditText.text.clear()
                 }
                 this.didBeginEditing()
+                this.window?.let {
+                    if (it.currentKeyboardHeight > 0) {
+                        it.keyboardWillShow(it.currentKeyboardHeight)
+                    }
+                }
             }
             else {
                 if (!this.shouldEndEditing()) {

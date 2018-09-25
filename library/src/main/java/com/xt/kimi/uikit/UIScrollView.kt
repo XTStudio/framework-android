@@ -380,7 +380,7 @@ open class UIScrollView: UIView() {
                 -velocity.x.toInt(),
                 -velocity.y.toInt(),
                 -this.contentInset.left.toInt() - 1000,
-                (this.contentSize.width + this.contentInset.right - this.bounds.width).toInt() + 100,
+                (this.contentSize.width + this.contentInset.right - this.bounds.width).toInt() + 1000,
                 -this.contentInset.top.toInt() - 1000,
                 (this.contentSize.height + this.contentInset.bottom - this.bounds.height).toInt() + 1000
         )
@@ -404,11 +404,25 @@ open class UIScrollView: UIView() {
     private fun loopScrollAnimation() {
         val finished = !this.scroller.computeScrollOffset()
         if (!finished) {
+            var minY = -this.contentInset.top
+            if (refreshControl?.refreshing == true) {
+                minY -= 88.0
+            }
             this.edo_contentOffset = CGPoint(
                     Math.max(-this.contentInset.left, Math.min(Math.max(-this.contentInset.left, this.contentSize.width + this.contentInset.right - this.bounds.width), this.scroller.currX.toDouble())),
-                    Math.max(-this.contentInset.top, Math.min(Math.max(-this.contentInset.top, this.contentSize.height + this.contentInset.bottom - this.bounds.height), this.scroller.currY.toDouble()))
+                    Math.max(minY, Math.min(Math.max(minY, this.contentSize.height + this.contentInset.bottom - this.bounds.height), this.scroller.currY.toDouble()))
             )
-            this@UIScrollView.didScroll()
+            this.didScroll()
+            if (this.contentSize.height > this.bounds.height && Math.abs(this.scroller.currY.toDouble() - this.edo_contentOffset.y) > 0.01) {
+                this.scroller.forceFinished(true)
+                this.didEndDecelerating()
+                return
+            }
+            if (this.contentSize.width > this.bounds.width && Math.abs(this.scroller.currX.toDouble() - this.edo_contentOffset.x) > 0.01) {
+                this.scroller.forceFinished(true)
+                this.didEndDecelerating()
+                return
+            }
             Choreographer.getInstance().postFrameCallback { this.loopScrollAnimation() }
         }
         else if (this.decelerating) {

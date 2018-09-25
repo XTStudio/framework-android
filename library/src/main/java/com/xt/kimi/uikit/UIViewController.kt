@@ -345,6 +345,9 @@ open class UIViewController {
     // Device Back Button Support
 
     fun canGoBack(childBacking: Boolean = false): Boolean {
+        if (UIActionSheet.currentActionSheet != null) {
+            return true
+        }
         if (!childBacking && this.window?.presentedViewControllers?.count() ?: 0 > 0) {
             return true
         }
@@ -358,6 +361,10 @@ open class UIViewController {
     }
 
     fun goBack(childBacking: Boolean = false) {
+        if (UIActionSheet.currentActionSheet != null) {
+            UIActionSheet.currentActionSheet?.dismiss(true) { }
+            return
+        }
         if (!childBacking && this.window?.presentedViewControllers?.count() ?: 0 > 0) {
             this.window?.presentedViewControllers?.lastOrNull()?.takeIf { it.canGoBack(true) }?.let {
                 return it.goBack(true)

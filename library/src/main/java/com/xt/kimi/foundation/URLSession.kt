@@ -3,6 +3,7 @@ package com.xt.kimi.foundation
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import com.alibaba.sdk.android.push.common.util.ThreadPoolFactory
 import com.eclipsesource.v8.V8
 import com.xt.endo.EDOCallback
 import com.xt.endo.EDOExporter
@@ -81,36 +82,38 @@ class URLSessionTask(private val urlRequest: URLRequest, private val complete: E
     }
 
     fun resume() {
-        try {
-            this.buildCall()
-            this.state = URLSessionTaskState.running
-            this.okCall?.enqueue(object : Callback {
-                override fun onFailure(call: Call?, e: IOException?) {
-                    if (this@URLSessionTask.state == URLSessionTaskState.cancelling) {
-                        return
-                    }
-                    this@URLSessionTask.state = URLSessionTaskState.completed
-                    this@URLSessionTask.handler.post {
-                        this@URLSessionTask.complete.invoke(V8.getUndefined(), V8.getUndefined(), Error(e?.message ?: "unknown error."))
-                    }
-                }
-                override fun onResponse(call: Call?, response: Response?) {
-                    this@URLSessionTask.state = URLSessionTaskState.completed
-                    val response = response ?: return
-                    val data: Data? = kotlin.run {
-                        response.body()?.bytes()?.let {
-                            return@run Data(it)
+        Thread {
+            try {
+                this.buildCall()
+                this.state = URLSessionTaskState.running
+                this.okCall?.enqueue(object : Callback {
+                    override fun onFailure(call: Call?, e: IOException?) {
+                        if (this@URLSessionTask.state == URLSessionTaskState.cancelling) {
+                            return
                         }
-                        return@run null
+                        this@URLSessionTask.state = URLSessionTaskState.completed
+                        this@URLSessionTask.handler.post {
+                            this@URLSessionTask.complete.invoke(V8.getUndefined(), V8.getUndefined(), Error(e?.message ?: "unknown error."))
+                        }
                     }
-                    this@URLSessionTask.handler.post {
-                        this@URLSessionTask.complete.invoke(data ?: V8.getUndefined(), URLResponse(response))
+                    override fun onResponse(call: Call?, response: Response?) {
+                        this@URLSessionTask.state = URLSessionTaskState.completed
+                        val response = response ?: return
+                        val data: Data? = kotlin.run {
+                            response.body()?.bytes()?.let {
+                                return@run Data(it)
+                            }
+                            return@run null
+                        }
+                        this@URLSessionTask.handler.post {
+                            this@URLSessionTask.complete.invoke(data ?: V8.getUndefined(), URLResponse(response))
+                        }
                     }
-                }
-            })
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+                })
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
     }
 
     private fun buildCall() {
