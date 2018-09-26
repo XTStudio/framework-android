@@ -1,12 +1,13 @@
 var main = new UIViewController
 main.view.backgroundColor = UIColor.green
+var r = new UIView
+r.backgroundColor = UIColor.white
+r.frame = {x:44, y:44, width:200, height: 200}
+main.view.addSubview(r)
 main.view.addGestureRecognizer(new UITapGestureRecognizer().on("touch", function(){
-
-                                                               var actionSheet = new UIActionSheet
-                                                               actionSheet.message = "退出后不会删除任何历史数据，下次登录依然可以使用本帐号。"
-                                                               actionSheet.addDangerAction('退出登录');
-                                                               actionSheet.addCancelAction('取消', function() {
-                                                                                          main.view.backgroundColor = UIColor.yellow
-                                                                                          });
-                                                               actionSheet.show()
+                                                               var menu = new UIMenu()
+                                                               menu.addMenuItem("测试", function() {
+                                                                                main.view.backgroundColor = UIColor.yellow
+                                                                                })
+                                                               menu.show(r)
                                                                }))
