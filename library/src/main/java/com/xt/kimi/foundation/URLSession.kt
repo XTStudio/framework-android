@@ -3,7 +3,6 @@ package com.xt.kimi.foundation
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import com.alibaba.sdk.android.push.common.util.ThreadPoolFactory
 import com.eclipsesource.v8.V8
 import com.xt.endo.EDOCallback
 import com.xt.endo.EDOExporter
