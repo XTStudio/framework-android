@@ -163,7 +163,7 @@ open class UITableView: UIScrollView() {
     }
 
     open fun heightForHeader(inSection: Int): Double {
-        return return (EDOJavaHelper.value(this, "heightForHeader", inSection) as? Number)?.toDouble() ?: 0.0
+        return (EDOJavaHelper.value(this, "heightForHeader", inSection) as? Number)?.toDouble() ?: 0.0
     }
 
     open fun viewForFooter(inSection: Int): UIView? {
@@ -171,7 +171,7 @@ open class UITableView: UIScrollView() {
     }
 
     open fun heightForFooter(inSection: Int): Double {
-        return return (EDOJavaHelper.value(this, "heightForFooter", inSection) as? Number)?.toDouble() ?: 0.0
+        return (EDOJavaHelper.value(this, "heightForFooter", inSection) as? Number)?.toDouble() ?: 0.0
     }
 
     open fun didSelectRow(indexPath: UIIndexPath) {
