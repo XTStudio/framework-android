@@ -220,6 +220,8 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             this.setNeedsDisplay()
         }
 
+    var touchAreaInsets: UIEdgeInsets? = null
+
     // Hierarchy
 
     var tag: Int = 0
@@ -793,6 +795,12 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     }
 
     open fun pointInside(point: CGPoint): Boolean {
+        touchAreaInsets?.let { touchAreaInsets ->
+            return point.x >= 0.0 - touchAreaInsets.left &&
+                    point.y >= 0.0 - touchAreaInsets.top &&
+                    point.x <= this.frame.width + touchAreaInsets.right &&
+                    point.y <= this.frame.height + touchAreaInsets.bottom
+        }
         return point.x >= 0.0 && point.y >= 0.0 && point.x <= this.frame.width && point.y <= this.frame.height
     }
 
@@ -960,6 +968,7 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "bounds", false, true)
     exporter.exportProperty(UIView::class.java, "center", false, true)
     exporter.exportProperty(UIView::class.java, "transform", false, true, true)
+    exporter.exportProperty(UIView::class.java, "touchAreaInsets", false, true, true)
     exporter.exportProperty(UIView::class.java, "tag", false, true, true)
     exporter.exportProperty(UIView::class.java, "superview", true, true)
     exporter.exportProperty(UIView::class.java, "subviews", true, true)
