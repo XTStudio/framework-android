@@ -98,7 +98,7 @@ open class UIScrollView: UIView() {
                     (contentOffset.y - this.edo_contentOffset.y).toInt(),
                     500
             )
-            this.loopScrollAnimation()
+            this.loopScrollAnimation(true)
         }
         else {
             this.edo_contentOffset = contentOffset
@@ -401,12 +401,15 @@ open class UIScrollView: UIView() {
         this.loopScrollAnimation()
     }
 
-    private fun loopScrollAnimation() {
+    private fun loopScrollAnimation(ignoreBounds: Boolean = false) {
         val finished = !this.scroller.computeScrollOffset()
         if (!finished) {
             var minY = -this.contentInset.top
             if (refreshControl?.refreshing == true) {
-                minY -= 88.0
+                minY -= 44.0
+            }
+            if (ignoreBounds) {
+                minY = -99999.0
             }
             this.edo_contentOffset = CGPoint(
                     Math.max(-this.contentInset.left, Math.min(Math.max(-this.contentInset.left, this.contentSize.width + this.contentInset.right - this.bounds.width), this.scroller.currX.toDouble())),
