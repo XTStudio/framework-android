@@ -165,10 +165,8 @@ class UIStackView(arrangedSubviews: List<UIView>?): UIView() {
                     axisValues[view]?.let {
                         space = it
                     } ?: kotlin.run {
-                        if (this.arrangedSubviews.count() < 2 || index == this.arrangedSubviews.count() - 2) {
-                            space = leftSpace
-                            leftSpace = 0.0
-                        }
+                        space = leftSpace
+                        leftSpace = 0.0
                     }
                     axisLocation.add(location)
                     axisLength.add(space)
