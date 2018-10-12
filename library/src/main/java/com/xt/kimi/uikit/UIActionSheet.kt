@@ -64,7 +64,7 @@ internal class UIActionSheetController: UIViewController() {
             messageView.addSubview(textLabel)
             val hrLayer = CAShapeLayer()
             hrLayer.lineWidth = 1.0
-            hrLayer.strokeColor = UIColor(0.8, 0.8, 0.8, 1.0)
+            hrLayer.strokeColor = UIColor(0.9, 0.9, 0.9, 1.0)
             messageView.layer.addSublayer(hrLayer)
             contentView.addSubview(messageView)
             height += messageView.frame.height
@@ -88,6 +88,9 @@ internal class UIActionSheetController: UIViewController() {
             view.setTitleFont(UIFont(19.0))
             if (it.style == UIAlertAction.Style.danger) {
                 view.setTitleColor(UIColor(231.0 / 255.0, 45.0 / 255.0, 39.0 / 255.0, 1.0), UIControlState.normal.rawValue)
+            }
+            if (it.style == UIAlertAction.Style.cancel) {
+                view.setTitleFont(UIFont(17.0))
             }
             view.frame = CGRect(0.0, height, 0.0, 55.0)
             val hrLayer = CAShapeLayer()
