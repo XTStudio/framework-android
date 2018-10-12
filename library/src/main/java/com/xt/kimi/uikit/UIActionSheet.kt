@@ -90,7 +90,7 @@ internal class UIActionSheetController: UIViewController() {
                 view.setTitleColor(UIColor(231.0 / 255.0, 45.0 / 255.0, 39.0 / 255.0, 1.0), UIControlState.normal.rawValue)
             }
             if (it.style == UIAlertAction.Style.cancel) {
-                view.setTitleFont(UIFont(17.0))
+                view.setTitleFont(UIFont(18.0))
             }
             view.frame = CGRect(0.0, height, 0.0, 55.0)
             val hrLayer = CAShapeLayer()
