@@ -408,7 +408,7 @@ open class UIScrollView: UIView() {
             if (refreshControl?.refreshing == true) {
                 minY -= 44.0
             }
-            if (ignoreBounds) {
+            if (ignoreBounds && this.contentSize.height != 0.0) {
                 minY = -99999.0
             }
             this.edo_contentOffset = CGPoint(

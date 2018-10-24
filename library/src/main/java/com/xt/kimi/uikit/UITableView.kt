@@ -39,14 +39,14 @@ open class UITableView: UIScrollView() {
             this._layoutTableView()
         }
 
-    var separatorColor: UIColor? = UIColor(0xbc / 255.0, 0xba / 255.0, 0xc1 / 255.0, 1.0)
+    var separatorColor: UIColor? = UIColor(0xbc / 255.0, 0xba / 255.0, 0xc1 / 255.0, 0.75)
         set(value) {
             field = value
             EDOJavaHelper.valueChanged(this, "separatorColor")
             this.setNeedsDisplay()
         }
 
-    var separatorInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
+    var separatorInset: UIEdgeInsets = UIEdgeInsets(0.0, 15.0, 0.0, 0.0)
         set(value) {
             field = value
             EDOJavaHelper.valueChanged(this, "separatorInset")
