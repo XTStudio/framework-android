@@ -31,7 +31,10 @@ open class UIScrollView: UIView() {
 
     var contentInset: UIEdgeInsets = UIEdgeInsets(0.0, 0.0, 0.0, 0.0)
         set(value) {
+            val deltaX = value.left - field.left
+            val deltaY = value.top - field.top
             field = value
+            this.setContentOffset(CGPoint(this.edo_contentOffset.x - deltaX, this.edo_contentOffset.y - deltaY), false)
             EDOJavaHelper.valueChanged(this, "contentInset")
             this.resetLockedDirection()
         }
@@ -650,6 +653,11 @@ open class UIScrollView: UIView() {
 
     private fun createRefreshEffect(translation: CGPoint): Double? {
         refreshControl?.takeIf { it.edo_enabled }?.takeIf { this.contentSize.width <= this.bounds.width }?.let {
+            this.refreshControl?.animationView?.let {
+                if (it.frame.y != this.contentInset.top) {
+                    it.frame = CGRect(it.frame.x, this.contentInset.top, it.frame.width, it.frame.height)
+                }
+            }
             if (this.edo_contentOffset.y - translation.y < -this.contentInset.top) {
                 val progress = max(0.0, min(1.0, (-this.contentInset.top - (this.edo_contentOffset.y - translation.y)) / 88.0))
                 this.refreshControl?.animationView?.edo_alpha = progress
