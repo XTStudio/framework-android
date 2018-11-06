@@ -2,12 +2,8 @@ package com.xt.kimi_demo
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
-import com.xt.endo.EDOExporter
-import com.xt.endo.EDOObjectTransfer
+import com.xt.endo.EDOFactory
 import com.xt.jscore.JSContext
-import com.xt.jscore.JSValue
-import com.xt.kimi.debugger.KIMIDebugger
 import com.xt.kimi.uikit.UIViewController
 
 class MainActivity : Activity() {
@@ -18,38 +14,19 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val debugger = KIMIDebugger(this)
-        debugger.connect({
+        this.context = EDOFactory.decodeContextFromAssets("test.js", this, null) {
             this.context = it
             this.attachWindow()
-        }, {
-            val context = JSContext()
-            EDOExporter.sharedExporter.exportWithContext(context)
-            context.exceptionHandler = { _, exception ->
-                Log.e("JSContext", exception.toString())
-            }
-            this.context = context
-            this.loadScript()
-            this.attachWindow()
-        })
-    }
-
-    private fun loadScript() {
-        val context = this.context ?: return
-        val inputStream = this.assets.open("test.js")
-        val buffer = ByteArray(inputStream.available())
-        inputStream.read(buffer)
-        inputStream.close()
-        val script = String(buffer)
-        context.evaluateScript(script)
+        }
+        this.attachWindow()
     }
 
     private fun attachWindow() {
         val context = this.context ?: return
-        val mainValue = context["main"] as? JSValue ?: return
-        val main = EDOObjectTransfer.convertToJavaObjectWithJSValue(mainValue, mainValue, null) as? UIViewController
-        main?.attachToActivity(this, true)
-        this.main = main
+        (EDOFactory.objectFromContext(context) as? UIViewController)?.let {
+            it.attachToActivity(this, true)
+            this.main = it
+        }
     }
 
     override fun onBackPressed() {
