@@ -2,6 +2,7 @@ package com.xt.kimi.uikit
 
 import android.graphics.Color
 import com.xt.kimi.KIMIPackage
+import java.lang.Exception
 import kotlin.math.abs
 
 /**
@@ -22,6 +23,31 @@ class UIColor(val r: Double, val g: Double, val b: Double, val a: Double) {
 
     companion object {
 
+        @JvmStatic fun hexColor(hexValue: String): UIColor {
+            val trimmedValue = hexValue.replace("#", "")
+            if (trimmedValue.length == 6) {
+                return try {
+                    return UIColor(
+                            trimmedValue.substring(0, 2).toInt(16).toDouble() / 255.0,
+                            trimmedValue.substring(2, 4).toInt(16).toDouble() / 255.0,
+                            trimmedValue.substring(4, 6).toInt(16).toDouble() / 255.0,
+                            1.0
+                    )
+                } catch (e: Exception) { UIColor.clear }
+            }
+            else if (trimmedValue.length == 8) {
+                return try {
+                    return UIColor(
+                            trimmedValue.substring(2, 4).toInt(16).toDouble() / 255.0,
+                            trimmedValue.substring(4, 6).toInt(16).toDouble() / 255.0,
+                            trimmedValue.substring(6, 8).toInt(16).toDouble() / 255.0,
+                            trimmedValue.substring(0, 2).toInt(16).toDouble() / 255.0
+                    )
+                } catch (e: Exception) { UIColor.clear }
+            }
+            return clear
+        }
+
         @JvmStatic val black = UIColor(0.0, 0.0, 0.0, 1.0)
         @JvmStatic val clear = UIColor(0.0, 0.0, 0.0, 0.0)
         @JvmStatic val gray = UIColor(0.5, 0.5, 0.5, 1.0)
@@ -37,6 +63,7 @@ class UIColor(val r: Double, val g: Double, val b: Double, val a: Double) {
 
 fun KIMIPackage.installUIColor() {
     exporter.exportClass(UIColor::class.java, "UIColor")
+    exporter.exportStaticMethodToJavaScript(UIColor::class.java, "hexColor")
     exporter.exportInitializer(UIColor::class.java) {
         val r: Double = if (0 < it.count() && it[0] is Number) (it[0] as Number).toDouble() else 0.0
         val g: Double = if (1 < it.count() && it[1] is Number) (it[1] as Number).toDouble() else 0.0
