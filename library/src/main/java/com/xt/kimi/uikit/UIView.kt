@@ -235,7 +235,6 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             field = value
             this.setWillNotDraw(false)
             EDOJavaHelper.valueChanged(this, "superview")
-            EDOJavaHelper.valueChanged(this, "window")
         }
 
     val window: UIWindow?
@@ -249,6 +248,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 current = current.superview
             }
             return null
+        }
+
+    val viewController: UIViewController?
+        get() {
+            return this.viewDelegate ?: this.superview?.viewController
         }
 
     open var subviews: List<UIView> = listOf()
@@ -980,7 +984,8 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "tag", false, true, true)
     exporter.exportProperty(UIView::class.java, "superview", true, true)
     exporter.exportProperty(UIView::class.java, "subviews", true, true)
-    exporter.exportProperty(UIView::class.java, "window", true, true)
+    exporter.exportProperty(UIView::class.java, "window", true, false)
+    exporter.exportProperty(UIView::class.java, "viewController", true, false)
     exporter.exportMethodToJavaScript(UIView::class.java, "removeFromSuperview")
     exporter.exportMethodToJavaScript(UIView::class.java, "insertSubviewAtIndex")
     exporter.exportMethodToJavaScript(UIView::class.java, "exchangeSubview")
