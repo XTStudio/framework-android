@@ -1,6 +1,9 @@
 package com.xt.kimi.foundation
 
 import android.util.Base64
+import com.eclipsesource.v8.V8
+import com.eclipsesource.v8.V8Object
+import com.eclipsesource.v8.utils.V8ObjectUtils
 import com.xt.kimi.KIMIPackage
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -105,6 +108,7 @@ fun KIMIPackage.installData() {
     exporter.exportMethodToJavaScript(Data::class.java, "base64EncodedData")
     exporter.exportMethodToJavaScript(Data::class.java, "base64EncodedString")
     exporter.exportMethodToJavaScript(Data::class.java, "mutable")
+    exporter.exportScript(Data::class.java, "Initializer.prototype.json=function(){var utf8String=this.utf8String();if(utf8String!==undefined){try{return JSON.parse(utf8String)}catch(error){return undefined}}return undefined};", true)
     exporter.exportClass(MutableData::class.java, "MutableData", "Data")
     exporter.exportInitializer(MutableData::class.java) {
         if (0 < it.count()) {
@@ -142,5 +146,4 @@ fun KIMIPackage.installData() {
     exporter.exportMethodToJavaScript(MutableData::class.java, "appendArrayBuffer")
     exporter.exportMethodToJavaScript(MutableData::class.java, "setData")
     exporter.exportMethodToJavaScript(MutableData::class.java, "immutable")
-
 }

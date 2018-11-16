@@ -211,4 +211,5 @@ fun KIMIPackage.installURLSession() {
             Pair("cancelling", URLSessionTaskState.cancelling),
             Pair("completed", URLSessionTaskState.completed)
     ))
+    exporter.exportScript(URLSession::class.java, "Initializer.prototype.fetch=function(request){var _this=this;return new Promise(function(resolver,rejector){_this.dataTask(request,function(data,response,error){if(error&&data!==undefined){rejector(error)}else{resolver(data)}}).resume()})};", true)
 }

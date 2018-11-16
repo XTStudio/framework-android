@@ -66,4 +66,5 @@ fun KIMIPackage.installTimer() {
     exporter.exportProperty(Timer::class.java, "valid", true)
     exporter.exportMethodToJavaScript(Timer::class.java, "fire")
     exporter.exportMethodToJavaScript(Timer::class.java, "invalidate")
+    exporter.exportScript(Timer::class.java, "Initializer.sleep = function (timeInterval) { return new Promise((resolver) => { new Timer(timeInterval, () => { resolver(); }, false) })}", true)
 }
