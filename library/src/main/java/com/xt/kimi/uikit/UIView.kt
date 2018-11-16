@@ -804,13 +804,30 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         return point.x >= 0.0 && point.y >= 0.0 && point.x <= this.frame.width && point.y <= this.frame.height
     }
 
+    fun convertPointToView(point: CGPoint, toView: UIView): CGPoint {
+        return toView.convertPointFromView(point, this)
+    }
+
     fun convertPointFromView(point: CGPoint, fromView: UIView): CGPoint {
         val fromPoint = fromView.convertPointToWindow(point) ?: return point
         return this.convertPointFromWindow(fromPoint) ?: return point
     }
 
-    fun convertPointToView(point: CGPoint, toView: UIView): CGPoint {
-        return toView.convertPointFromView(point, this)
+    fun convertRectToView(rect: CGRect, toView: UIView): CGRect {
+        val lt = this.convertPointToView(CGPoint(rect.x, rect.y), toView)
+        val rt = this.convertPointToView(CGPoint(rect.x + rect.width, rect.y), toView)
+        val lb = this.convertPointToView(CGPoint(rect.x, rect.y + rect.height), toView)
+        val rb = this.convertPointToView(CGPoint(rect.x + rect.width, rect.y + rect.height), toView)
+        return CGRect(
+                Math.min(Math.min(lt.x, rt.x), Math.min(lb.x, rb.x)),
+                Math.min(Math.min(lt.y, rt.y), Math.min(lb.y, rb.y)),
+                Math.max(Math.max(lt.x, rt.x), Math.max(lb.x, rb.x)) - Math.min(Math.min(lt.x, rt.x), Math.min(lb.x, rb.x)),
+                Math.max(Math.max(lt.y, rt.y), Math.max(lb.y, rb.y)) - Math.min(Math.min(lt.y, rt.y), Math.min(lb.y, rb.y))
+        )
+    }
+
+    fun convertRectFromView(rect: CGRect, fromView: UIView): CGRect {
+        return fromView.convertRectToView(rect, this)
     }
 
     fun convertPointToWindow(point: CGPoint): CGPoint? {
@@ -897,37 +914,10 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
     }
 
     fun convertRectToWindow(rect: CGRect?): CGRect? {
-        if (this.window == null) {
-            return null
+        this.window?.let { window ->
+            return this.convertRectToView(rect ?: this.bounds, window)
         }
-        var matrix = UIView._convertRectToWindow_sharedMatrix1
-        matrix.reset()
-        var current: UIView? = this
-        while (current != null) {
-            if (current is UIWindow) { break }
-            val it = current
-            (it.superview as? UIScrollWrapperView)?.let {
-                matrix.preTranslate(-it.scrollX / scale, -it.scrollY / scale)
-            }
-            matrix.preTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
-            if (!it.transform.isIdentity()) {
-                val unmatrix = it.transform.unmatrix()
-                val matrix2 = UIView._convertRectToWindow_sharedMatrix2
-                matrix2.reset()
-                matrix2.preTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
-                matrix2.preRotate(unmatrix.degree.toFloat())
-                matrix2.preScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
-                matrix2.preTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
-                matrix2.preTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
-                matrix.preConcat(matrix2)
-            }
-            current = current.superview
-        }
-        val fromArr = UIView._convertRectToWindow_sharedFloatArray
-        matrix.getValues(fromArr)
-        val lt = CGPoint(((rect ?: this.bounds).x) * fromArr[0] + ((rect ?: this.bounds).x) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).y) * fromArr[1] + ((rect ?: this.bounds).y) * fromArr[4] + fromArr[5])
-        val rb = CGPoint(((rect ?: this.bounds).width) * fromArr[0] + ((rect ?: this.bounds).width) * fromArr[3] + fromArr[2], ((rect ?: this.bounds).height) * fromArr[1] + ((rect ?: this.bounds).height) * fromArr[4] + fromArr[5])
-        return CGRect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y)
+        return null
     }
 
     open fun intrinsicContentSize(): CGSize? {
@@ -983,6 +973,10 @@ fun KIMIPackage.installUIView() {
     exporter.exportProperty(UIView::class.java, "center", false, true)
     exporter.exportProperty(UIView::class.java, "transform", false, true, true)
     exporter.exportProperty(UIView::class.java, "touchAreaInsets", false, true, true)
+    exporter.exportMethodToJavaScript(UIView::class.java, "convertPointToView")
+    exporter.exportMethodToJavaScript(UIView::class.java, "convertPointFromView")
+    exporter.exportMethodToJavaScript(UIView::class.java, "convertRectToView")
+    exporter.exportMethodToJavaScript(UIView::class.java, "convertRectFromView")
     exporter.exportProperty(UIView::class.java, "tag", false, true, true)
     exporter.exportProperty(UIView::class.java, "superview", true, true)
     exporter.exportProperty(UIView::class.java, "subviews", true, true)
