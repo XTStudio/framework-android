@@ -817,41 +817,48 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         if (this.window == null) {
             return null
         }
-        var matrix = Matrix()
         var current: UIView? = this
-        var routes: MutableList<UIView> = mutableListOf()
+        val currentPoint = CGPointMutable(point.x, point.y)
+        val sharedFloatArr = FloatArray(9)
         while (current != null) {
             if (current is UIWindow) { break }
-            routes.add(0, current)
+            if (!current.transform.isIdentity()) {
+                val unmatrix = current.transform.unmatrix()
+                val matrix = sharedMatrix
+                matrix.reset()
+                matrix.postTranslate(-(current.frame.width / 2.0).toFloat(), -(current.frame.height / 2.0).toFloat())
+                matrix.postRotate(unmatrix.degree.toFloat())
+                matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix.postTranslate((current.frame.width / 2.0).toFloat(), (current.frame.height / 2.0).toFloat())
+                val x = currentPoint.x
+                val y = currentPoint.y
+                matrix.getValues(sharedFloatArr)
+                currentPoint.x = x * sharedFloatArr[0] + y * sharedFloatArr[1] + sharedFloatArr[2]
+                currentPoint.y = x * sharedFloatArr[3] + y * sharedFloatArr[4] + sharedFloatArr[5]
+            }
+            if (current.superview is UIScrollWrapperView) {
+                (current.superview as? UIScrollWrapperView)?.let {
+                    currentPoint.x += it.scrollX / scale
+                    currentPoint.y += it.scrollY / scale
+                }
+            }
+            else {
+                currentPoint.x += current.frame.x
+                currentPoint.y += current.frame.y
+            }
             current = current.superview
         }
-        routes.forEach {
-            (it.superview as? UIScrollWrapperView)?.let {
-                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
-            }
-            matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
-            if (!it.transform.isIdentity()) {
-                val unmatrix = it.transform.unmatrix()
-                val matrix2 = Matrix()
-                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
-                matrix2.postRotate(unmatrix.degree.toFloat())
-                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
-                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
-                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
-                matrix.postConcat(matrix2)
-            }
-        }
-        var fromArr = FloatArray(9)
-        matrix.getValues(fromArr)
-        return CGPoint(point.x * fromArr[0] + point.x * fromArr[3] + fromArr[2], point.y * fromArr[1] + point.y * fromArr[4] + fromArr[5])
+        return CGPoint(currentPoint.x, currentPoint.y)
     }
 
     fun convertPointFromWindow(point: CGPoint): CGPoint? {
         if (this.window == null) {
             return null
         }
-        var matrix = Matrix()
         var current: UIView? = this
+        val currentPoint = CGPointMutable(point.x, point.y)
+        val sharedFloatArr = FloatArray(9)
         var routes: MutableList<UIView> = mutableListOf()
         while (current != null) {
             if (current is UIWindow) { break }
@@ -859,27 +866,34 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
             current = current.superview
         }
         routes.forEach {
-            (it.superview as? UIScrollWrapperView)?.let {
-                matrix.postTranslate(-it.scrollX / scale, -it.scrollY / scale)
+            if (it.superview is UIScrollWrapperView) {
+                (it.superview as? UIScrollWrapperView)?.let {
+                    currentPoint.x -= it.scrollX / scale
+                    currentPoint.y -= it.scrollY / scale
+                }
             }
-            matrix.postTranslate(it.frame.x.toFloat(), it.frame.y.toFloat())
+            else {
+                currentPoint.x -= it.frame.x
+                currentPoint.y -= it.frame.y
+            }
             if (!it.transform.isIdentity()) {
                 val unmatrix = it.transform.unmatrix()
-                val matrix2 = Matrix()
-                matrix2.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
-                matrix2.postRotate(unmatrix.degree.toFloat())
-                matrix2.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
-                matrix2.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
-                matrix2.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
-                matrix.preConcat(matrix2)
+                val matrix = sharedMatrix
+                matrix.reset()
+                matrix.postTranslate(-(it.frame.width / 2.0).toFloat(), -(it.frame.height / 2.0).toFloat())
+                matrix.postRotate(unmatrix.degree.toFloat())
+                matrix.postScale(unmatrix.scale.x.toFloat(), unmatrix.scale.y.toFloat())
+                matrix.postTranslate(unmatrix.translate.x.toFloat(), unmatrix.translate.y.toFloat())
+                matrix.postTranslate((it.frame.width / 2.0).toFloat(), (it.frame.height / 2.0).toFloat())
+                matrix.getValues(sharedFloatArr)
+                val id = 1.0 / ((sharedFloatArr[0] * sharedFloatArr[4]) + (sharedFloatArr[1] * -sharedFloatArr[3]))
+                val x = currentPoint.x
+                val y = currentPoint.y
+                currentPoint.x = (sharedFloatArr[4] * id * x) + (-sharedFloatArr[1] * id * y) + (((sharedFloatArr[5] * sharedFloatArr[1]) - (sharedFloatArr[2] * sharedFloatArr[4])) * id)
+                currentPoint.y = (sharedFloatArr[0] * id * y) + (-sharedFloatArr[3] * id * x) + (((-sharedFloatArr[5] * sharedFloatArr[0]) + (sharedFloatArr[2] * sharedFloatArr[3])) * id)
             }
         }
-        var fromArr = FloatArray(9)
-        matrix.getValues(fromArr)
-        return CGPoint(
-                (point.x - fromArr[2]) / (fromArr[0] + fromArr[3]),
-                (point.y - fromArr[5]) / (fromArr[1] + fromArr[4])
-        )
+        return CGPoint(currentPoint.x, currentPoint.y)
     }
 
     fun convertRectToWindow(rect: CGRect?): CGRect? {
