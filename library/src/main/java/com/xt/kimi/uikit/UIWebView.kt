@@ -82,7 +82,7 @@ open class UIWebView: UINativeTouchView() {
 
     // Implementation
 
-    internal val systemWebView = WebView(this.context)
+    val systemWebView = WebView(this.context)
 
     init {
         this.resetWebViewConfiguration()
