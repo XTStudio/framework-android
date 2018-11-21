@@ -769,9 +769,12 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
 
     open fun hitTest(point: CGPoint): UIView? {
         if (this.userInteractionEnabled && this.alpha > 0.0 && !this.hidden && this.pointInside(point)) {
-            this.subviews.reversed().forEach {
+            var i = this.subviews.count() - 1
+            while (i >= 0) {
+                val it = this.subviews[i]
                 val convertedPoint = it.convertPointFromView(point, this)
                 it.hitTest(convertedPoint)?.let { return it }
+                i--
             }
             return this
         }
@@ -859,15 +862,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
                 currentPoint.y = x * sharedFloatArr[3] + y * sharedFloatArr[4] + sharedFloatArr[5]
             }
             if (current.superview is UIScrollWrapperView) {
-                (current.superview as? UIScrollWrapperView)?.let {
-                    currentPoint.x += it.scrollX / scale
-                    currentPoint.y += it.scrollY / scale
-                }
+                currentPoint.x += -(current.superview!!.superview as UIScrollView).edo_contentOffset.x
+                currentPoint.y += -(current.superview!!.superview as UIScrollView).edo_contentOffset.y
             }
-            else {
-                currentPoint.x += current.frame.x
-                currentPoint.y += current.frame.y
-            }
+            currentPoint.x += current.frame.x
+            currentPoint.y += current.frame.y
             current = current.superview
         }
         return CGPoint(currentPoint.x, currentPoint.y)
@@ -888,15 +887,11 @@ open class UIView : FrameLayout(EDOExporter.sharedExporter.applicationContext) {
         }
         routes.forEach {
             if (it.superview is UIScrollWrapperView) {
-                (it.superview as? UIScrollWrapperView)?.let {
-                    currentPoint.x -= it.scrollX / scale
-                    currentPoint.y -= it.scrollY / scale
-                }
+                currentPoint.x -= -(it.superview!!.superview as UIScrollView).edo_contentOffset.x
+                currentPoint.y -= -(it.superview!!.superview as UIScrollView).edo_contentOffset.y
             }
-            else {
-                currentPoint.x -= it.frame.x
-                currentPoint.y -= it.frame.y
-            }
+            currentPoint.x -= it.frame.x
+            currentPoint.y -= it.frame.y
             if (!it.transform.isIdentity()) {
                 val unmatrix = it.transform.unmatrix()
                 val matrix = sharedMatrix
