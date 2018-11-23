@@ -27,6 +27,8 @@ open class UITableView: UIScrollView() {
             this._setContentSize()
             value?.let { this.addSubview(it) }
             this._layoutTableView()
+            this._layoutSectionHeaders()
+            this._layoutSectionFooters()
         }
 
     var tableFooterView: UIView? = null
@@ -37,6 +39,8 @@ open class UITableView: UIScrollView() {
             this._setContentSize()
             value?.let { this.addSubview(it) }
             this._layoutTableView()
+            this._layoutSectionHeaders()
+            this._layoutSectionFooters()
         }
 
     var separatorColor: UIColor? = UIColor(0xbc / 255.0, 0xba / 255.0, 0xc1 / 255.0, 0.75)
@@ -96,6 +100,8 @@ open class UITableView: UIScrollView() {
         this._setContentSize()
         this._needsReload = false
         this._layoutTableView()
+        this._layoutSectionHeaders()
+        this._layoutSectionFooters()
     }
 
     fun selectRow(indexPath: UIIndexPath, animated: Boolean) {
@@ -190,6 +196,8 @@ open class UITableView: UIScrollView() {
             if (super.edo_contentOffset.y == value.y) { return }
             super.edo_contentOffset = value
             this._layoutTableView()
+            this._layoutSectionHeaders()
+            this._layoutSectionFooters()
         }
 
     init {
@@ -199,6 +207,8 @@ open class UITableView: UIScrollView() {
     override fun layoutSubviews() {
         super.layoutSubviews()
         this._layoutTableView()
+        this._layoutSectionHeaders()
+        this._layoutSectionFooters()
     }
 
     private val _registeredCellsClass: MutableMap<String, Class<UITableViewCell>> = mutableMapOf()
@@ -324,7 +334,7 @@ open class UITableView: UIScrollView() {
                         cell.frame = rowRect
                         cell.edo_backgroundColor = this.edo_backgroundColor
                         if (cell.superview == null) {
-                            this.addSubview(cell)
+                            this.insertSubviewAtIndex(cell, 0)
                         }
                         cell.hidden = false
                     }
@@ -349,6 +359,58 @@ open class UITableView: UIScrollView() {
         }
         this.tableFooterView?.let {
             it.frame = CGRect(0.0, tableHeight, boundsSize.width, it.frame.height)
+        }
+    }
+
+    private fun _layoutSectionHeaders() {
+        var lastHeight = 0.0
+        var nextHeight = 0.0
+        this._sections.forEach { sectionRecord ->
+            nextHeight += sectionRecord.sectionHeight()
+            val footerHeight = sectionRecord.footerView?.frame?.height ?: 0.0
+            val boxHeight = nextHeight - footerHeight
+            if (this.edo_contentOffset.y >= lastHeight && this.edo_contentOffset.y <= boxHeight) {
+                sectionRecord.headerView?.let {
+                    if (this.edo_contentOffset.y >= boxHeight - it.frame.height) {
+                        it.frame = CGRect(0.0, this.edo_contentOffset.y - (this.edo_contentOffset.y - (boxHeight - it.frame.height)), it.frame.width, it.frame.height)
+                    }
+                    else {
+                        it.frame = CGRect(0.0, this.edo_contentOffset.y, it.frame.width, it.frame.height)
+                    }
+                }
+            }
+            else {
+                sectionRecord.headerView?.let {
+                    it.frame = CGRect(0.0, lastHeight, it.frame.width, it.frame.height)
+                }
+            }
+            lastHeight += sectionRecord.sectionHeight()
+        }
+    }
+
+    private fun _layoutSectionFooters() {
+        var lastHeight = 0.0
+        var nextHeight = 0.0
+        this._sections.forEach { sectionRecord ->
+            nextHeight += sectionRecord.sectionHeight()
+            val headerHeight = sectionRecord.headerView?.frame?.height ?: 0.0
+            val boxHeight = lastHeight + headerHeight
+            if (this.edo_contentOffset.y + this.bounds.height >= boxHeight && this.edo_contentOffset.y + this.bounds.height <= nextHeight) {
+                sectionRecord.footerView?.let {
+                    if (it.frame.height > this.edo_contentOffset.y + this.bounds.height - boxHeight) {
+                        it.frame = CGRect(0.0, (this.edo_contentOffset.y + this.bounds.height - it.frame.height) - ((this.edo_contentOffset.y + this.bounds.height - boxHeight) - it.frame.height), it.frame.width, it.frame.height)
+                    }
+                    else {
+                        it.frame = CGRect(0.0, this.edo_contentOffset.y + this.bounds.height - it.frame.height, it.frame.width, it.frame.height)
+                    }
+                }
+            }
+            else {
+                sectionRecord.footerView?.let {
+                    it.frame = CGRect(0.0, nextHeight - it.frame.height, it.frame.width, it.frame.height)
+                }
+            }
+            lastHeight += sectionRecord.sectionHeight()
         }
     }
 
