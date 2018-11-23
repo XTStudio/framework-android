@@ -361,7 +361,12 @@ open class UITableView: UIScrollView() {
         }
     }
 
+    private var pinningHeaderTop: Double? = null
+    private var pinningHeaderBottom: Double? = null
+
     private fun _layoutSectionHeaders() {
+        pinningHeaderTop = null
+        pinningHeaderBottom = null
         this._sections.forEachIndexed { idx, sectionRecord ->
             val rect = this._rectForSection(idx)
             val topY = rect.y
@@ -375,6 +380,8 @@ open class UITableView: UIScrollView() {
                     else {
                         it.frame = CGRect(0.0, this.edo_contentOffset.y, it.frame.width, it.frame.height)
                     }
+                    pinningHeaderTop = it.frame.y
+                    pinningHeaderBottom = it.frame.y + it.frame.height
                 }
             }
             else {
@@ -385,7 +392,12 @@ open class UITableView: UIScrollView() {
         }
     }
 
+    private var pinningFooterTop: Double? = null
+    private var pinningFooterBottom: Double? = null
+
     private fun _layoutSectionFooters() {
+        pinningFooterTop = null
+        pinningFooterBottom = null
         this._sections.forEachIndexed { idx, sectionRecord ->
             val rect = this._rectForSection(idx)
             val topY = rect.y
@@ -399,6 +411,8 @@ open class UITableView: UIScrollView() {
                     else {
                         it.frame = CGRect(0.0, this.edo_contentOffset.y + this.bounds.height - it.frame.height, it.frame.width, it.frame.height)
                     }
+                    pinningFooterTop = it.frame.y
+                    pinningFooterBottom = it.frame.y + it.frame.height
                 }
             }
             else {
@@ -475,6 +489,20 @@ open class UITableView: UIScrollView() {
                         return@filter currentIndexPath.row > 0 && currentIndexPath.row < currentSectionRecord.numberOfRows
                     }
                     .forEach {
+                        pinningHeaderTop?.let { pinningHeaderTop ->
+                            pinningHeaderBottom?.let { pinningHeaderBottom ->
+                                if (it.frame.y > pinningHeaderTop && it.frame.y < pinningHeaderBottom) {
+                                    return@forEach
+                                }
+                            }
+                        }
+                        pinningFooterTop?.let { pinningFooterTop ->
+                            pinningFooterBottom?.let { pinningFooterBottom ->
+                                if (it.frame.y > pinningFooterTop && it.frame.y < pinningFooterBottom) {
+                                    return@forEach
+                                }
+                            }
+                        }
                 canvas.drawLine(
                         (this.separatorInset.left * scale).toFloat(),
                         ((it.frame.y - this.edo_contentOffset.y) * scale).toFloat(),
