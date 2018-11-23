@@ -2,7 +2,6 @@ package com.xt.kimi.uikit
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.os.SystemClock
 import com.eclipsesource.v8.V8
 import com.xt.endo.*
 import com.xt.jscore.JSContext
@@ -363,16 +362,15 @@ open class UITableView: UIScrollView() {
     }
 
     private fun _layoutSectionHeaders() {
-        var lastHeight = 0.0
-        var nextHeight = 0.0
-        this._sections.forEach { sectionRecord ->
-            nextHeight += sectionRecord.sectionHeight()
-            val footerHeight = sectionRecord.footerView?.frame?.height ?: 0.0
-            val boxHeight = nextHeight - footerHeight
-            if (this.edo_contentOffset.y >= lastHeight && this.edo_contentOffset.y <= boxHeight) {
+        this._sections.forEachIndexed { idx, sectionRecord ->
+            val rect = this._rectForSection(idx)
+            val topY = rect.y
+            val bottomY = rect.y + rect.height
+            val boxY = bottomY - sectionRecord.footerHeight
+            if (this.edo_contentOffset.y in topY..boxY) {
                 sectionRecord.headerView?.let {
-                    if (this.edo_contentOffset.y >= boxHeight - it.frame.height) {
-                        it.frame = CGRect(0.0, this.edo_contentOffset.y - (this.edo_contentOffset.y - (boxHeight - it.frame.height)), it.frame.width, it.frame.height)
+                    if (this.edo_contentOffset.y >= boxY - it.frame.height) {
+                        it.frame = CGRect(0.0, this.edo_contentOffset.y - (this.edo_contentOffset.y - (boxY - it.frame.height)), it.frame.width, it.frame.height)
                     }
                     else {
                         it.frame = CGRect(0.0, this.edo_contentOffset.y, it.frame.width, it.frame.height)
@@ -381,24 +379,22 @@ open class UITableView: UIScrollView() {
             }
             else {
                 sectionRecord.headerView?.let {
-                    it.frame = CGRect(0.0, lastHeight, it.frame.width, it.frame.height)
+                    it.frame = CGRect(0.0, topY, it.frame.width, it.frame.height)
                 }
             }
-            lastHeight += sectionRecord.sectionHeight()
         }
     }
 
     private fun _layoutSectionFooters() {
-        var lastHeight = 0.0
-        var nextHeight = 0.0
-        this._sections.forEach { sectionRecord ->
-            nextHeight += sectionRecord.sectionHeight()
-            val headerHeight = sectionRecord.headerView?.frame?.height ?: 0.0
-            val boxHeight = lastHeight + headerHeight
-            if (this.edo_contentOffset.y + this.bounds.height >= boxHeight && this.edo_contentOffset.y + this.bounds.height <= nextHeight) {
+        this._sections.forEachIndexed { idx, sectionRecord ->
+            val rect = this._rectForSection(idx)
+            val topY = rect.y
+            val bottomY = rect.y + rect.height
+            val boxY = topY + sectionRecord.headerHeight
+            if (this.edo_contentOffset.y + this.bounds.height in boxY..bottomY) {
                 sectionRecord.footerView?.let {
-                    if (it.frame.height > this.edo_contentOffset.y + this.bounds.height - boxHeight) {
-                        it.frame = CGRect(0.0, (this.edo_contentOffset.y + this.bounds.height - it.frame.height) - ((this.edo_contentOffset.y + this.bounds.height - boxHeight) - it.frame.height), it.frame.width, it.frame.height)
+                    if (it.frame.height > this.edo_contentOffset.y + this.bounds.height - boxY) {
+                        it.frame = CGRect(0.0, (this.edo_contentOffset.y + this.bounds.height - it.frame.height) - ((this.edo_contentOffset.y + this.bounds.height - boxY) - it.frame.height), it.frame.width, it.frame.height)
                     }
                     else {
                         it.frame = CGRect(0.0, this.edo_contentOffset.y + this.bounds.height - it.frame.height, it.frame.width, it.frame.height)
@@ -407,10 +403,9 @@ open class UITableView: UIScrollView() {
             }
             else {
                 sectionRecord.footerView?.let {
-                    it.frame = CGRect(0.0, nextHeight - it.frame.height, it.frame.width, it.frame.height)
+                    it.frame = CGRect(0.0, bottomY - it.frame.height, it.frame.width, it.frame.height)
                 }
             }
-            lastHeight += sectionRecord.sectionHeight()
         }
     }
 
