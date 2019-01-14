@@ -6,7 +6,7 @@ class KMCore {
 
     companion object {
 
-        @JvmField val version = "0.7.0"
+        @JvmField val version = "0.8.0"
 
         @JvmField var hostVersion: String = ""
 
