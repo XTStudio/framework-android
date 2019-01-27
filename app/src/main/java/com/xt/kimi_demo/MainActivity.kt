@@ -14,11 +14,11 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        this.context = EDOFactory.decodeContextFromAssets("test.js", this, null) {
+        this.context = EDOFactory.decodeContextFromAssets("test.js", this, "192.168.0.23:8090") {
             this.context = it
             this.attachWindow()
         }
-        this.attachWindow()
+//        this.attachWindow()
     }
 
     private fun attachWindow() {
