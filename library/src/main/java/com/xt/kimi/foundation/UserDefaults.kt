@@ -37,6 +37,10 @@ class UserDefaults(val suite: String?) {
         this.sharedPreferences?.edit()?.clear()?.apply()
     }
 
+    fun dump(): Any? {
+        return this.sharedPreferences?.all ?: emptyMap<String, Any>()
+    }
+
     companion object {
 
         @JvmField val standard: UserDefaults = UserDefaults(null)
@@ -51,6 +55,7 @@ fun KIMIPackage.installUserDefaults() {
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "valueForKey")
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "setValue")
     exporter.exportMethodToJavaScript(UserDefaults::class.java, "reset")
+    exporter.exportMethodToJavaScript(UserDefaults::class.java, "dump")
     exporter.exportInitializer(UserDefaults::class.java) {
         return@exportInitializer UserDefaults(it.firstOrNull() as? String)
     }
